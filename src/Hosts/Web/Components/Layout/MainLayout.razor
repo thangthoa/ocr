@@ -8,10 +8,30 @@
             <span class="app-brand-product">@Text["AppProduct"]</span>
         </a>
         <div class="app-header-actions">
-            <CultureSelector />
-            @* Mockup only: there is no authentication yet, so the user is always the demo account. *@
-            <span class="app-user" title="@Text["DemoUserNote"]">admin</span>
-            <a class="app-header-link" href="login">@Text["SignOut"]</a>
+            @* A native disclosure works in this static layout without a circuit; wwwroot/js/account-menu.js
+               only adds closing on an outside click or Escape.
+               Mockup only: there is no authentication yet, so the user is always the demo account. *@
+            <details class="account-menu">
+                <summary class="account-toggle" title="@Text["AccountMenu", DemoUser]">
+                    <span class="avatar" aria-hidden="true">@Initial</span>
+                    <span class="visually-hidden">@Text["AccountMenu", DemoUser]</span>
+                </summary>
+                <div class="account-panel">
+                    <div class="account-who">
+                        <span class="avatar avatar-lg" aria-hidden="true">@Initial</span>
+                        <div class="min-w-0">
+                            <div class="account-name" dir="ltr">@DemoUser</div>
+                            <div class="account-role">@Text["DemoRole"]</div>
+                        </div>
+                    </div>
+                    <p class="account-note">@Text["DemoUserNote"]</p>
+                    <div class="account-section">
+                        <div class="account-heading" id="account-language">@Text["Language"]</div>
+                        <CultureSelector />
+                    </div>
+                    <a class="account-item account-signout" href="login">@Text["SignOut"]</a>
+                </div>
+            </details>
         </div>
     </header>
 
@@ -36,3 +56,9 @@
     <a href="." class="reload">@Text["Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private const string DemoUser = "admin";
+
+    private static string Initial => DemoUser[..1].ToUpperInvariant();
+}

@@ -44,7 +44,6 @@
   <data name="Column.Actions" xml:space="preserve"><value>Actions</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="DeleteJob" xml:space="preserve"><value>Delete job {0}</value></data>
-  <data name="ConfirmDelete" xml:space="preserve"><value>Confirm delete</value></data>
   <data name="Deleting" xml:space="preserve"><value>Deleting…</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Pagination" xml:space="preserve"><value>Job pages</value></data>
@@ -107,7 +106,7 @@
   <data name="Warning.GpuRetry" xml:space="preserve"><value>A temporary GPU error occurred; the page was read again and the result is normal.</value></data>
   <data name="ocr.not_found" xml:space="preserve"><value>OCR job not found.</value></data>
   <data name="Detail.JobId" xml:space="preserve"><value>Job id</value></data>
-  <data name="DeleteNote" xml:space="preserve"><value>Deleting removes the job from this list. The OCR service only cancels jobs that are still queued; running or finished jobs stay there.</value></data>
+  <data name="DeleteNote" xml:space="preserve"><value>This removes the document and what was saved for it in this app (review status, metadata, versions). The OCR service only cancels jobs that are still queued; running or finished jobs stay on the service and can appear again in the list.</value></data>
   <data name="ListFromMemoryNotice" xml:space="preserve"><value>The OCR service cannot list jobs yet, so this shows jobs sent from this app since the server last started. Open older jobs by their id.</value></data>
   <data name="SearchPlaceholder" xml:space="preserve"><value>Search by file name or job id</value></data>
   <data name="NoMatches" xml:space="preserve"><value>No jobs match “{0}”.</value></data>
@@ -124,4 +123,5 @@
   <data name="Batch.Short" xml:space="preserve"><value>{0} file(s) fewer than the {1} expected.</value></data>
   <data name="Batch.Over" xml:space="preserve"><value>{0} file(s) more than the {1} expected.</value></data>
   <data name="Column.Batch" xml:space="preserve"><value>Batch</value></data>
+  <data name="DeleteTitle" xml:space="preserve"><value>Delete “{0}”?</value></data>
 </root>

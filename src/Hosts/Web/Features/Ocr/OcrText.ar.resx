@@ -44,7 +44,6 @@
   <data name="Column.Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="Delete" xml:space="preserve"><value>حذف</value></data>
   <data name="DeleteJob" xml:space="preserve"><value>حذف المهمة {0}</value></data>
-  <data name="ConfirmDelete" xml:space="preserve"><value>تأكيد الحذف</value></data>
   <data name="Deleting" xml:space="preserve"><value>جارٍ الحذف…</value></data>
   <data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
   <data name="Pagination" xml:space="preserve"><value>صفحات المهام</value></data>
@@ -107,7 +106,7 @@
   <data name="Warning.GpuRetry" xml:space="preserve"><value>حدث خطأ مؤقت في GPU؛ أُعيدت قراءة الصفحة والنتيجة سليمة.</value></data>
   <data name="ocr.not_found" xml:space="preserve"><value>لم يتم العثور على مهمة OCR.</value></data>
   <data name="Detail.JobId" xml:space="preserve"><value>رقم المهمة</value></data>
-  <data name="DeleteNote" xml:space="preserve"><value>يزيل الحذف المهمة من هذه القائمة. لا تُلغي خدمة OCR إلا المهام التي ما زالت في الانتظار؛ أما المهام قيد المعالجة أو المكتملة فتبقى على الخدمة.</value></data>
+  <data name="DeleteNote" xml:space="preserve"><value>يزيل هذا المستند وما حُفظ له في هذا التطبيق (حالة المراجعة والبيانات الوصفية والإصدارات). لا تُلغي خدمة OCR إلا المهام التي ما زالت في الانتظار؛ أما المهام قيد المعالجة أو المكتملة فتبقى على الخدمة وقد تظهر مجددًا في القائمة.</value></data>
   <data name="ListFromMemoryNotice" xml:space="preserve"><value>لا تتيح خدمة OCR عرض قائمة المهام بعد، لذا تعرض هذه الصفحة المهام المرسلة من هذا التطبيق منذ آخر تشغيل للخادم. افتح المهام الأقدم برقمها.</value></data>
   <data name="SearchPlaceholder" xml:space="preserve"><value>ابحث باسم الملف أو رقم المهمة</value></data>
   <data name="NoMatches" xml:space="preserve"><value>لا توجد مهام تطابق «{0}».</value></data>
@@ -124,4 +123,5 @@
   <data name="Batch.Short" xml:space="preserve"><value>أقل من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
   <data name="Batch.Over" xml:space="preserve"><value>أكثر من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
   <data name="Column.Batch" xml:space="preserve"><value>الدفعة</value></data>
+  <data name="DeleteTitle" xml:space="preserve"><value>حذف «{0}»؟</value></data>
 </root>

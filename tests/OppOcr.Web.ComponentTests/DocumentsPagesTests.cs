@@ -73,10 +73,34 @@ public sealed class DocumentsPagesTests : BunitContext
         var cut = Render<DocumentsPage>();
 
         cut.WaitForElement("button[aria-label='Delete job scan.png']").Click();
-        cut.Find("[role=group] button.btn-danger").Click();
+        cut.Find("[role=alertdialog] button.btn-danger").Click();
 
         cut.WaitForAssertion(() => Assert.DoesNotContain("scan.png", cut.Markup, StringComparison.Ordinal));
         Assert.Equal(["job_0000000000000001"], _ocr.Cancelled);
+        Assert.Empty(cut.FindAll("[role=alertdialog]"));
+    }
+
+    [Fact]
+    public void Delete_asks_for_confirmation_in_a_dialog_that_can_be_cancelled()
+    {
+        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "scan.png", OcrJobStatus.Queued));
+        var cut = Render<DocumentsPage>();
+
+        cut.WaitForElement("button[aria-label='Delete job scan.png']").Click();
+        var dialog = cut.Find("[role=alertdialog]");
+        Assert.Equal("true", dialog.GetAttribute("aria-modal"));
+        Assert.Equal("Delete “scan.png”?", cut.Find("[role=alertdialog] h2").TextContent);
+        Assert.Contains("only cancels jobs that are still queued", dialog.TextContent, StringComparison.Ordinal);
+
+        cut.Find("[role=alertdialog] button.btn-secondary").Click();
+        Assert.Empty(cut.FindAll("[role=alertdialog]"));
+
+        cut.Find("button[aria-label='Delete job scan.png']").Click();
+        cut.Find("[role=alertdialog]").KeyDown(new Microsoft.AspNetCore.Components.Web.KeyboardEventArgs { Key = "Escape" });
+        Assert.Empty(cut.FindAll("[role=alertdialog]"));
+
+        Assert.Empty(_ocr.Cancelled);
+        Assert.Contains("scan.png", cut.Markup, StringComparison.Ordinal);
     }
 
     [Fact]

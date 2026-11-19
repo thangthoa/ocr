@@ -108,6 +108,7 @@
   <data name="Detail.NotFound" xml:space="preserve"><value>Document not found.</value></data>
   <data name="Detail.Pages" xml:space="preserve"><value>{0} pages</value></data>
   <data name="Detail.Uploaded" xml:space="preserve"><value>uploaded {0} by {1}</value></data>
+  <data name="Detail.UploadedAt" xml:space="preserve"><value>uploaded {0}</value></data>
   <data name="Detail.CurrentVersion" xml:space="preserve"><value>version {0}</value></data>
   <data name="Detail.Confidence" xml:space="preserve"><value>OCR confidence {0}</value></data>
   <data name="Detail.ArchivedNote" xml:space="preserve"><value>Archived documents are read-only.</value></data>

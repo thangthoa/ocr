@@ -59,10 +59,149 @@
             outline-color: #fff;
         }
 
-.app-user {
-    color: #f4f4f4;
-    padding-inline-start: 1rem;
-    border-inline-start: 1px solid #393939;
+/* Account menu: an avatar button in the header opening a light panel. */
+.account-menu {
+    position: relative;
+}
+
+.account-toggle {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+}
+
+    .account-toggle::-webkit-details-marker {
+        display: none;
+    }
+
+    .account-toggle:hover,
+    .account-menu[open] > .account-toggle {
+        background-color: #393939;
+    }
+
+    .account-toggle:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: -2px;
+    }
+
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: #0f62fe;
+    color: #fff;
+    font-size: .875rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    flex: none;
+}
+
+.avatar-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+}
+
+.account-panel {
+    position: absolute;
+    top: 100%;
+    inset-inline-end: 0;
+    width: 17rem;
+    background-color: #fff;
+    color: #161616;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    z-index: 10;
+}
+
+.account-who {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1rem 1rem .5rem;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.account-name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.account-role,
+.account-note {
+    font-size: .75rem;
+    color: #525252;
+}
+
+.account-note {
+    margin: 0;
+    padding: 0 1rem .75rem;
+}
+
+.account-section {
+    border-top: 1px solid #e0e0e0;
+    padding: .5rem 0;
+}
+
+.account-heading {
+    padding: .25rem 1rem;
+    font-size: .75rem;
+    color: #525252;
+}
+
+/* The language links become menu rows; the current language carries a check mark. */
+.app-header-actions .account-panel ::deep .culture-selector {
+    flex-direction: column;
+    gap: 0;
+}
+
+    .app-header-actions .account-panel ::deep .culture-selector a,
+    .app-header-actions .account-panel .account-item {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        min-height: 2.5rem;
+        padding: 0 1rem;
+        color: #161616;
+        font-weight: 400 !important;
+        text-decoration: none;
+    }
+
+        .app-header-actions .account-panel ::deep .culture-selector a::before {
+            content: "";
+            width: 1rem;
+            height: 1rem;
+            flex: none;
+        }
+
+        .app-header-actions .account-panel ::deep .culture-selector a[aria-current]::before {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230f62fe' stroke-width='2'%3E%3Cpath d='M3 8l3.5 3.5L13 5'/%3E%3C/svg%3E") no-repeat center/1rem;
+        }
+
+        .app-header-actions .account-panel ::deep .culture-selector a:hover,
+        .app-header-actions .account-panel .account-item:hover {
+            background-color: #e8e8e8;
+            color: #161616;
+        }
+
+        .app-header-actions .account-panel ::deep .culture-selector a:focus-visible,
+        .app-header-actions .account-panel .account-item:focus-visible {
+            outline: 2px solid #0f62fe;
+            outline-offset: -2px;
+        }
+
+.account-signout {
+    border-top: 1px solid #e0e0e0;
 }
 
 .app-body {
@@ -90,9 +229,6 @@ main {
         display: none;
     }
 
-    .app-user {
-        display: none;
-    }
 }
 
 @media (min-width: 641px) {

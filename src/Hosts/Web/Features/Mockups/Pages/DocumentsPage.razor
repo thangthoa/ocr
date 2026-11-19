@@ -191,7 +191,7 @@ else
                                 @if (!document.IsSample)
                                 {
                                     <ConfirmButton Label="@OcrText["Delete"]" ConfirmLabel="@OcrText["Delete"]" CancelLabel="@OcrText["Cancel"]"
-                                                   BusyLabel="@OcrText["Deleting"]" ConfirmGroupLabel="@OcrText["ConfirmDelete"]"
+                                                   BusyLabel="@OcrText["Deleting"]" Title="@OcrText["DeleteTitle", document.FileName]" Message="@OcrText["DeleteNote"]"
                                                    AriaLabel="@OcrText["DeleteJob", document.FileName]" Busy="@(_deletingId == document.Id)"
                                                    OnConfirm="() => DeleteAsync(document.Id, document.FileName)" />
                                 }

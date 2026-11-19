@@ -38,6 +38,14 @@ File upload kèm phiếu batch được gắn mã batch, người upload và ph�
 phục phiên bản, đổi trạng thái, xoá. Chỉ giữ 500 dòng gần nhất trong bộ nhớ; nhật ký thật (append-only, đẩy
 sang SIEM) cần database.
 
+## Khung giao diện
+
+- Góc phải header chỉ có **avatar**; bấm vào mở menu tài khoản (tên, vai trò demo, chọn **ngôn ngữ**, **Sign out**).
+  Menu là thẻ `<details>` nên chạy được cả khi chưa có kết nối Blazor; `wwwroot/js/account-menu.js` chỉ thêm việc
+  đóng menu khi bấm ra ngoài hoặc nhấn Esc. Trang đăng nhập vẫn có chọn ngôn ngữ trên header.
+- **Xoá** luôn hỏi lại bằng hộp thoại cảnh báo (`Components/Shared/ConfirmButton.razor`): focus vào *Cancel*,
+  Esc hoặc bấm ra ngoài để đóng, chỉ nút *Delete* màu đỏ mới xoá.
+
 ## Giới hạn cần biết
 
 - **Đăng nhập là giả.** Trang `/login` chỉ chuyển sang Dashboard khi nhập `admin` / `admin`. Không có

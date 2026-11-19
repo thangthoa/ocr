@@ -1,0 +1,40 @@
+@using Modules.Ocr.Domain.Jobs
+@inject IStringLocalizer<OcrText> Text
+
+@switch (Status)
+{
+    case OcrJobStatus.Queued:
+        <span class="small">@(QueuePosition is null ? Text["Progress.Queued"] : Text["Progress.QueuePosition", QueuePosition])</span>
+        break;
+    case OcrJobStatus.Running:
+        <div class="small">
+            @if (PagesTotal > 0)
+            {
+                <div class="progress mb-1" role="progressbar" aria-label="@Text["Progress.Pages", PagesDone, PagesTotal]"
+                     aria-valuenow="@PagesDone" aria-valuemin="0" aria-valuemax="@PagesTotal" style="height: .5rem">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @Percent%"></div>
+                </div>
+                <span>@Text["Progress.Pages", PagesDone, PagesTotal]</span>
+            }
+            @if (!string.IsNullOrEmpty(CurrentStep))
+            {
+                @* The service reports steps in English only (API doc §4.2); shown verbatim. *@
+                <div class="text-muted text-truncate" title="@CurrentStep" lang="en" dir="ltr">@CurrentStep</div>
+            }
+        </div>
+        break;
+    case OcrJobStatus.Done:
+        <span class="small">@Text["Progress.Pages", PagesDone, PagesTotal]</span>
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public OcrJobStatus Status { get; set; }
+    [Parameter] public int PagesTotal { get; set; }
+    [Parameter] public int PagesDone { get; set; }
+    [Parameter] public string? CurrentStep { get; set; }
+    [Parameter] public int? QueuePosition { get; set; }
+
+    // pages_done only moves at the last step, so show at least a sliver while work is underway.
+    private int Percent => PagesTotal == 0 ? 0 : Math.Max(5, PagesDone * 100 / PagesTotal);
+}

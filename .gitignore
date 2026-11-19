@@ -1,0 +1,14 @@
+bin/
+obj/
+App_Data/
+*.user
+.vs/
+.idea/
+TestResults/
+.env
+
+# Local tooling (machine-specific paths)
+.claude/launch.json
+
+# Deploy state on the server
+devops/dev/.state/

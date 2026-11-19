@@ -1,0 +1,18 @@
+@using Modules.Ocr.Domain.Jobs
+@inject IStringLocalizer<OcrText> Text
+
+<span class="badge @CssClass">@Text.Status(Status)</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public OcrJobStatus Status { get; set; }
+
+    private string CssClass => Status switch
+    {
+        OcrJobStatus.Queued => "text-bg-info",
+        OcrJobStatus.Running => "text-bg-primary",
+        OcrJobStatus.Done => "text-bg-success",
+        OcrJobStatus.Failed => "text-bg-danger",
+        _ => "text-bg-dark",
+    };
+}

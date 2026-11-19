@@ -1,0 +1,93 @@
+@using Modules.Ocr.Application.Contracts
+@using Modules.Ocr.Domain.Jobs
+@implements IDisposable
+@inject OcrJobNotifications Notifications
+@inject IStringLocalizer<OcrText> Text
+
+<div class="toast-container position-fixed bottom-0 p-3 ocr-toasts" aria-live="polite" aria-atomic="false">
+    @foreach (var toast in _toasts)
+    {
+        <div class="toast show ocr-toast ocr-toast-@toast.Status.ToString().ToLowerInvariant()" role="status" @key="toast">
+            <div class="d-flex align-items-start gap-2 p-3">
+                <span class="ocr-toast-icon" aria-hidden="true">@Icon(toast.Status)</span>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold">@toast.Title</div>
+                    @if (toast.Detail is not null)
+                    {
+                        <div class="small">@toast.Detail</div>
+                    }
+                    <div class="small text-body-secondary text-truncate" dir="auto" title="@toast.FileName">@toast.FileName</div>
+                </div>
+                <a class="btn btn-sm btn-outline-secondary text-nowrap" href="@OcrEndpoints.JobUrl(toast.JobId)">@Text["View"]</a>
+                <button type="button" class="btn-close" aria-label="@Text["Close"]" @onclick="() => _toasts.Remove(toast)"></button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly TimeSpan DisplayTime = TimeSpan.FromSeconds(8);
+
+    private readonly List<Toast> _toasts = [];
+    private readonly Dictionary<string, OcrJobStatus> _lastStatus = [];
+    private readonly CancellationTokenSource _disposed = new();
+    private IDisposable? _subscription;
+
+    protected override void OnInitialized() => _subscription = Notifications.Subscribe(OnChangedAsync);
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+        _disposed.Cancel();
+        _disposed.Dispose();
+    }
+
+    private Task OnChangedAsync(OcrJobChange change)
+    {
+        // Progress updates within the same status are frequent; only status transitions are announced.
+        if (change.Kind != OcrJobChangeKind.Updated
+            || (_lastStatus.TryGetValue(change.JobId.Value, out var last) && last == change.Status))
+            return Task.CompletedTask;
+        _lastStatus[change.JobId.Value] = change.Status;
+
+        var detail = change.Status == OcrJobStatus.Failed ? Text.JobError(change.ErrorCode) : null;
+        var toast = new Toast(change.JobId.Value, change.FileName, change.Status, Text[$"Toast.{change.Status}"].Value, detail);
+
+        // Show now, hide later without awaiting: the notifier awaits this handler, and the
+        // background worker must not be held up for the toast's display time.
+        _ = HideLaterAsync(toast);
+        return InvokeAsync(() =>
+        {
+            _toasts.Add(toast);
+            StateHasChanged();
+        });
+    }
+
+    private async Task HideLaterAsync(Toast toast)
+    {
+        try
+        {
+            await Task.Delay(DisplayTime, _disposed.Token);
+            await InvokeAsync(() =>
+            {
+                _toasts.Remove(toast);
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Component disposed; nothing left to hide.
+        }
+    }
+
+    // Simple inline glyphs so the toast needs no icon font.
+    private static RenderFragment Icon(OcrJobStatus status) => status switch
+    {
+        OcrJobStatus.Done => @<svg viewBox="0 0 16 16" width="20" height="20"><circle cx="8" cy="8" r="8" fill="currentColor" /><path d="M4.5 8.2l2.3 2.3 4.7-4.9" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>,
+        OcrJobStatus.Failed => @<svg viewBox="0 0 16 16" width="20" height="20"><circle cx="8" cy="8" r="8" fill="currentColor" /><path d="M5.2 5.2l5.6 5.6M10.8 5.2l-5.6 5.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" /></svg>,
+        OcrJobStatus.Running => @<svg viewBox="0 0 16 16" width="20" height="20"><circle cx="8" cy="8" r="8" fill="currentColor" /><path d="M6.3 4.8v6.4L11.2 8z" fill="#fff" /></svg>,
+        _ => @<svg viewBox="0 0 16 16" width="20" height="20"><circle cx="8" cy="8" r="8" fill="currentColor" /><path d="M8 4.2V8l2.6 1.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" /></svg>,
+    };
+
+    private sealed record Toast(string JobId, string FileName, OcrJobStatus Status, string Title, string? Detail);
+}

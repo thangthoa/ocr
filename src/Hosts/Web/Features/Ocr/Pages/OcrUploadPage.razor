@@ -1,0 +1,66 @@
+@page "/ocr"
+@rendermode InteractiveServer
+@using Modules.Ocr.Domain.Jobs
+@using OppOcr.Web.Features.Ocr.Components
+
+<PageTitle>@Text["UploadTitle"]</PageTitle>
+
+<h1 class="h3 mb-3">@Text["UploadTitle"]</h1>
+
+<fieldset class="mb-3" disabled="@_uploading">
+    <legend class="h6">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></legend>
+    @foreach (var type in Enum.GetValues<OcrDocumentType>())
+    {
+        var id = $"doc-type-{type}";
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="doc-type" id="@id" value="@type"
+                   checked="@(_documentType == type)" @onchange="() => _documentType = type" />
+            <label class="form-check-label" for="@id">@Text.DocumentType(type)</label>
+        </div>
+    }
+    @if (_documentType is null)
+    {
+        <div class="form-text">@Text["DocumentTypeHint"]</div>
+    }
+</fieldset>
+
+<FileDropZone Id="ocr-files" Accept="@Accept" Prompt="@Text["DropZonePrompt"]" OnFilesSelected="UploadAsync"
+              Disabled="@(_uploading || _documentType is null)"
+              Hint="@Text["DropZoneHint", OcrTextExtensions.SupportedFormatsLabel, OcrRules.MaxSizeBytes / 1024 / 1024, MaxFilesPerBatch]" />
+
+@if (_batchError is not null)
+{
+    <div class="alert alert-danger mt-3" role="alert">@_batchError</div>
+}
+
+@if (_uploads.Count > 0)
+{
+    <ul class="list-group mt-3" aria-live="polite">
+        @foreach (var item in _uploads)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                <span class="text-truncate"><bdi>@item.FileName</bdi> <span class="text-muted small">(@FileSizeFormatter.Format(item.SizeBytes))</span></span>
+                @switch (item.Status)
+                {
+                    case UploadStatus.Uploading:
+                        <span class="badge text-bg-secondary">@Text["Uploading"]</span>
+                        break;
+                    case UploadStatus.Succeeded:
+                        <span><span class="badge text-bg-success">@Text["Uploaded"]</span> <a href="@OcrEndpoints.JobUrl(item.JobId!)">@Text["View"]</a></span>
+                        break;
+                    default:
+                        <span class="text-danger small text-end">@item.ErrorMessage</span>
+                        break;
+                }
+            </li>
+        }
+    </ul>
+
+    @if (!_uploading && _uploads.Exists(x => x.Status == UploadStatus.Succeeded))
+    {
+        <p class="mt-3">
+            @Text["UploadSummary", _uploads.Count(x => x.Status == UploadStatus.Succeeded)]
+            <a href="ocr/jobs">@Text["GoToJobs"]</a>
+        </p>
+    }
+}

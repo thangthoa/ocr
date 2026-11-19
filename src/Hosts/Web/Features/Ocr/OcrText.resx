@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="UploadTitle" xml:space="preserve"><value>OCR upload</value></data>
+  <data name="JobsTitle" xml:space="preserve"><value>OCR jobs</value></data>
+  <data name="JobTitle" xml:space="preserve"><value>OCR job</value></data>
+  <data name="DocumentTypeLegend" xml:space="preserve"><value>Document type</value></data>
+  <data name="DocumentTypeHint" xml:space="preserve"><value>Choose a document type before selecting files.</value></data>
+  <data name="DocumentType.Printed" xml:space="preserve"><value>Printed / typed</value></data>
+  <data name="DocumentType.Handwritten" xml:space="preserve"><value>Handwritten</value></data>
+  <data name="DropZonePrompt" xml:space="preserve"><value>Drag and drop documents here, or click to browse</value></data>
+  <data name="DropZoneHint" xml:space="preserve"><value>{0} · up to {1} MB per file · up to {2} files at a time · each file is sent as its own job</value></data>
+  <data name="TooManyFiles" xml:space="preserve"><value>You can select at most {0} files at a time.</value></data>
+  <data name="Uploading" xml:space="preserve"><value>Sending to the OCR service…</value></data>
+  <data name="Uploaded" xml:space="preserve"><value>Sent</value></data>
+  <data name="UploadSummary" xml:space="preserve"><value>{0} job(s) created on the OCR service; you will be notified as each one progresses.</value></data>
+  <data name="GoToJobs" xml:space="preserve"><value>View jobs</value></data>
+  <data name="NewUpload" xml:space="preserve"><value>New upload</value></data>
+  <data name="View" xml:space="preserve"><value>View</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
+  <data name="FilterByStatus" xml:space="preserve"><value>Filter by status</value></data>
+  <data name="AllStatuses" xml:space="preserve"><value>All statuses</value></data>
+  <data name="Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="LoadFailed" xml:space="preserve"><value>Could not load OCR jobs.</value></data>
+  <data name="Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="NoJobs" xml:space="preserve"><value>No OCR jobs yet.</value></data>
+  <data name="Column.File" xml:space="preserve"><value>File</value></data>
+  <data name="Column.Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Column.Progress" xml:space="preserve"><value>Progress</value></data>
+  <data name="Column.Created" xml:space="preserve"><value>Created</value></data>
+  <data name="Column.Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="DeleteJob" xml:space="preserve"><value>Delete job {0}</value></data>
+  <data name="ConfirmDelete" xml:space="preserve"><value>Confirm delete</value></data>
+  <data name="Deleting" xml:space="preserve"><value>Deleting…</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Job pages</value></data>
+  <data name="Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="Next" xml:space="preserve"><value>Next</value></data>
+  <data name="PageOf" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>Something went wrong. Please try again later.</value></data>
+  <data name="BackToJobs" xml:space="preserve"><value>Back to jobs</value></data>
+  <data name="JobNotFound" xml:space="preserve"><value>OCR job not found.</value></data>
+  <data name="JobDeleted" xml:space="preserve"><value>This job has been deleted.</value></data>
+  <data name="Detail.Completed" xml:space="preserve"><value>Finished</value></data>
+  <data name="Download" xml:space="preserve"><value>Download result</value></data>
+  <data name="PagesPending" xml:space="preserve"><value>Pages appear here as they finish. Most pages complete together at the last step.</value></data>
+  <data name="PageHeading" xml:space="preserve"><value>Page {0} / {1}</value></data>
+  <data name="PageImageAlt" xml:space="preserve"><value>Image of page {0}</value></data>
+  <data name="Seconds" xml:space="preserve"><value>{0} s</value></data>
+  <data name="Cached" xml:space="preserve"><value>cached result</value></data>
+  <data name="Progress.Queued" xml:space="preserve"><value>Queued</value></data>
+  <data name="Progress.QueuePosition" xml:space="preserve"><value>In queue, position {0}</value></data>
+  <data name="Progress.Pages" xml:space="preserve"><value>{0}/{1} pages</value></data>
+  <data name="Status.Queued" xml:space="preserve"><value>Queued</value></data>
+  <data name="Status.Running" xml:space="preserve"><value>Running</value></data>
+  <data name="Status.Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Status.Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Status.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="Toast.Queued" xml:space="preserve"><value>Sent to the OCR service, waiting in queue</value></data>
+  <data name="Toast.Running" xml:space="preserve"><value>OCR started</value></data>
+  <data name="Toast.Done" xml:space="preserve"><value>OCR finished</value></data>
+  <data name="Toast.Failed" xml:space="preserve"><value>OCR failed</value></data>
+  <data name="Toast.Cancelled" xml:space="preserve"><value>Job cancelled</value></data>
+  <data name="ocr.file_name_required" xml:space="preserve"><value>File name is required.</value></data>
+  <data name="ocr.file_name_too_long" xml:space="preserve"><value>File name must not exceed {0} characters.</value></data>
+  <data name="ocr.unsupported_format" xml:space="preserve"><value>Only {0} files are supported.</value></data>
+  <data name="ocr.empty" xml:space="preserve"><value>The file is empty.</value></data>
+  <data name="ocr.too_large" xml:space="preserve"><value>The file exceeds {0} MB.</value></data>
+  <data name="ocr.content_mismatch" xml:space="preserve"><value>The file is not a supported document or does not match its extension.</value></data>
+  <data name="ocr.document_type_required" xml:space="preserve"><value>Choose a document type.</value></data>
+  <data name="ocr.not_ready" xml:space="preserve"><value>The result is not ready yet.</value></data>
+  <data name="ocr.service_unavailable" xml:space="preserve"><value>The OCR service is not available right now.</value></data>
+  <data name="JobError.unauthorized" xml:space="preserve"><value>The OCR service rejected the API key. Check the configuration.</value></data>
+  <data name="JobError.not_found" xml:space="preserve"><value>The OCR service could not find this job.</value></data>
+  <data name="JobError.file_too_large" xml:space="preserve"><value>The file is larger than 25 MB.</value></data>
+  <data name="JobError.too_many_pages" xml:space="preserve"><value>The document has more than 20 pages. Split it and upload again.</value></data>
+  <data name="JobError.unsupported_file" xml:space="preserve"><value>The OCR service does not support this file type.</value></data>
+  <data name="JobError.bad_image" xml:space="preserve"><value>The file is damaged, password-protected or has no pages.</value></data>
+  <data name="JobError.invalid_request" xml:space="preserve"><value>The OCR service rejected the request.</value></data>
+  <data name="JobError.internal_error" xml:space="preserve"><value>The OCR service hit an unexpected error.</value></data>
+  <data name="JobError.processing_error" xml:space="preserve"><value>Processing failed on the OCR service. Upload the file again to retry.</value></data>
+  <data name="JobError.service_unavailable" xml:space="preserve"><value>The OCR service could not be reached.</value></data>
+  <data name="JobError.remote_job_lost" xml:space="preserve"><value>The OCR service no longer has this job (it may have been restarted).</value></data>
+  <data name="JobError.unknown" xml:space="preserve"><value>OCR failed ({0}).</value></data>
+  <data name="Warning.Repeated" xml:space="preserve"><value>The full-page read repeated itself; the page was read block by block (slower).</value></data>
+  <data name="Warning.AllRepeated" xml:space="preserve"><value>Every full-page read repeated itself; the text may be incomplete.</value></data>
+  <data name="Warning.LayoutSmaller" xml:space="preserve"><value>Layout detection failed at the usual size and was redone at a smaller size.</value></data>
+  <data name="Warning.NoBlocks" xml:space="preserve"><value>No text block was found; the whole page was treated as one block.</value></data>
+  <data name="Warning.NothingReadable" xml:space="preserve"><value>Every reading method failed; the text is only the readable part and is almost certainly incomplete.</value></data>
+  <data name="Warning.KrakenFailed" xml:space="preserve"><value>Line detection failed; a fallback method was used.</value></data>
+  <data name="Warning.LayoutOom" xml:space="preserve"><value>Layout ran out of GPU memory when enlarged and was redone at the original size.</value></data>
+  <data name="Warning.ChandraFailed" xml:space="preserve"><value>One of the four handwriting readings could not run; the result was chosen from the other three.</value></data>
+  <data name="Warning.GpuRetry" xml:space="preserve"><value>A temporary GPU error occurred; the page was read again and the result is normal.</value></data>
+  <data name="ocr.not_found" xml:space="preserve"><value>OCR job not found.</value></data>
+  <data name="Detail.JobId" xml:space="preserve"><value>Job id</value></data>
+  <data name="DeleteNote" xml:space="preserve"><value>Deleting removes the job from this list. The OCR service only cancels jobs that are still queued; running or finished jobs stay there.</value></data>
+  <data name="ListFromMemoryNotice" xml:space="preserve"><value>The OCR service cannot list jobs yet, so this shows jobs sent from this app since the server last started. Open older jobs by their id.</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search by file name or job id</value></data>
+  <data name="NoMatches" xml:space="preserve"><value>No jobs match “{0}”.</value></data>
+  <data name="SearchLimited" xml:space="preserve"><value>Only the newest {0} jobs were searched.</value></data>
+</root>

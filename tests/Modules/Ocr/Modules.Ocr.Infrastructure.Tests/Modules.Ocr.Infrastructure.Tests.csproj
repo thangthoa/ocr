@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Modules/Ocr/Modules.Ocr.Infrastructure/Modules.Ocr.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

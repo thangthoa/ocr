@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedText> Text
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <CultureSelector />
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@* Interactive island in the static layout: job notifications appear on every page. *@
+<OppOcr.Web.Features.Ocr.Components.OcrToasts @rendermode="InteractiveServer" />
+
+<div id="blazor-error-ui" data-nosnippet>
+    @Text["UnhandledError"]
+    <a href="." class="reload">@Text["Reload"]</a>
+    <span class="dismiss">🗙</span>
+</div>

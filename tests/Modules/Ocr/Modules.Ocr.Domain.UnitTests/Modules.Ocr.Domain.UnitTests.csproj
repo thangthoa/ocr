@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Modules/Ocr/Modules.Ocr.Domain/Modules.Ocr.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

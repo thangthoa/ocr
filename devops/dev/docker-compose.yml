@@ -1,0 +1,19 @@
+# Dev environment, started by deploy.sh on the server. Secrets come from devops/dev/.env.
+services:
+  oppocr-web:
+    image: ${IMAGE_NAME:-oppocr-web}:${IMAGE_TAG:?IMAGE_TAG is set by deploy.sh}
+    # Built on this server by deploy.sh; never pulled from a registry.
+    pull_policy: never
+    container_name: ${CONTAINER_NAME:-oppocr-dev}
+    restart: unless-stopped
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      # Host port (default 5286, same as local `dotnet run`) → app port inside the container.
+      - "${APP_PORT:-5286}:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

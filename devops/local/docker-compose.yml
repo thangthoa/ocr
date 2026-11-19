@@ -1,0 +1,16 @@
+# Runs the app in a container on your own machine.
+#   docker-compose -f devops/local/docker-compose.yml up -d --build   → http://localhost:8080
+#   LOCAL_PORT=8096 docker-compose -f devops/local/docker-compose.yml up -d --build   (if 8080 is taken)
+# Settings (OCR_API_BASE_URL, OCR_API_KEY) come from the repository's .env, which is git-ignored.
+# Port 8080 so it does not clash with `dotnet run` on 5286.
+services:
+  oppocr-web:
+    build:
+      context: ../..
+      dockerfile: devops/docker/Dockerfile
+    image: oppocr-web:local
+    container_name: oppocr-local
+    # Sends documents to the third-party OCR server over plain HTTP.
+    env_file: ../../.env
+    ports:
+      - "127.0.0.1:${LOCAL_PORT:-8080}:8080"

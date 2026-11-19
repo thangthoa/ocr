@@ -1,0 +1,38 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="CLAUDE.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path=".editorconfig" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/devops/">
+    <File Path="devops/docker/Dockerfile" />
+    <File Path="devops/local/docker-compose.yml" />
+    <File Path="devops/dev/docker-compose.yml" />
+    <File Path="devops/dev/README.md" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Hosts/">
+    <Project Path="src/Hosts/Web/OppOcr.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/OppOcr.BuildingBlocks.Application/OppOcr.BuildingBlocks.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Ocr/">
+    <Project Path="src/Modules/Ocr/Modules.Ocr.Domain/Modules.Ocr.Domain.csproj" />
+    <Project Path="src/Modules/Ocr/Modules.Ocr.Application/Modules.Ocr.Application.csproj" />
+    <Project Path="src/Modules/Ocr/Modules.Ocr.Infrastructure/Modules.Ocr.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OppOcr.ArchitectureTests/OppOcr.ArchitectureTests.csproj" />
+    <Project Path="tests/OppOcr.Web.ComponentTests/OppOcr.Web.ComponentTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Ocr/">
+    <Project Path="tests/Modules/Ocr/Modules.Ocr.Domain.UnitTests/Modules.Ocr.Domain.UnitTests.csproj" />
+    <Project Path="tests/Modules/Ocr/Modules.Ocr.Application.UnitTests/Modules.Ocr.Application.UnitTests.csproj" />
+    <Project Path="tests/Modules/Ocr/Modules.Ocr.Infrastructure.Tests/Modules.Ocr.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

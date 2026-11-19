@@ -1,0 +1,35 @@
+/* Bottom centre in both LTR and RTL: physical left + translate is direction-independent. */
+.ocr-toasts {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.ocr-toast {
+    width: min(26rem, calc(100vw - 2rem));
+    border: 0;
+    border-inline-start: 4px solid var(--ocr-toast-color);
+    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .15);
+    --ocr-toast-color: var(--bs-secondary);
+}
+
+.ocr-toast-icon {
+    color: var(--ocr-toast-color);
+    line-height: 0;
+    flex-shrink: 0;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.ocr-toast-running {
+    --ocr-toast-color: var(--bs-primary);
+}
+
+.ocr-toast-done {
+    --ocr-toast-color: var(--bs-success);
+}
+
+.ocr-toast-failed {
+    --ocr-toast-color: var(--bs-danger);
+}

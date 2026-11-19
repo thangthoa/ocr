@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>119e4356-2fd8-416a-aead-8cdc79af21e1</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Ocr\Modules.Ocr.Application\Modules.Ocr.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Ocr\Modules.Ocr.Infrastructure\Modules.Ocr.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OppOcr.Web.ComponentTests" />
+  </ItemGroup>
+
+</Project>

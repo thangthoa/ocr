@@ -1,0 +1,181 @@
+@page "/admin"
+@rendermode InteractiveServer
+@using Microsoft.Extensions.Diagnostics.HealthChecks
+
+<PageTitle>@Text["Admin.Title"]</PageTitle>
+
+<div class="mb-3">
+    <h1 class="h3 mb-1">@Text["Admin.Title"]</h1>
+    <p class="text-muted mb-0">@Text["Admin.Intro"]</p>
+</div>
+
+<div role="tablist" class="admin-tabs mb-3" aria-label="@Text["Admin.Sections"]">
+    @foreach (var tab in Enum.GetValues<AdminTab>())
+    {
+        var selected = tab == _tab;
+        <button type="button" role="tab" id="@($"tab-{tab}")" aria-controls="@($"panel-{tab}")"
+                aria-selected="@(selected ? "true" : "false")" class="@(selected ? "active" : null)"
+                @onclick="() => SelectAsync(tab)">@Text[$"Admin.Tab.{tab}"]</button>
+    }
+</div>
+
+<div id="@($"panel-{_tab}")" role="tabpanel" aria-labelledby="@($"tab-{_tab}")">
+    @switch (_tab)
+    {
+        case AdminTab.Roles:
+            <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Roles.Note"]</p>
+            <div class="table-responsive position-relative">
+                <table class="table align-middle">
+                    <caption class="visually-hidden">@Text["Admin.Tab.Roles"]</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">@Text["Roles.Column.Role"]</th>
+                            <th scope="col">@Text["Roles.Column.Group"]</th>
+                            <th scope="col" class="text-end">@Text["Roles.Column.Users"]</th>
+                            <th scope="col">@Text["Roles.Column.Can"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var role in Roles)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@Text[$"Role.{role.Key}"]</td>
+                                <td><code dir="ltr">@role.Group</code></td>
+                                <td class="text-end">@FormatNumber(role.Users)</td>
+                                <td>@Text[$"Role.{role.Key}.Can"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            break;
+
+        case AdminTab.Retention:
+            <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Retention.Note"]</p>
+            <div class="table-responsive position-relative">
+                <table class="table align-middle">
+                    <caption class="visually-hidden">@Text["Admin.Tab.Retention"]</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">@Text["Column.Department"]</th>
+                            <th scope="col">@Text["Column.Kind"]</th>
+                            <th scope="col">@Text["Retention.Column.Keep"]</th>
+                            <th scope="col">@Text["Retention.Column.From"]</th>
+                            <th scope="col">@Text["Retention.Column.Then"]</th>
+                            <th scope="col" class="text-end">@Text["Retention.Column.Documents"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rule in Retention)
+                        {
+                            <tr>
+                                <td>@Text.Department(rule.Department)</td>
+                                <td>@Text.Kind(rule.Kind)</td>
+                                <td>@(rule.Years is { } years ? Text["Retention.Years", years] : Text["Retention.Permanent"])</td>
+                                <td>@Text[$"Retention.From.{rule.From}"]</td>
+                                <td>@Text[$"Retention.Then.{rule.Then}"]</td>
+                                <td class="text-end"><a href="@($"documents?department={rule.Department}&kind={rule.Kind}")">@DocumentsUnder(rule)</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            break;
+
+        case AdminTab.Integrations:
+            <p class="small text-muted">@Text["Integrations.Note"]</p>
+            <div class="table-responsive position-relative">
+                <table class="table align-middle">
+                    <caption class="visually-hidden">@Text["Admin.Tab.Integrations"]</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">@Text["Integrations.Column.System"]</th>
+                            <th scope="col">@Text["Integrations.Column.Purpose"]</th>
+                            <th scope="col">@Text["Integrations.Column.Status"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-semibold">@Text["Integration.Ocr"]</td>
+                            <td>@Text["Integration.Ocr.Purpose"]</td>
+                            <td>
+                                <span class="d-inline-flex flex-wrap align-items-center gap-2">
+                                    @if (_checking || _ocrHealth is null)
+                                    {
+                                        <span id="ocr-health" class="badge tag-gray">@Text["Integration.Status.Checking"]</span>
+                                    }
+                                    else if (_ocrHealth == HealthStatus.Healthy)
+                                    {
+                                        <span id="ocr-health" class="badge tag-green">@Text["Integration.Status.Connected"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span id="ocr-health" class="badge tag-red">@Text["Integration.Status.Down"]</span>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@_checking" @onclick="CheckAsync">@Text["Integrations.Check"]</button>
+                                </span>
+                            </td>
+                        </tr>
+                        @foreach (var system in PlannedSystems)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@Text[$"Integration.{system}"]</td>
+                                <td>@Text[$"Integration.{system}.Purpose"]</td>
+                                <td><span class="badge tag-purple">@Text["Integration.Status.Planned"]</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            break;
+
+        case AdminTab.Audit:
+            var entries = Audit.Latest();
+            <p class="small text-muted">@Text["Audit.Note"]</p>
+            @if (entries.Count == 0)
+            {
+                <div class="empty-state" role="status">@Text["Audit.Empty"]</div>
+            }
+            else
+            {
+                <div class="table-responsive position-relative">
+                    <table class="table align-middle audit-table">
+                        <caption class="visually-hidden">@Text["Admin.Tab.Audit"]</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">@Text["Audit.Column.Time"]</th>
+                                <th scope="col">@Text["Audit.Column.User"]</th>
+                                <th scope="col">@Text["Audit.Column.Action"]</th>
+                                <th scope="col">@Text["Audit.Column.Document"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in entries)
+                            {
+                                <tr>
+                                    <td class="small text-nowrap">@FormatDateTime(entry.AtUtc)</td>
+                                    <td class="text-nowrap" dir="ltr">@entry.User</td>
+                                    <td>@Describe(entry)</td>
+                                    <td>
+                                        @if (entry.DocumentId is null)
+                                        {
+                                            <span class="text-muted">@Missing</span>
+                                        }
+                                        else if (entry.Action == AuditAction.Deleted)
+                                        {
+                                            <span dir="auto">@(entry.DocumentName ?? entry.DocumentId)</span>
+                                        }
+                                        else
+                                        {
+                                            <a href="@OcrEndpoints.JobUrl(entry.DocumentId)" dir="auto">@(entry.DocumentName ?? entry.DocumentId)</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            break;
+    }
+</div>

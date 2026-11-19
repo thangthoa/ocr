@@ -2,19 +2,30 @@
 @inject IStringLocalizer<SharedText> Text
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
+    <header class="app-header">
+        <a class="app-brand" href="">
+            <span class="app-brand-name">@Text["AppName"]</span>
+            <span class="app-brand-product">@Text["AppProduct"]</span>
+        </a>
+        <div class="app-header-actions">
             <CultureSelector />
+            @* Mockup only: there is no authentication yet, so the user is always the demo account. *@
+            <span class="app-user" title="@Text["DemoUserNote"]">admin</span>
+            <a class="app-header-link" href="login">@Text["SignOut"]</a>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+        <main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
 </div>
 
 @* Interactive island in the static layout: job notifications appear on every page. *@

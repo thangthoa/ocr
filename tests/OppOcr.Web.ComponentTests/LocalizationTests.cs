@@ -2,6 +2,7 @@ using System.Collections;
 using System.Globalization;
 using System.Resources;
 using Modules.Ocr.Application.Contracts;
+using OppOcr.Web.Features.Mockups;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 
@@ -9,7 +10,7 @@ namespace OppOcr.Web.ComponentTests;
 
 public sealed class LocalizationTests
 {
-    public static TheoryData<string> ResourceTypes => [typeof(SharedText).FullName!, typeof(OcrText).FullName!];
+    public static TheoryData<string> ResourceTypes => [typeof(SharedText).FullName!, typeof(OcrText).FullName!, typeof(MockupText).FullName!];
 
     [Theory]
     [MemberData(nameof(ResourceTypes))]

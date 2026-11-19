@@ -7,6 +7,8 @@ using Modules.Ocr.Application;
 using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Application.Ports;
 using Modules.Ocr.Domain.Jobs;
+using OppOcr.Web.Features.Mockups;
+using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Features.Ocr.Components;
 using OppOcr.Web.Features.Ocr.Pages;
@@ -30,6 +32,7 @@ public sealed class OcrPagesTests : BunitContext
         Services.AddSingleton<IOcrJobRegistry>(_ocr);
         Services.AddSingleton(_notifications);
         Services.AddSingleton<IOcrJobNotifier>(_notifications);
+        Services.AddMockups();
     }
 
     [Fact]
@@ -59,103 +62,107 @@ public sealed class OcrPagesTests : BunitContext
             Assert.All(_ocr.Registry, j => Assert.Equal(OcrDocumentType.Handwritten, j.DocumentType));
             Assert.Contains("Only JPG, JPEG, PNG", cut.Markup, StringComparison.Ordinal);
             Assert.Contains("2 job(s) created on the OCR service", cut.Markup, StringComparison.Ordinal);
-            Assert.Equal(2, cut.FindAll("a[href^='ocr/jobs/job_']").Count);
+            Assert.Equal(2, cut.FindAll(".upload-results a[href^='documents/job_']").Count);
         });
     }
 
     [Fact]
-    public void Job_list_explains_the_temporary_source_and_refreshes_on_changes()
+    public void Folder_upload_sends_supported_files_and_skips_the_rest()
     {
-        var job = _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "scan.png", OcrJobStatus.Queued) with { QueuePosition = 3 });
-        var cut = Render<OcrJobsPage>();
-        cut.WaitForAssertion(() =>
-        {
-            Assert.Contains("cannot list jobs yet", cut.Markup, StringComparison.Ordinal);
-            Assert.Contains("In queue, position 3", cut.Markup, StringComparison.Ordinal);
-        });
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#doc-type-Printed").Change(true);
 
-        ((Modules.Ocr.Application.Ports.IOcrJobRegistry)_ocr).Update(job with { Status = OcrJobStatus.Running, QueuePosition = null, CurrentStep = "page 1/1: reading (view 2/4)" });
-        _ = _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Running, OcrJobChangeKind.Updated), Xunit.TestContext.Current.CancellationToken);
-
-        cut.WaitForAssertion(() => Assert.Contains("reading (view 2/4)", cut.Markup, StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public void Search_filters_jobs_by_file_name()
-    {
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "invoice.png", OcrJobStatus.Done));
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000002", "letter.png", OcrJobStatus.Done));
-        var cut = Render<OcrJobsPage>();
-        cut.WaitForAssertion(() => Assert.Equal(2, cut.FindAll("tbody tr").Count));
-
-        cut.Find("#job-search").Input("INVO");
-
-        cut.WaitForAssertion(() => Assert.Equal("invoice.png", Assert.Single(cut.FindAll("tbody tr")).QuerySelector("td a")!.TextContent));
-    }
-
-    [Fact]
-    public void Search_without_matches_says_so()
-    {
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "invoice.png", OcrJobStatus.Done));
-        var cut = Render<OcrJobsPage>();
-
-        cut.Find("#job-search").Input("zzz");
-
-        cut.WaitForAssertion(() => Assert.Contains("No jobs match “zzz”.", cut.Markup, StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public void Deleting_a_queued_job_cancels_it_on_the_service()
-    {
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "scan.png", OcrJobStatus.Queued));
-        var cut = Render<OcrJobsPage>();
-
-        cut.WaitForElement("button[aria-label='Delete job scan.png']").Click();
-        cut.Find("[role=group] button.btn-danger").Click();
-
-        cut.WaitForAssertion(() => Assert.Contains("No OCR jobs yet.", cut.Markup, StringComparison.Ordinal));
-        Assert.Equal(["job_0000000000000001"], _ocr.Cancelled);
-    }
-
-    [Fact]
-    public void Finished_job_shows_rtl_text_translated_warnings_and_downloads()
-    {
-        var page = new OcrPage(1, OcrDocumentType.Printed, "لما كان القانون", 63, "A v2",
-            ["the full-page read repeated itself; this page was read block by block"], Cached: false);
-        _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000002", "contract.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] });
-        SetCulture("ar");
-
-        var cut = Render<OcrJobPage>(p => p.Add(x => x.JobId, "job_0000000000000002"));
+        cut.FindComponents<InputFile>()[1].UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "scan-1.png"),
+            InputFileContent.CreateFromText("notes", "readme.txt"),
+            InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "scan-2.pdf"));
 
         cut.WaitForAssertion(() =>
         {
-            var text = cut.Find(".ocr-text");
-            Assert.Equal("rtl", text.GetAttribute("dir"));
-            Assert.Equal("ar", text.GetAttribute("lang"));
-            Assert.Equal("لما كان القانون", text.TextContent);
-            Assert.Contains("تكرّر النص عند قراءة الصفحة كاملة", cut.Markup, StringComparison.Ordinal);
-            Assert.Equal("ltr", cut.Find("code").GetAttribute("dir"));
-            Assert.Equal(4, cut.FindAll("a[download]").Count);
+            Assert.Equal(["scan-1.png", "scan-2.pdf"], _ocr.Registry.Select(j => j.FileName).Order(StringComparer.Ordinal));
+            Assert.Contains("1 file(s) in the folder were skipped", cut.Markup, StringComparison.Ordinal);
+            Assert.Equal(2, cut.FindAll(".upload-results a[href^='documents/job_']").Count);
         });
     }
 
     [Fact]
-    public void Failed_job_shows_localized_service_error()
+    public void Folder_without_supported_files_uploads_nothing()
     {
-        _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000003", "big.pdf", OcrJobStatus.Failed) with { ErrorCode = "processing_error" });
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#doc-type-Printed").Change(true);
 
-        var cut = Render<OcrJobPage>(p => p.Add(x => x.JobId, "job_0000000000000003"));
+        cut.FindComponents<InputFile>()[1].UploadFiles(InputFileContent.CreateFromText("notes", "readme.txt"));
 
-        cut.WaitForAssertion(() => Assert.Contains("Processing failed on the OCR service", cut.Markup, StringComparison.Ordinal));
-        Assert.Empty(cut.FindAll("a[download]"));
+        cut.WaitForAssertion(() => Assert.Contains("The folder has no supported files", cut.Markup, StringComparison.Ordinal));
+        Assert.Empty(_ocr.Registry);
     }
 
     [Fact]
-    public void Unknown_job_id_shows_not_found()
+    public void Capture_lists_recent_scans_and_adds_new_uploads()
     {
-        var cut = Render<OcrJobPage>(p => p.Add(x => x.JobId, "job_does0not0exist"));
+        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000077", "earlier.png", OcrJobStatus.Done) with { PagesDone = 1 });
+        var cut = Render<OcrUploadPage>();
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Find(".scan-history a[href='documents/job_0000000000000077']")));
 
-        cut.WaitForAssertion(() => Assert.Contains("OCR job not found.", cut.Markup, StringComparison.Ordinal));
+        cut.Find("#doc-type-Printed").Change(true);
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "new-scan.png"));
+
+        cut.WaitForAssertion(() =>
+        {
+            var history = cut.Find(".scan-history").TextContent;
+            Assert.Contains("earlier.png", history, StringComparison.Ordinal);
+            Assert.Contains("new-scan.png", history, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public void Batch_ticket_is_reconciled_and_kept_with_the_documents()
+    {
+        var cut = Render<OcrUploadPage>();
+        var batchId = cut.WaitForElement("#batch-id").GetAttribute("value")!;
+        Assert.StartsWith("B-", batchId, StringComparison.Ordinal);
+
+        cut.Find("#doc-type-Printed").Change(true);
+        cut.Find("#batch-box").Change("BX-00731");
+        cut.Find("#batch-department").Change(nameof(DocumentDepartment.Finance));
+        cut.Find("#batch-expected").Change("3");
+        cut.FindComponent<InputFile>().UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "a.png"),
+            InputFileContent.CreateFromBinary(PngBytes, "b.png"));
+
+        cut.WaitForAssertion(() =>
+        {
+            var result = cut.Find("#batch-result").TextContent;
+            Assert.Contains($"Batch {batchId}: 2 file(s) uploaded, 0 failed.", result, StringComparison.Ordinal);
+            Assert.Contains("1 file(s) fewer than the 3 expected.", result, StringComparison.Ordinal);
+            Assert.NotEqual(batchId, cut.Find("#batch-id").GetAttribute("value"));
+        });
+
+        var batch = Services.GetRequiredService<CaptureBatchStore>().ForJob(_ocr.Registry[0].Id.Value)!;
+        Assert.Equal(("BX-00731", DocumentDepartment.Finance, 3), (batch.BoxBarcode, batch.Department, batch.ExpectedFiles));
+        var document = Services.GetRequiredService<DocumentStore>().FromJob(_ocr.Registry[0]);
+        Assert.Equal(batchId, document.BatchId);
+        Assert.Equal(DocumentDepartment.Finance, document.Metadata.Department);
+        Assert.Equal(2, Services.GetRequiredService<AuditLog>().Latest().Count(e => e.Action == AuditAction.Uploaded && e.BatchId == batchId));
+    }
+
+    [Fact]
+    public void Capture_history_explains_when_the_ocr_service_is_down()
+    {
+        _ocr.Unavailable = true;
+
+        var cut = Render<OcrUploadPage>();
+
+        cut.WaitForAssertion(() => Assert.Contains("not available", cut.Find(".scan-history [role=alert]").TextContent, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Folder_button_is_disabled_until_a_document_type_is_chosen()
+    {
+        var cut = Render<OcrUploadPage>();
+
+        Assert.True(cut.Find("#ocr-folder").HasAttribute("disabled"));
+        Assert.True(cut.Find("#ocr-folder").HasAttribute("webkitdirectory"));
     }
 
     [Fact]

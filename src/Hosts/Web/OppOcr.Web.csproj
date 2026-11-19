@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- The SDK only restores the package that ships blazor.web.js when it sees .razor files at restore
+         time. The Dockerfile restores from the .csproj alone (for layer caching), so without this the
+         published app has no blazor.web.js and no page is interactive. -->
+    <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
     <UserSecretsId>119e4356-2fd8-416a-aead-8cdc79af21e1</UserSecretsId>
   </PropertyGroup>
 

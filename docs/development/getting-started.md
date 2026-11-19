@@ -13,10 +13,10 @@ App không dùng database (xem ADR 0003).
 cp .env.example .env      # điền OCR_API_KEY (và OCR_API_BASE_URL nếu khác mặc định)
 ```
 
-| Biến | Tương đương | Ý nghĩa |
-|---|---|---|
+| Biến                | Tương đương    | Ý nghĩa                                                        |
+| -------------------- | ------------------- | ---------------------------------------------------------------- |
 | `OCR_API_BASE_URL` | `Ocr:Api:BaseUrl` | Địa chỉ dịch vụ OCR, mặc định `http://n2.ckey.vn:1436` |
-| `OCR_API_KEY` | `Ocr:Api:ApiKey` | Khoá API, bắt buộc; chỉ ở server, không commit |
+| `OCR_API_KEY`      | `Ocr:Api:ApiKey`  | Khoá API, bắt buộc; chỉ ở server, không commit             |
 
 Ở môi trường Development, app tự đọc `.env` ở thư mục gốc repo (biến môi trường thật vẫn được ưu tiên).
 Môi trường khác phải đặt biến môi trường như bình thường. Thiếu khoá thì app dừng ngay khi khởi động.

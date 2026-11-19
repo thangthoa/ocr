@@ -1,8 +1,8 @@
 .upload-zone {
     position: relative;
     padding: 2.5rem 1rem;
-    border: 2px dashed #adb5bd;
-    border-radius: .5rem;
+    border: 1px dashed #8d8d8d;
+    border-radius: 0;
     text-align: center;
     transition: background-color .15s, border-color .15s;
 }
@@ -10,8 +10,8 @@
 .upload-zone:hover,
 .upload-zone:focus-within,
 .upload-zone.drag-over {
-    border-color: #0d6efd;
-    background-color: #f0f6ff;
+    border-color: #0f62fe;
+    background-color: #edf5ff;
 }
 
 .upload-zone.disabled {

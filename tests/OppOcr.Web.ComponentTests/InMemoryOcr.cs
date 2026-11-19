@@ -14,6 +14,11 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
 
     public List<string> Cancelled { get; } = [];
 
+    /// <summary>Makes every call fail as if the OCR service could not be reached.</summary>
+    public bool Unavailable { get; set; }
+
+    private static Error Down => Error.Failure(OcrServiceErrorCodes.ServiceUnavailable, "OCR service unreachable");
+
     public IReadOnlyList<OcrJob> Registry => _registry;
 
     /// <summary>Puts a job on the "service" and in the app's list, as if uploaded through the app.</summary>
@@ -34,11 +39,15 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
         return job;
     }
 
-    public Task<Result<OcrJob>> GetAsync(OcrJobId jobId, CancellationToken cancellationToken) =>
-        Task.FromResult<Result<OcrJob>>(_service.TryGetValue(jobId.Value, out var job) ? job : Error.NotFound("not_found", "job not found"));
+    public Task<Result<OcrJob>> GetAsync(OcrJobId jobId, CancellationToken cancellationToken)
+    {
+        if (Unavailable)
+            return Task.FromResult<Result<OcrJob>>(Down);
+        return Task.FromResult<Result<OcrJob>>(_service.TryGetValue(jobId.Value, out var job) ? job : Error.NotFound("not_found", "job not found"));
+    }
 
     public Task<Result<PagedResult<OcrJob>>> ListAsync(int page, int pageSize, OcrJobStatus? status, CancellationToken cancellationToken) =>
-        Task.FromResult<Result<PagedResult<OcrJob>>>(Error.Validation(OcrServiceErrorCodes.ListNotSupported, "no list"));
+        Task.FromResult<Result<PagedResult<OcrJob>>>(Unavailable ? Down : Error.Validation(OcrServiceErrorCodes.ListNotSupported, "no list"));
 
     public Task<Result> CancelAsync(OcrJobId jobId, CancellationToken cancellationToken)
     {

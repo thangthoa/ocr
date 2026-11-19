@@ -4,6 +4,7 @@ using Modules.Ocr.Application.Ports;
 using Modules.Ocr.Infrastructure;
 using OppOcr.Web.Components;
 using OppOcr.Web.Extensions;
+using OppOcr.Web.Features.Mockups;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 using Serilog;
@@ -25,6 +26,7 @@ builder.Services.AddOcrApplication();
 builder.Services.AddOcrInfrastructure(builder.Configuration);
 builder.Services.AddSingleton<OcrJobNotifications>();
 builder.Services.AddSingleton<IOcrJobNotifier>(sp => sp.GetRequiredService<OcrJobNotifications>());
+builder.Services.AddMockups();
 
 builder.Services.AddHealthChecks()
     .AddOcrHealthChecks(HealthCheckTags.Ready);

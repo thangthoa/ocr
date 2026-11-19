@@ -1,0 +1,58 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+}
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3rem;
+    padding-inline: 1rem;
+    background-color: #161616;
+    color: #f4f4f4;
+    font-size: .875rem;
+}
+
+    .auth-header ::deep .culture-selector {
+        margin-inline-start: auto;
+    }
+
+    .auth-header ::deep a {
+        color: #c6c6c6;
+        text-decoration: none;
+    }
+
+        .auth-header ::deep a:hover,
+        .auth-header ::deep a[aria-current] {
+            color: #fff;
+        }
+
+.auth-main {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4rem 1rem;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-sizing: border-box;
+    display: none;
+    inset-inline-start: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        inset-inline-end: 0.75rem;
+        top: 0.5rem;
+    }

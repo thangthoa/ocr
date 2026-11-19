@@ -4,6 +4,8 @@ Các lệnh này chạy **trên chính server dev**, từ thư mục code của 
 Không có SSH: script build image và chạy container ngay trên máy đang đứng.
 
 Server chỉ cần **Docker + docker compose** (v2 `docker compose` hoặc `docker-compose`) và `curl`.
+Nên dùng v2: `docker-compose` v1 (1.29) đã ngừng hỗ trợ và không recreate được container trên Docker Engine 25+
+(`KeyError: 'ContainerConfig'`). Script vẫn chạy được với v1 vì luôn xoá container cũ rồi mới tạo container mới.
 Không cần .NET SDK: Dockerfile ([devops/docker/Dockerfile](../docker/Dockerfile)) build bên trong container.
 
 ## Lần đầu trên server

@@ -1,0 +1,8 @@
+@inject IStringLocalizer<MockupText> Text
+
+<span class="badge @StatusTagClass(Status)">@Text.Status(Status)</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public DocumentStatus Status { get; set; }
+}

@@ -10,7 +10,7 @@ docker image inspect "$IMAGE_NAME:$PREVIOUS" >/dev/null 2>&1 || die "image $IMAG
 
 CURRENT="$(current_tag)"
 log "Rolling back from ${CURRENT:-unknown} to $PREVIOUS"
-compose "$PREVIOUS" up -d
+start_app "$PREVIOUS"
 echo "$PREVIOUS" > "$STATE_DIR/current_tag"
 [[ -n "$CURRENT" ]] && echo "$CURRENT" > "$STATE_DIR/previous_tag"
 

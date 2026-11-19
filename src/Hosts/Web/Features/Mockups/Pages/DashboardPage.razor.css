@@ -1,0 +1,243 @@
+/* Carbon content switcher */
+.content-switcher {
+    display: inline-flex;
+    border: 1px solid #161616;
+}
+
+    .content-switcher button {
+        min-height: 2.5rem;
+        min-width: 5.5rem;
+        padding: 0 1rem;
+        border: 0;
+        border-inline-start: 1px solid #8d8d8d;
+        background-color: #fff;
+        color: #525252;
+        font-size: .875rem;
+    }
+
+        .content-switcher button:first-child {
+            border-inline-start: 0;
+        }
+
+        .content-switcher button:hover {
+            background-color: #e8e8e8;
+            color: #161616;
+        }
+
+        .content-switcher button.active {
+            background-color: #161616;
+            color: #fff;
+        }
+
+        .content-switcher button:focus-visible {
+            outline: 2px solid #0f62fe;
+            outline-offset: -2px;
+        }
+
+/* KPI tiles: tiles separated by 1px gaps on a grey ground, no shadows. */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    background-color: #e0e0e0;
+    border: 1px solid #e0e0e0;
+}
+
+.kpi {
+    display: flex;
+    flex-direction: column;
+    gap: .375rem;
+    padding: 1rem;
+    background-color: #fff;
+}
+
+.kpi-label {
+    font-size: .875rem;
+    color: #525252;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-note {
+    font-size: .75rem;
+    letter-spacing: .32px;
+    color: #525252;
+}
+
+a.kpi-note {
+    color: #0f62fe;
+}
+
+.kpi-meter,
+.status-meter {
+    display: block;
+    height: .25rem;
+    background-color: #e0e0e0;
+}
+
+    .kpi-meter > span,
+    .status-meter > span {
+        display: block;
+        height: 100%;
+        background-color: #0f62fe;
+    }
+
+.dash-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.dash-card {
+    border: 1px solid #e0e0e0;
+    padding: 1rem 1.25rem;
+    background-color: #fff;
+    min-width: 0;
+}
+
+.dash-chart {
+    flex: 3 1 32rem;
+}
+
+.dash-status {
+    flex: 2 1 18rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+/* Bar chart: one series, so one colour and no legend; the target is a dashed reference line. */
+.bar-chart {
+    display: flex;
+    gap: .5rem;
+    margin-top: 1rem;
+}
+
+.bar-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 12rem;
+    font-size: .75rem;
+    color: #525252;
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+    .bar-axis span:first-child {
+        transform: translateY(-50%);
+    }
+
+    .bar-axis span:last-child {
+        transform: translateY(50%);
+    }
+
+.bar-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.bar-plot {
+    position: relative;
+    height: 12rem;
+    border-bottom: 1px solid #8d8d8d;
+}
+
+.bar-gridline {
+    position: absolute;
+    inset-inline: 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.bar-slot {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+    .bar-slot:hover .bar {
+        background-color: #0043ce;
+    }
+
+.bar {
+    display: block;
+    width: 72%;
+    max-width: 2rem;
+    background-color: #0f62fe;
+}
+
+.bar-target {
+    position: absolute;
+    inset-inline: 0;
+    border-top: 2px dashed #161616;
+    pointer-events: none;
+}
+
+    /* The label sits over the first bars, which start below target, so it does not hide a bar. */
+    .bar-target > span {
+        position: absolute;
+        inset-inline-start: .25rem;
+        bottom: .125rem;
+        padding: 0 .25rem;
+        font-size: .75rem;
+        font-weight: 600;
+        background-color: #fff;
+    }
+
+.bar-labels {
+    display: flex;
+    gap: 2px;
+    margin-top: .25rem;
+    font-size: .75rem;
+    color: #525252;
+}
+
+    .bar-labels span {
+        flex: 1 1 0;
+        min-width: 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: visible;
+    }
+
+        /* The newest label would otherwise run past the end of the axis; a flex end-aligned
+           item overflows towards the start instead (text-align cannot do that). */
+        .bar-labels span:last-child {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+.status-bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .875rem;
+}
+
+    .status-bars li {
+        display: flex;
+        flex-direction: column;
+        gap: .375rem;
+    }
+
+.status-percent {
+    min-width: 3.5rem;
+    text-align: end;
+}

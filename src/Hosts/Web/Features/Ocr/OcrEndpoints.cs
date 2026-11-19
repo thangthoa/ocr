@@ -11,7 +11,8 @@ namespace OppOcr.Web.Features.Ocr;
 /// </summary>
 internal static class OcrEndpoints
 {
-    public static string JobUrl(string jobId) => $"ocr/jobs/{Uri.EscapeDataString(jobId)}";
+    /// <summary>An OCR job is shown as a document; this is its page.</summary>
+    public static string JobUrl(string jobId) => $"documents/{Uri.EscapeDataString(jobId)}";
 
     public static string PageImageUrl(string jobId, int page) => $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/pages/{page}/image";
 
@@ -20,6 +21,10 @@ internal static class OcrEndpoints
 
     public static IEndpointRouteBuilder MapOcrEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        // The OCR job pages were merged into Documents; bookmarks and old links still land there.
+        endpoints.MapGet("/ocr/jobs", () => Results.LocalRedirect("~/documents"));
+        endpoints.MapGet("/ocr/jobs/{id}", (string id) => Results.LocalRedirect($"~/{JobUrl(id)}"));
+
         var group = endpoints.MapGroup("/ocr/jobs/{id}");
 
         group.MapGet("/pages/{page:int}/image", async (string id, int page, GetOcrPageImageHandler handler, HttpContext http, CancellationToken ct) =>

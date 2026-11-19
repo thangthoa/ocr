@@ -27,7 +27,7 @@ docker build -f devops/docker/Dockerfile -t "$IMAGE_NAME:$TAG" .
 mkdir -p "$STATE_DIR"
 PREVIOUS="$(current_tag)"
 log "Starting $IMAGE_NAME:$TAG"
-compose "$TAG" up -d --remove-orphans
+start_app "$TAG"
 [[ -n "$PREVIOUS" && "$PREVIOUS" != "$TAG" ]] && echo "$PREVIOUS" > "$STATE_DIR/previous_tag"
 echo "$TAG" > "$STATE_DIR/current_tag"
 

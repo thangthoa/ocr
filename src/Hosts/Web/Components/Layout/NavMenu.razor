@@ -1,37 +1,37 @@
 @inject IStringLocalizer<SharedText> Text
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">@Text["AppName"]</a>
-    </div>
+<div class="nav-mobile-bar">
+    <span class="nav-mobile-label" aria-hidden="true">@Text["NavMenu"]</span>
 </div>
 
-<input type="checkbox" title="@Text["NavToggle"]" class="navbar-toggler" />
+<input type="checkbox" title="@Text["NavToggle"]" aria-label="@Text["NavToggle"]" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
+    <nav class="nav flex-column" aria-label="@Text["NavMain"]">
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @Text["NavHome"]
+                <span class="bi bi-dashboard-nav-menu" aria-hidden="true"></span> @Text["NavDashboard"]
             </NavLink>
         </div>
-
-        @* Native disclosure: works in the static layout without JavaScript. Clicks on the
-           summary must not bubble to .nav-scrollable, which closes the mobile menu. *@
-        <details class="nav-group px-3" open onclick="event.stopPropagation()">
-            <summary class="nav-link">
-                <span class="bi bi-file-text-nav-menu" aria-hidden="true"></span> @Text["NavOcrGroup"]
-            </summary>
-            <div class="nav-item nav-subitem">
-                <NavLink class="nav-link" href="ocr" Match="NavLinkMatch.All">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> @Text["NavOcrScan"]
-                </NavLink>
-            </div>
-            <div class="nav-item nav-subitem">
-                <NavLink class="nav-link" href="ocr/jobs">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @Text["NavOcrJobs"]
-                </NavLink>
-            </div>
-        </details>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="capture">
+                <span class="bi bi-capture-nav-menu" aria-hidden="true"></span> @Text["NavCapture"]
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="review">
+                <span class="bi bi-review-nav-menu" aria-hidden="true"></span> @Text["NavReview"]
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="documents">
+                <span class="bi bi-documents-nav-menu" aria-hidden="true"></span> @Text["NavDocuments"]
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="admin">
+                <span class="bi bi-admin-nav-menu" aria-hidden="true"></span> @Text["NavAdmin"]
+            </NavLink>
+        </div>
     </nav>
 </div>

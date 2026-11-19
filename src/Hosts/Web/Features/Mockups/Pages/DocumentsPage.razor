@@ -1,0 +1,214 @@
+@page "/documents"
+@rendermode InteractiveServer
+
+<PageTitle>@Text["Documents.Title"]</PageTitle>
+
+<div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+    <div class="me-auto">
+        <h1 class="h3 mb-1">@Text["Documents.Title"]</h1>
+        <p class="text-muted mb-0">@Text["Documents.Intro"]</p>
+    </div>
+    <a class="btn btn-primary" href="capture">@Text["Documents.Upload"]</a>
+</div>
+
+@if (_list?.JobsError is { } jobsError)
+{
+    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+else if (_loadError is not null)
+{
+    <div class="alert alert-danger d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@_loadError</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+@if (_list is { JobsFromService: false })
+{
+    <div class="alert alert-info py-2 small" role="note">@OcrText["ListFromMemoryNotice"]</div>
+}
+@if (_list is { } list && list.JobsTotal > DocumentCatalog.MaxJobs)
+{
+    <div class="alert alert-secondary py-2 small" role="note">@Text["Documents.NewestOnly", DocumentCatalog.MaxJobs, list.JobsTotal]</div>
+}
+
+<div class="status-filter mb-3" role="group" aria-label="@Text["Filter.Status"]">
+    <button type="button" id="status-all" class="@(_status is null ? "active" : null)" aria-pressed="@(_status is null ? "true" : "false")"
+            @onclick="() => SetStatus(null)">
+        @Text["Filter.AllStatuses"] <span class="count">@_counts.Values.Sum()</span>
+    </button>
+    @foreach (var status in Enum.GetValues<DocumentStatus>())
+    {
+        var selected = _status == status;
+        <button type="button" id="@($"status-{status}")" class="@(selected ? "active" : null)" aria-pressed="@(selected ? "true" : "false")"
+                @onclick="() => SetStatus(status)">
+            @Text.Status(status) <span class="count">@_counts.GetValueOrDefault(status)</span>
+        </button>
+    }
+</div>
+
+<div class="doc-filters mb-3" role="search">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label for="doc-search" class="form-label">@Text["Search.Label"]</label>
+            <div class="input-group">
+                <label for="doc-field" class="visually-hidden">@Text["Search.Field"]</label>
+                <select id="doc-field" class="form-select doc-field" @bind="_field" @bind:after="() => Apply()">
+                    @foreach (var field in Enum.GetValues<DocumentSearchField>())
+                    {
+                        <option value="@field">@Text.Field(field)</option>
+                    }
+                </select>
+                <input id="doc-search" type="search" class="form-control" dir="auto" autocomplete="off" spellcheck="false"
+                       placeholder="@Text["Search.Placeholder"]" @bind="_search" @bind:event="oninput" @bind:after="() => Apply()" />
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="doc-department" class="form-label">@Text["Filter.Department"]</label>
+            <select id="doc-department" class="form-select" @bind="_department" @bind:after="() => Apply()">
+                <option value="">@Text["Filter.AllDepartments"]</option>
+                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                {
+                    <option value="@department">@Text.Department(department)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="doc-kind" class="form-label">@Text["Filter.Kind"]</label>
+            <select id="doc-kind" class="form-select" @bind="_kind" @bind:after="() => Apply()">
+                <option value="">@Text["Filter.AllKinds"]</option>
+                @foreach (var kind in Enum.GetValues<DocumentKind>())
+                {
+                    <option value="@kind">@Text.Kind(kind)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="doc-from" class="form-label">@Text["Filter.From"]</label>
+            <input id="doc-from" type="date" class="form-control" @bind="_from" @bind:after="() => Apply()" />
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="doc-to" class="form-label">@Text["Filter.To"]</label>
+            <input id="doc-to" type="date" class="form-control" @bind="_to" @bind:after="() => Apply()" />
+        </div>
+    </div>
+</div>
+
+@if (_list is null && _loadError is null)
+{
+    <p class="text-muted" role="status">@OcrText["Loading"]</p>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <p class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", _results.Count]</p>
+        @if (HasFilters)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
+        }
+    </div>
+
+    @if (_deleteError is not null)
+    {
+        <div class="alert alert-danger py-2" role="alert">@_deleteError</div>
+    }
+
+    @if (_results.Count == 0)
+    {
+        <div class="empty-state">
+            <p class="mb-2">@Text["Documents.None"]</p>
+            @if (HasFilters)
+            {
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
+            }
+        </div>
+    }
+    else
+    {
+        @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
+        <div class="table-responsive position-relative">
+            <table class="table table-hover align-middle doc-table">
+                <caption class="visually-hidden">@Text["Documents.Title"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Text["Column.File"]</th>
+                        <th scope="col">@Text["Column.Title"]</th>
+                        <th scope="col">@Text["Column.Reference"]</th>
+                        <th scope="col">@Text["Column.Department"] / @Text["Column.Kind"]</th>
+                        <th scope="col">@Text["Column.DocumentDate"]</th>
+                        <th scope="col">@Text["Column.Status"]</th>
+                        <th scope="col">@Text["Column.Version"]</th>
+                        <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var document in PageItems)
+                    {
+                        var metadata = document.Metadata;
+                        <tr @key="document.Id" class="doc-row" @onclick="() => Open(document.Id)">
+                            <td class="text-nowrap">
+                                <a href="@DetailUrl(document.Id)" dir="auto" @onclick:stopPropagation="true">@document.FileName</a>
+                                <div class="small text-muted">
+                                    @if (document.IsSample)
+                                    {
+                                        <span class="badge tag-gray me-1">@Text["SampleTag"]</span>
+                                    }
+                                    <span dir="ltr">@document.Id</span>
+                                    @if (document.Job is { } job)
+                                    {
+                                        <span> · @OcrText.DocumentType(job.DocumentType)</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="doc-title" lang="ar" dir="auto">@metadata.Title</td>
+                            <td class="text-nowrap" dir="ltr">@OrMissing(metadata.Reference)</td>
+                            <td class="text-nowrap">
+                                @(metadata.Department is { } department ? Text.Department(department) : Missing)
+                                <div class="small text-muted">@(metadata.Kind is { } kind ? Text.Kind(kind) : Missing)</div>
+                            </td>
+                            <td class="text-nowrap">@FormatDate(metadata.DocumentDate)</td>
+                            <td class="doc-status">
+                                <DocumentStatusTag Status="document.Status" />
+                                @if (document.Job is { IsFinished: false } running)
+                                {
+                                    <div class="mt-1">
+                                        <OcrProgress Status="running.Status" PagesTotal="running.PagesTotal" PagesDone="running.PagesDone"
+                                                     CurrentStep="@running.CurrentStep" QueuePosition="running.QueuePosition" />
+                                    </div>
+                                }
+                                else if (document.Job is { Status: OcrJobStatus.Failed } failed)
+                                {
+                                    <div class="small text-danger mt-1">@OcrText.JobError(failed.ErrorCode)</div>
+                                }
+                            </td>
+                            <td class="text-nowrap">
+                                <span dir="ltr">@(document.CurrentVersion?.Number ?? Missing)</span>
+                                <div class="small text-muted" title="@($"{Text["Column.Updated"]}: {FormatDateTime(document.UpdatedAtUtc)}")">@FormatShortDate(document.UpdatedAtUtc)</div>
+                            </td>
+                            <td class="text-end text-nowrap" @onclick:stopPropagation="true">
+                                @if (!document.IsSample)
+                                {
+                                    <ConfirmButton Label="@OcrText["Delete"]" ConfirmLabel="@OcrText["Delete"]" CancelLabel="@OcrText["Cancel"]"
+                                                   BusyLabel="@OcrText["Deleting"]" ConfirmGroupLabel="@OcrText["ConfirmDelete"]"
+                                                   AriaLabel="@OcrText["DeleteJob", document.FileName]" Busy="@(_deletingId == document.Id)"
+                                                   OnConfirm="() => DeleteAsync(document.Id, document.FileName)" />
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (TotalPages > 1)
+        {
+            <nav class="d-flex align-items-center gap-2" aria-label="@Text["Pager.Label"]">
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page <= 1)" @onclick="() => _page--">@Text["Pager.Previous"]</button>
+                <span class="small">@Text["Pager.PageOf", _page, TotalPages]</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page >= TotalPages)" @onclick="() => _page++">@Text["Pager.Next"]</button>
+            </nav>
+        }
+    }
+}

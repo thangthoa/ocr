@@ -1,0 +1,105 @@
+@page "/review"
+@rendermode InteractiveServer
+
+<PageTitle>@Text["Review.Title"]</PageTitle>
+
+<div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+    <div class="me-auto">
+        <h1 class="h3 mb-1">@Text["Review.Title"]</h1>
+        <p class="text-muted mb-0">@Text["Review.Intro"]</p>
+    </div>
+    @if (_queue.Count > 0)
+    {
+        <a id="review-start" class="btn btn-primary" href="@DetailUrl(_queue[0].Id)">@Text["Review.Start"]</a>
+    }
+</div>
+
+@if (_list?.JobsError is { } jobsError)
+{
+    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+else if (_loadError is not null)
+{
+    <div class="alert alert-danger d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@_loadError</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+
+@if (_list is null && _loadError is null)
+{
+    <p class="text-muted" role="status">@OcrText["Loading"]</p>
+}
+else if (_queue.Count == 0)
+{
+    <div class="empty-state" role="status">@Text["Review.Empty"]</div>
+}
+else
+{
+    <dl class="review-summary mb-3">
+        <div>
+            <dt>@Text["Kpi.Review"]</dt>
+            <dd id="review-count">@_queue.Count</dd>
+        </div>
+        <div>
+            <dt>@Text["Review.Oldest"]</dt>
+            <dd>@FormatDateTime(_queue.Min(d => d.UploadedAtUtc))</dd>
+        </div>
+    </dl>
+
+    @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
+    <div class="table-responsive position-relative">
+        <table class="table table-hover align-middle">
+            <caption class="visually-hidden">@Text["Review.Title"]</caption>
+            <thead>
+                <tr>
+                    <th scope="col">@Text["Column.File"]</th>
+                    <th scope="col">@Text["Column.Title"]</th>
+                    <th scope="col" class="text-end">@Text["Column.Pages"]</th>
+                    <th scope="col" class="text-end">@Text["Column.Confidence"]</th>
+                    <th scope="col">@Text["Column.Uploaded"]</th>
+                    <th scope="col">@Text["Column.Waiting"]</th>
+                    <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var document in _queue)
+                {
+                    <tr @key="document.Id">
+                        <td class="text-nowrap">
+                            <a href="@DetailUrl(document.Id)" dir="auto">@document.FileName</a>
+                            <div class="small text-muted">
+                                @if (document.IsSample)
+                                {
+                                    <span class="badge tag-gray me-1">@Text["SampleTag"]</span>
+                                }
+                                <span dir="ltr">@document.Id</span>
+                            </div>
+                        </td>
+                        <td class="doc-title" lang="ar" dir="auto">@document.Metadata.Title</td>
+                        <td class="text-end">@(document.Pages > 0 ? FormatNumber(document.Pages) : Missing)</td>
+                        <td class="text-end">
+                            @if (document.Confidence is { } confidence)
+                            {
+                                <span class="@(confidence < LowConfidence ? "low-confidence" : null)">@FormatPercent(confidence)</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted" title="@Text["Review.NoConfidence"]">@Missing</span>
+                            }
+                        </td>
+                        <td class="small text-nowrap">@FormatDateTime(document.UploadedAtUtc)</td>
+                        <td class="text-nowrap">@WaitingFor(document)</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="@DetailUrl(document.Id)"
+                               aria-label="@Text["Review.ActionLabel", document.FileName]">@Text["Review.Action"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

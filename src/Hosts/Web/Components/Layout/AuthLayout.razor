@@ -1,0 +1,19 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedText> Text
+
+@* Layout for pages shown before sign-in: no navigation, only the brand and the language switch. *@
+<div class="auth-page">
+    <header class="auth-header">
+        <span class="auth-brand"><strong>@Text["AppName"]</strong> @Text["AppProduct"]</span>
+        <CultureSelector />
+    </header>
+    <main class="auth-main">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    @Text["UnhandledError"]
+    <a href="." class="reload">@Text["Reload"]</a>
+    <span class="dismiss">🗙</span>
+</div>

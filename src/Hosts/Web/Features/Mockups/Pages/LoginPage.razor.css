@@ -1,0 +1,23 @@
+.login-panel {
+    width: min(26rem, 100%);
+    background-color: #fff;
+    padding: 2rem;
+    border: 1px solid #e0e0e0;
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: .5rem;
+}
+
+.login-submit {
+    text-align: start;
+}
+
+.login-note {
+    padding: .75rem 1rem;
+    background-color: #edf5ff;
+    border-inline-start: 3px solid #0043ce;
+    color: #161616;
+}

@@ -1,0 +1,21 @@
+.folder-upload {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+}
+
+/* The real input stays focusable for keyboard users; its label is the visible button. */
+.folder-upload ::deep .folder-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+    .folder-upload ::deep .folder-input:focus-visible + label {
+        outline: 2px solid #0f62fe;
+        outline-offset: 2px;
+    }

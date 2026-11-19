@@ -4,7 +4,14 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="UploadTitle" xml:space="preserve"><value>رفع ملفات OCR</value></data>
+  <data name="UploadTitle" xml:space="preserve"><value>الرفع والمسح</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>ارفع الملفات الممسوحة ضوئيًا أو مجلدًا كاملًا. يُرسَل كل ملف إلى خدمة OCR كمهمة مستقلة.</value></data>
+  <data name="FolderPrompt" xml:space="preserve"><value>أو ارفع كل الملفات المدعومة داخل مجلد:</value></data>
+  <data name="ChooseFolder" xml:space="preserve"><value>اختيار مجلد</value></data>
+  <data name="FolderSkipped" xml:space="preserve"><value>تم تخطي {0} ملف في المجلد لأن نوعه غير مدعوم.</value></data>
+  <data name="FolderEmpty" xml:space="preserve"><value>لا يحتوي المجلد على ملفات مدعومة ({0}).</value></data>
+  <data name="FolderTooManyFiles" xml:space="preserve"><value>يحتوي المجلد على {0} ملفًا مدعومًا؛ يمكنك رفع {1} ملفًا كحد أقصى في المرة الواحدة.</value></data>
+  <data name="FolderTooLarge" xml:space="preserve"><value>يحتوي المجلد على أكثر من {0} ملف. اختر مجلدًا أصغر.</value></data>
   <data name="JobsTitle" xml:space="preserve"><value>مهام OCR</value></data>
   <data name="JobTitle" xml:space="preserve"><value>مهمة OCR</value></data>
   <data name="DocumentTypeLegend" xml:space="preserve"><value>نوع المستند</value></data>
@@ -17,7 +24,9 @@
   <data name="Uploading" xml:space="preserve"><value>جارٍ الإرسال إلى خدمة OCR…</value></data>
   <data name="Uploaded" xml:space="preserve"><value>تم الإرسال</value></data>
   <data name="UploadSummary" xml:space="preserve"><value>تم إنشاء {0} مهمة على خدمة OCR؛ سيصلك إشعار عند تغيّر حالة كل مهمة.</value></data>
-  <data name="GoToJobs" xml:space="preserve"><value>عرض المهام</value></data>
+  <data name="GoToJobs" xml:space="preserve"><value>عرض المستندات</value></data>
+  <data name="History.Title" xml:space="preserve"><value>الملفات الممسوحة مؤخرًا</value></data>
+  <data name="History.Empty" xml:space="preserve"><value>لم يتم مسح أي ملف بعد.</value></data>
   <data name="NewUpload" xml:space="preserve"><value>رفع جديد</value></data>
   <data name="View" xml:space="preserve"><value>عرض</value></data>
   <data name="Close" xml:space="preserve"><value>إغلاق</value></data>
@@ -103,4 +112,16 @@
   <data name="SearchPlaceholder" xml:space="preserve"><value>ابحث باسم الملف أو رقم المهمة</value></data>
   <data name="NoMatches" xml:space="preserve"><value>لا توجد مهام تطابق «{0}».</value></data>
   <data name="SearchLimited" xml:space="preserve"><value>جرى البحث في أحدث {0} مهمة فقط.</value></data>
+  <data name="Batch.Heading" xml:space="preserve"><value>بطاقة الدفعة</value></data>
+  <data name="Batch.Hint" xml:space="preserve"><value>اختياري. يُستخدم لمطابقة ما تم استلامه مع ما هو متوقع.</value></data>
+  <data name="Batch.Id" xml:space="preserve"><value>رقم الدفعة</value></data>
+  <data name="Batch.Box" xml:space="preserve"><value>باركود الصندوق</value></data>
+  <data name="Batch.Department" xml:space="preserve"><value>الإدارة</value></data>
+  <data name="Batch.NoDepartment" xml:space="preserve"><value>غير محدد</value></data>
+  <data name="Batch.Expected" xml:space="preserve"><value>عدد الملفات المتوقع</value></data>
+  <data name="Batch.Result" xml:space="preserve"><value>الدفعة {0}: رُفع {1} ملف، وفشل {2}.</value></data>
+  <data name="Batch.Matches" xml:space="preserve"><value>مطابق للعدد المتوقع ({0}).</value></data>
+  <data name="Batch.Short" xml:space="preserve"><value>أقل من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
+  <data name="Batch.Over" xml:space="preserve"><value>أكثر من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
+  <data name="Column.Batch" xml:space="preserve"><value>الدفعة</value></data>
 </root>

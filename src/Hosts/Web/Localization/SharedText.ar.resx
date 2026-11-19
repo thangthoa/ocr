@@ -4,16 +4,19 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="AppName" xml:space="preserve"><value>OppOcr</value></data>
-  <data name="NavHome" xml:space="preserve"><value>الرئيسية</value></data>
+  <data name="AppName" xml:space="preserve"><value>نظام OCR</value></data>
+  <data name="AppProduct" xml:space="preserve"><value>أرشيف المستندات</value></data>
   <data name="NavToggle" xml:space="preserve"><value>قائمة التنقل</value></data>
-  <data name="HomeTitle" xml:space="preserve"><value>الرئيسية</value></data>
+  <data name="NavMenu" xml:space="preserve"><value>القائمة</value></data>
+  <data name="NavMain" xml:space="preserve"><value>التنقل الرئيسي</value></data>
+  <data name="NavDashboard" xml:space="preserve"><value>لوحة المعلومات</value></data>
+  <data name="NavCapture" xml:space="preserve"><value>الرفع والمسح</value></data>
+  <data name="NavReview" xml:space="preserve"><value>المراجعة</value></data>
+  <data name="NavAdmin" xml:space="preserve"><value>إدارة النظام</value></data>
+  <data name="NavDocuments" xml:space="preserve"><value>المستندات</value></data>
+  <data name="SignOut" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="DemoUserNote" xml:space="preserve"><value>حساب تجريبي: تسجيل الدخول نموذج أولي ولا يحمي أي صفحة بعد.</value></data>
   <data name="UnhandledError" xml:space="preserve"><value>حدث خطأ غير متوقع.</value></data>
   <data name="Reload" xml:space="preserve"><value>إعادة التحميل</value></data>
   <data name="Language" xml:space="preserve"><value>اللغة</value></data>
-  <data name="FeatureOcrTitle" xml:space="preserve"><value>التعرف الضوئي على النصوص العربية</value></data>
-  <data name="FeatureOcrDescription" xml:space="preserve"><value>ارفع صورًا أو ملفات PDF؛ يُرسَل كل ملف إلى خدمة OCR كمهمة مستقلة.</value></data>
-  <data name="NavOcrGroup" xml:space="preserve"><value>OCR</value></data>
-  <data name="NavOcrScan" xml:space="preserve"><value>مسح ضوئي</value></data>
-  <data name="NavOcrJobs" xml:space="preserve"><value>المهام</value></data>
 </root>

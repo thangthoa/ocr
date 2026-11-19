@@ -1,11 +1,16 @@
+@page "/capture"
 @page "/ocr"
 @rendermode InteractiveServer
+@using System.Globalization
 @using Modules.Ocr.Domain.Jobs
 @using OppOcr.Web.Features.Ocr.Components
+@using OppOcr.Web.Features.Mockups
+@using OppOcr.Web.Features.Mockups.Data
 
 <PageTitle>@Text["UploadTitle"]</PageTitle>
 
-<h1 class="h3 mb-3">@Text["UploadTitle"]</h1>
+<h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
+<p class="text-muted mb-4">@Text["UploadIntro"]</p>
 
 <fieldset class="mb-3" disabled="@_uploading">
     <legend class="h6">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></legend>
@@ -24,18 +29,60 @@
     }
 </fieldset>
 
+<fieldset class="batch-ticket mb-3" disabled="@_uploading">
+    <legend class="h6 mb-1">@Text["Batch.Heading"]</legend>
+    <p class="form-text mt-0 mb-2">@Text["Batch.Hint"]</p>
+    <div class="row g-3">
+        <div class="col-6 col-lg-3">
+            <label for="batch-id" class="form-label">@Text["Batch.Id"]</label>
+            <input id="batch-id" class="form-control" value="@_batchId" readonly dir="ltr" />
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="batch-box" class="form-label">@Text["Batch.Box"]</label>
+            <input id="batch-box" class="form-control" dir="ltr" autocomplete="off" @bind="_boxBarcode" />
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="batch-department" class="form-label">@Text["Batch.Department"]</label>
+            <select id="batch-department" class="form-select" @bind="_batchDepartment">
+                <option value="">@Text["Batch.NoDepartment"]</option>
+                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                {
+                    <option value="@department">@MockupText.Department(department)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="batch-expected" class="form-label">@Text["Batch.Expected"]</label>
+            <input id="batch-expected" type="number" min="1" class="form-control" @bind="_expectedFiles" />
+        </div>
+    </div>
+</fieldset>
+
 <FileDropZone Id="ocr-files" Accept="@Accept" Prompt="@Text["DropZonePrompt"]" OnFilesSelected="UploadAsync"
               Disabled="@(_uploading || _documentType is null)"
               Hint="@Text["DropZoneHint", OcrTextExtensions.SupportedFormatsLabel, OcrRules.MaxSizeBytes / 1024 / 1024, MaxFilesPerBatch]" />
+
+<div class="folder-upload mt-3">
+    <span id="ocr-folder-hint" class="small text-muted">@Text["FolderPrompt"]</span>
+    @* webkitdirectory lets the browser pick a whole folder (all current browsers support it). *@
+    <InputFile id="ocr-folder" class="folder-input" OnChange="UploadFolderAsync" multiple webkitdirectory="true"
+               disabled="@(_uploading || _documentType is null)" aria-describedby="ocr-folder-hint" />
+    <label for="ocr-folder" class="btn btn-sm btn-outline-primary @(_uploading || _documentType is null ? "disabled" : null)">@Text["ChooseFolder"]</label>
+</div>
 
 @if (_batchError is not null)
 {
     <div class="alert alert-danger mt-3" role="alert">@_batchError</div>
 }
 
+@if (_folderNote is not null)
+{
+    <div class="alert alert-info mt-3 py-2" role="status">@_folderNote</div>
+}
+
 @if (_uploads.Count > 0)
 {
-    <ul class="list-group mt-3" aria-live="polite">
+    <ul class="list-group mt-3 upload-results" aria-live="polite">
         @foreach (var item in _uploads)
         {
             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
@@ -56,11 +103,99 @@
         }
     </ul>
 
+    @if (_lastBatch is { } last && !_uploading)
+    {
+        var matches = last.FailedFiles == 0 && last.Difference is null or 0;
+        <div id="batch-result" class="alert @(matches ? "alert-success" : "alert-warning") mt-3 py-2" role="status">
+            <div>@Text["Batch.Result", last.Id, last.UploadedFiles, last.FailedFiles]</div>
+            @if (last.ExpectedFiles is { } expected)
+            {
+                <div>
+                    @(last.Difference switch
+                    {
+                        0 => Text["Batch.Matches", expected],
+                        < 0 => Text["Batch.Short", -last.Difference!.Value, expected],
+                        _ => Text["Batch.Over", last.Difference!.Value, expected],
+                    })
+                </div>
+            }
+        </div>
+    }
+
     @if (!_uploading && _uploads.Exists(x => x.Status == UploadStatus.Succeeded))
     {
         <p class="mt-3">
             @Text["UploadSummary", _uploads.Count(x => x.Status == UploadStatus.Succeeded)]
-            <a href="ocr/jobs">@Text["GoToJobs"]</a>
+            <a href="documents">@Text["GoToJobs"]</a>
         </p>
     }
 }
+
+<section class="scan-history mt-5" aria-labelledby="history-title">
+    <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
+        <h2 id="history-title" class="h5 mb-0 me-auto">@Text["History.Title"]</h2>
+        <a class="small" href="documents">@Text["GoToJobs"]</a>
+    </div>
+
+    @if (_historyError is not null)
+    {
+        <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+            <span class="me-auto">@_historyError</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadHistoryAsync">@Text["Retry"]</button>
+        </div>
+    }
+    else if (_history is null)
+    {
+        <p class="text-muted" role="status">@Text["Loading"]</p>
+    }
+    else if (_history.Jobs.Items.Count == 0)
+    {
+        <p class="text-muted">@Text["History.Empty"]</p>
+    }
+    else
+    {
+        @if (!_history.FromService)
+        {
+            <p class="small text-muted">@Text["ListFromMemoryNotice"]</p>
+        }
+        @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
+        <div class="table-responsive position-relative">
+            <table class="table align-middle">
+                <caption class="visually-hidden">@Text["History.Title"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col" style="min-width: 12rem">@Text["Column.File"]</th>
+                        <th scope="col">@Text["Column.Type"]</th>
+                        <th scope="col">@Text["Column.Batch"]</th>
+                        <th scope="col">@Text["Column.Status"]</th>
+                        <th scope="col">@Text["Column.Progress"]</th>
+                        <th scope="col">@Text["Column.Created"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var job in _history.Jobs.Items)
+                    {
+                        <tr @key="job.Id">
+                            <td class="text-break"><a href="@OcrEndpoints.JobUrl(job.Id.Value)" dir="auto">@job.FileName</a></td>
+                            <td class="text-nowrap">@Text.DocumentType(job.DocumentType)</td>
+                            <td class="small text-nowrap" dir="ltr">@(Batches.ForJob(job.Id.Value)?.Id ?? "—")</td>
+                            <td><OcrStatusBadge Status="job.Status" /></td>
+                            <td style="min-width: 12rem">
+                                @if (job.Status == OcrJobStatus.Failed)
+                                {
+                                    <span class="text-danger small">@Text.JobError(job.ErrorCode)</span>
+                                }
+                                else
+                                {
+                                    <OcrProgress Status="job.Status" PagesTotal="job.PagesTotal" PagesDone="job.PagesDone"
+                                                 CurrentStep="@job.CurrentStep" QueuePosition="job.QueuePosition" />
+                                }
+                            </td>
+                            <td class="small text-nowrap">@job.CreatedAtUtc?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

@@ -31,6 +31,16 @@ compose() {
         "${cmd[@]}" -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR" -p "$CONTAINER_NAME" "$@"
 }
 
+# Starts the app on the given image tag, replacing any running container.
+# The old container is removed first instead of being recreated: docker-compose v1 cannot recreate a
+# container on Docker Engine 25+ (it fails with KeyError: 'ContainerConfig' after already stopping the
+# old one). `down` also clears a container v1 left renamed as <id>_<name> after such a failure.
+start_app() {
+    local tag="$1"
+    compose "$tag" down --remove-orphans
+    compose "$tag" up -d --remove-orphans
+}
+
 # APP_PORT from the environment, else from the .env file, else 5286.
 app_port() {
     if [[ -n "${APP_PORT:-}" ]]; then

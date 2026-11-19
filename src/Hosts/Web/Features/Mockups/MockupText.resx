@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SampleData" xml:space="preserve"><value>Sample data</value></data>
+  <data name="Status.Processing" xml:space="preserve"><value>Processing</value></data>
+  <data name="Status.NeedsReview" xml:space="preserve"><value>Needs review</value></data>
+  <data name="Status.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Status.Archived" xml:space="preserve"><value>Archived</value></data>
+  <data name="Status.Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Status.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="SampleTag" xml:space="preserve"><value>Sample</value></data>
+  <data name="Department.Finance" xml:space="preserve"><value>Finance</value></data>
+  <data name="Department.HumanResources" xml:space="preserve"><value>Human Resources</value></data>
+  <data name="Department.Legal" xml:space="preserve"><value>Legal</value></data>
+  <data name="Department.Procurement" xml:space="preserve"><value>Procurement</value></data>
+  <data name="Department.Administration" xml:space="preserve"><value>Administration</value></data>
+  <data name="Kind.PaymentVoucher" xml:space="preserve"><value>Payment voucher</value></data>
+  <data name="Kind.PurchaseOrder" xml:space="preserve"><value>Purchase order</value></data>
+  <data name="Kind.Contract" xml:space="preserve"><value>Contract</value></data>
+  <data name="Kind.Correspondence" xml:space="preserve"><value>Correspondence</value></data>
+  <data name="Kind.Decision" xml:space="preserve"><value>Administrative decision</value></data>
+  <data name="Confidentiality.Internal" xml:space="preserve"><value>Internal</value></data>
+  <data name="Confidentiality.Confidential" xml:space="preserve"><value>Confidential</value></data>
+  <data name="Confidentiality.Secret" xml:space="preserve"><value>Secret</value></data>
+  <data name="Field.All" xml:space="preserve"><value>All fields</value></data>
+  <data name="Field.FileName" xml:space="preserve"><value>File name</value></data>
+  <data name="Field.Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Field.Reference" xml:space="preserve"><value>Reference no.</value></data>
+  <data name="Field.Keyword" xml:space="preserve"><value>Keyword</value></data>
+  <data name="Field.Content" xml:space="preserve"><value>Text content</value></data>
+  <data name="Login.Title" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Login.Intro" xml:space="preserve"><value>Sign in to the document archive.</value></data>
+  <data name="Login.UserName" xml:space="preserve"><value>User name</value></data>
+  <data name="Login.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login.Submit" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Login.Required" xml:space="preserve"><value>Enter your user name and password.</value></data>
+  <data name="Login.Failed" xml:space="preserve"><value>Incorrect user name or password.</value></data>
+  <data name="Login.DemoNote" xml:space="preserve"><value>Demo only: sign in with admin / admin. No real authentication is performed yet, and pages are not protected.</value></data>
+  <data name="Dashboard.Title" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Dashboard.Range" xml:space="preserve"><value>{0} – {1}</value></data>
+  <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>Open documents</value></data>
+  <data name="Period.Label" xml:space="preserve"><value>Report period</value></data>
+  <data name="Period.Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Period.Week" xml:space="preserve"><value>Week</value></data>
+  <data name="Period.Month" xml:space="preserve"><value>Month</value></data>
+  <data name="Kpi.Heading" xml:space="preserve"><value>Key figures</value></data>
+  <data name="Kpi.Pages" xml:space="preserve"><value>Pages scanned</value></data>
+  <data name="Kpi.PagesTarget" xml:space="preserve"><value>{0} of the {1} target</value></data>
+  <data name="Kpi.VsPrevious" xml:space="preserve"><value>{0} vs previous period</value></data>
+  <data name="Kpi.Documents" xml:space="preserve"><value>Documents created</value></data>
+  <data name="Kpi.Confidence" xml:space="preserve"><value>Average OCR confidence</value></data>
+  <data name="Kpi.PointsChange" xml:space="preserve"><value>{0} pts vs previous period</value></data>
+  <data name="Kpi.Review" xml:space="preserve"><value>Waiting for review</value></data>
+  <data name="Kpi.Failed" xml:space="preserve"><value>{0} failed</value></data>
+  <data name="Kpi.OpenReview" xml:space="preserve"><value>Open documents to review</value></data>
+  <data name="Chart.PagesByHour" xml:space="preserve"><value>Pages scanned per hour</value></data>
+  <data name="Chart.PagesByDay" xml:space="preserve"><value>Pages scanned per day</value></data>
+  <data name="Chart.Summary" xml:space="preserve"><value>{0}: between {1} and {2} pages; target {3}.</value></data>
+  <data name="Chart.Target" xml:space="preserve"><value>Target {0}</value></data>
+  <data name="Chart.BarTip" xml:space="preserve"><value>{0}: {1} pages</value></data>
+  <data name="Chart.ShowTable" xml:space="preserve"><value>Show as a table</value></data>
+  <data name="Chart.Period" xml:space="preserve"><value>Period</value></data>
+  <data name="Chart.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Status.Heading" xml:space="preserve"><value>Documents by status</value></data>
+  <data name="Dept.Heading" xml:space="preserve"><value>By department</value></data>
+  <data name="Dept.Department" xml:space="preserve"><value>Department</value></data>
+  <data name="Dept.Documents" xml:space="preserve"><value>Documents</value></data>
+  <data name="Dept.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Dept.Confidence" xml:space="preserve"><value>Average confidence</value></data>
+  <data name="Documents.Title" xml:space="preserve"><value>Documents</value></data>
+  <data name="Documents.Intro" xml:space="preserve"><value>Every uploaded file is a document. Select one to preview it, review it, edit it or see its versions.</value></data>
+  <data name="Documents.JobsUnavailable" xml:space="preserve"><value>OCR jobs could not be loaded: {0} Sample documents are still shown.</value></data>
+  <data name="Documents.NewestOnly" xml:space="preserve"><value>Showing the newest {0} of {1} OCR jobs.</value></data>
+  <data name="Documents.Upload" xml:space="preserve"><value>Upload files</value></data>
+  <data name="Documents.Count" xml:space="preserve"><value>{0} document(s)</value></data>
+  <data name="Documents.None" xml:space="preserve"><value>No documents match these filters.</value></data>
+  <data name="Filter.Status" xml:space="preserve"><value>Filter by status</value></data>
+  <data name="Filter.AllStatuses" xml:space="preserve"><value>All</value></data>
+  <data name="Filter.Department" xml:space="preserve"><value>Department</value></data>
+  <data name="Filter.AllDepartments" xml:space="preserve"><value>All departments</value></data>
+  <data name="Filter.Kind" xml:space="preserve"><value>Document type</value></data>
+  <data name="Filter.AllKinds" xml:space="preserve"><value>All types</value></data>
+  <data name="Filter.From" xml:space="preserve"><value>Document date from</value></data>
+  <data name="Filter.To" xml:space="preserve"><value>Document date to</value></data>
+  <data name="Filter.Clear" xml:space="preserve"><value>Clear filters</value></data>
+  <data name="Search.Label" xml:space="preserve"><value>Search metadata</value></data>
+  <data name="Search.Field" xml:space="preserve"><value>Search in</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>File name, title, reference no., keyword…</value></data>
+  <data name="Column.File" xml:space="preserve"><value>File</value></data>
+  <data name="Column.Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Column.Reference" xml:space="preserve"><value>Reference no.</value></data>
+  <data name="Column.Department" xml:space="preserve"><value>Department</value></data>
+  <data name="Column.Kind" xml:space="preserve"><value>Type</value></data>
+  <data name="Column.DocumentDate" xml:space="preserve"><value>Document date</value></data>
+  <data name="Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Column.Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Column.Updated" xml:space="preserve"><value>Updated</value></data>
+  <data name="Column.Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Pager.Label" xml:space="preserve"><value>Pagination</value></data>
+  <data name="Pager.Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="Pager.Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Pager.PageOf" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="Detail.TitleFallback" xml:space="preserve"><value>Document</value></data>
+  <data name="Detail.Back" xml:space="preserve"><value>Back to documents</value></data>
+  <data name="Detail.NotFound" xml:space="preserve"><value>Document not found.</value></data>
+  <data name="Detail.Pages" xml:space="preserve"><value>{0} pages</value></data>
+  <data name="Detail.Uploaded" xml:space="preserve"><value>uploaded {0} by {1}</value></data>
+  <data name="Detail.CurrentVersion" xml:space="preserve"><value>version {0}</value></data>
+  <data name="Detail.Confidence" xml:space="preserve"><value>OCR confidence {0}</value></data>
+  <data name="Detail.ArchivedNote" xml:space="preserve"><value>Archived documents are read-only.</value></data>
+  <data name="Detail.ProcessingNote" xml:space="preserve"><value>OCR is still running on this file. Text and versions appear when it finishes.</value></data>
+  <data name="Detail.FailedNote" xml:space="preserve"><value>OCR could not read this file. Rescan the original or retry OCR.</value></data>
+  <data name="Detail.CancelledNote" xml:space="preserve"><value>This OCR job was cancelled before it ran.</value></data>
+  <data name="Detail.DownloadNote" xml:space="preserve"><value>Downloads contain the text as recognized by OCR, without later edits.</value></data>
+  <data name="Detail.Saved" xml:space="preserve"><value>Saved as version {0}.</value></data>
+  <data name="Detail.StatusChanged" xml:space="preserve"><value>Status changed to {0}.</value></data>
+  <data name="Detail.Restored" xml:space="preserve"><value>Version {0} restored as version {1}.</value></data>
+  <data name="Detail.Sections" xml:space="preserve"><value>Document details</value></data>
+  <data name="Action.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Action.Save" xml:space="preserve"><value>Save as new version</value></data>
+  <data name="Action.Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Action.SendToReview" xml:space="preserve"><value>Send back to review</value></data>
+  <data name="Action.Archive" xml:space="preserve"><value>Archive</value></data>
+  <data name="Action.RetryOcr" xml:space="preserve"><value>Retry OCR</value></data>
+  <data name="Action.Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Edit.FixErrors" xml:space="preserve"><value>Fix the highlighted fields before saving.</value></data>
+  <data name="Edit.Text" xml:space="preserve"><value>Recognized text</value></data>
+  <data name="Edit.PageText" xml:space="preserve"><value>Text of page {0}</value></data>
+  <data name="Edit.TitleRequired" xml:space="preserve"><value>Title is required.</value></data>
+  <data name="Edit.KeywordsHint" xml:space="preserve"><value>Separate keywords with commas.</value></data>
+  <data name="Edit.Note" xml:space="preserve"><value>Change note (optional)</value></data>
+  <data name="Preview.Heading" xml:space="preserve"><value>Preview</value></data>
+  <data name="Preview.Page" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="Preview.ViewingVersion" xml:space="preserve"><value>You are viewing version {0}, not the current version.</value></data>
+  <data name="Preview.BackToCurrent" xml:space="preserve"><value>Show current version</value></data>
+  <data name="Preview.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Preview.PageButton" xml:space="preserve"><value>Page {0}</value></data>
+  <data name="Preview.NoText" xml:space="preserve"><value>No recognized text yet.</value></data>
+  <data name="Preview.SampleOnly" xml:space="preserve"><value>Sample preview: only the first page has text.</value></data>
+  <data name="Tab.Metadata" xml:space="preserve"><value>Metadata</value></data>
+  <data name="Tab.Versions" xml:space="preserve"><value>Versions</value></data>
+  <data name="Meta.Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Meta.Reference" xml:space="preserve"><value>Reference no.</value></data>
+  <data name="Meta.DocumentDate" xml:space="preserve"><value>Document date</value></data>
+  <data name="Meta.Department" xml:space="preserve"><value>Department</value></data>
+  <data name="Meta.Kind" xml:space="preserve"><value>Document type</value></data>
+  <data name="Meta.Confidentiality" xml:space="preserve"><value>Confidentiality</value></data>
+  <data name="Meta.Keywords" xml:space="preserve"><value>Keywords</value></data>
+  <data name="Meta.FindSimilar" xml:space="preserve"><value>Find documents with this value</value></data>
+  <data name="Meta.NotSet" xml:space="preserve"><value>Not set</value></data>
+  <data name="Meta.OcrHeading" xml:space="preserve"><value>OCR job</value></data>
+  <data name="Meta.SearchHint" xml:space="preserve"><value>Select a value to find other documents that have it.</value></data>
+  <data name="Meta.FileHeading" xml:space="preserve"><value>File</value></data>
+  <data name="Meta.FileName" xml:space="preserve"><value>File name</value></data>
+  <data name="Meta.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Meta.Size" xml:space="preserve"><value>File size</value></data>
+  <data name="Meta.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
+  <data name="Meta.UploadedBy" xml:space="preserve"><value>Uploaded by</value></data>
+  <data name="Meta.Id" xml:space="preserve"><value>Document ID</value></data>
+  <data name="Version.None" xml:space="preserve"><value>No versions yet: versions start when OCR has finished this file.</value></data>
+  <data name="Version.Current" xml:space="preserve"><value>Current</value></data>
+  <data name="Version.Viewing" xml:space="preserve"><value>Shown</value></data>
+  <data name="Version.Meta" xml:space="preserve"><value>{0} by {1}</value></data>
+  <data name="Version.View" xml:space="preserve"><value>View</value></data>
+  <data name="Version.ViewLabel" xml:space="preserve"><value>View version {0}</value></data>
+  <data name="Version.Restore" xml:space="preserve"><value>Restore</value></data>
+  <data name="Version.RestoreLabel" xml:space="preserve"><value>Restore version {0} as a new version</value></data>
+  <data name="Change.OcrResult" xml:space="preserve"><value>OCR result</value></data>
+  <data name="Change.Edited" xml:space="preserve"><value>Edited</value></data>
+  <data name="Change.Restored" xml:space="preserve"><value>Restored from version {0}</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Review queue</value></data>
+  <data name="Review.Intro" xml:space="preserve"><value>Documents whose OCR text and metadata still need a person's check before approval.</value></data>
+  <data name="Review.Oldest" xml:space="preserve"><value>Oldest waiting since</value></data>
+  <data name="Review.Start" xml:space="preserve"><value>Start reviewing</value></data>
+  <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when OCR finishes.</value></data>
+  <data name="Review.Action" xml:space="preserve"><value>Review</value></data>
+  <data name="Review.ActionLabel" xml:space="preserve"><value>Review {0}</value></data>
+  <data name="Review.Hours" xml:space="preserve"><value>{0} h</value></data>
+  <data name="Review.Days" xml:space="preserve"><value>{0} d</value></data>
+  <data name="Review.NoConfidence" xml:space="preserve"><value>Not reported by the OCR service</value></data>
+  <data name="Column.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Column.Confidence" xml:space="preserve"><value>OCR confidence</value></data>
+  <data name="Column.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
+  <data name="Column.Waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="Detail.BackToReview" xml:space="preserve"><value>Back to the review queue</value></data>
+  <data name="Meta.Batch" xml:space="preserve"><value>Batch</value></data>
+  <data name="Admin.Title" xml:space="preserve"><value>Administration</value></data>
+  <data name="Admin.Intro" xml:space="preserve"><value>Roles and access, classification and retention, connected systems and the activity log.</value></data>
+  <data name="Admin.Sections" xml:space="preserve"><value>Administration sections</value></data>
+  <data name="Admin.Tab.Roles" xml:space="preserve"><value>Roles &amp; access</value></data>
+  <data name="Admin.Tab.Retention" xml:space="preserve"><value>Classification &amp; retention</value></data>
+  <data name="Admin.Tab.Integrations" xml:space="preserve"><value>Connected systems</value></data>
+  <data name="Admin.Tab.Audit" xml:space="preserve"><value>Activity log</value></data>
+  <data name="Roles.Note" xml:space="preserve"><value>Sign-in is not connected to Active Directory yet; these roles show the planned set-up.</value></data>
+  <data name="Roles.Column.Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Roles.Column.Group" xml:space="preserve"><value>AD group</value></data>
+  <data name="Roles.Column.Users" xml:space="preserve"><value>Users</value></data>
+  <data name="Roles.Column.Can" xml:space="preserve"><value>Can</value></data>
+  <data name="Role.CaptureOperator" xml:space="preserve"><value>Capture operator</value></data>
+  <data name="Role.CaptureOperator.Can" xml:space="preserve"><value>Create batches and upload files</value></data>
+  <data name="Role.Reviewer" xml:space="preserve"><value>OCR reviewer</value></data>
+  <data name="Role.Reviewer.Can" xml:space="preserve"><value>Review, correct and approve documents</value></data>
+  <data name="Role.RecordsManager" xml:space="preserve"><value>Records manager</value></data>
+  <data name="Role.RecordsManager.Can" xml:space="preserve"><value>Classify, archive and manage retention</value></data>
+  <data name="Role.Reader" xml:space="preserve"><value>Department reader</value></data>
+  <data name="Role.Reader.Can" xml:space="preserve"><value>Search and view their department's documents</value></data>
+  <data name="Role.Administrator" xml:space="preserve"><value>Administrator</value></data>
+  <data name="Role.Administrator.Can" xml:space="preserve"><value>Settings and the activity log</value></data>
+  <data name="Retention.Note" xml:space="preserve"><value>Retention is not enforced yet: nothing is disposed of or put on legal hold automatically.</value></data>
+  <data name="Retention.Column.Keep" xml:space="preserve"><value>Keep for</value></data>
+  <data name="Retention.Column.From" xml:space="preserve"><value>Counted from</value></data>
+  <data name="Retention.Column.Then" xml:space="preserve"><value>Then</value></data>
+  <data name="Retention.Column.Documents" xml:space="preserve"><value>Documents</value></data>
+  <data name="Retention.Years" xml:space="preserve"><value>{0} years</value></data>
+  <data name="Retention.Permanent" xml:space="preserve"><value>Permanently</value></data>
+  <data name="Retention.From.FiscalYearEnd" xml:space="preserve"><value>End of the fiscal year</value></data>
+  <data name="Retention.From.ContractEnd" xml:space="preserve"><value>End of the contract</value></data>
+  <data name="Retention.From.ServiceEnd" xml:space="preserve"><value>End of service</value></data>
+  <data name="Retention.From.DocumentDate" xml:space="preserve"><value>Document date</value></data>
+  <data name="Retention.Then.Review" xml:space="preserve"><value>Review for disposal</value></data>
+  <data name="Retention.Then.Transfer" xml:space="preserve"><value>Transfer to the national archive</value></data>
+  <data name="Retention.Then.Keep" xml:space="preserve"><value>Keep</value></data>
+  <data name="Retention.Then.Destroy" xml:space="preserve"><value>Destroy with a certificate</value></data>
+  <data name="Integrations.Note" xml:space="preserve"><value>Only the OCR service is connected today; the other systems are planned in the proposal.</value></data>
+  <data name="Integrations.Column.System" xml:space="preserve"><value>System</value></data>
+  <data name="Integrations.Column.Purpose" xml:space="preserve"><value>Purpose</value></data>
+  <data name="Integrations.Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Integrations.Check" xml:space="preserve"><value>Check again</value></data>
+  <data name="Integration.Ocr" xml:space="preserve"><value>OCR service</value></data>
+  <data name="Integration.Ocr.Purpose" xml:space="preserve"><value>Reads text from scanned pages</value></data>
+  <data name="Integration.Ad" xml:space="preserve"><value>Active Directory</value></data>
+  <data name="Integration.Ad.Purpose" xml:space="preserve"><value>Sign-in and groups</value></data>
+  <data name="Integration.SharePoint" xml:space="preserve"><value>SharePoint</value></data>
+  <data name="Integration.SharePoint.Purpose" xml:space="preserve"><value>Two-way sync and migration of existing documents</value></data>
+  <data name="Integration.Cms" xml:space="preserve"><value>Correspondence Management System</value></data>
+  <data name="Integration.Cms.Purpose" xml:space="preserve"><value>Correspondence and reference numbers</value></data>
+  <data name="Integration.Internal" xml:space="preserve"><value>Internal system (.NET)</value></data>
+  <data name="Integration.Internal.Purpose" xml:space="preserve"><value>Documents, metadata and embedded search</value></data>
+  <data name="Integration.Siem" xml:space="preserve"><value>SIEM</value></data>
+  <data name="Integration.Siem.Purpose" xml:space="preserve"><value>Audit and security events</value></data>
+  <data name="Integration.Status.Connected" xml:space="preserve"><value>Connected</value></data>
+  <data name="Integration.Status.Down" xml:space="preserve"><value>Not reachable</value></data>
+  <data name="Integration.Status.Planned" xml:space="preserve"><value>Planned</value></data>
+  <data name="Integration.Status.Checking" xml:space="preserve"><value>Checking…</value></data>
+  <data name="Audit.Note" xml:space="preserve"><value>What was done in this app since it started, newest first. Kept in memory only.</value></data>
+  <data name="Audit.Empty" xml:space="preserve"><value>No activity recorded yet.</value></data>
+  <data name="Audit.Column.Time" xml:space="preserve"><value>Time</value></data>
+  <data name="Audit.Column.User" xml:space="preserve"><value>User</value></data>
+  <data name="Audit.Column.Action" xml:space="preserve"><value>Action</value></data>
+  <data name="Audit.Column.Document" xml:space="preserve"><value>Document</value></data>
+  <data name="Audit.SignedIn" xml:space="preserve"><value>Signed in</value></data>
+  <data name="Audit.SignInFailed" xml:space="preserve"><value>Sign-in failed</value></data>
+  <data name="Audit.Uploaded" xml:space="preserve"><value>Uploaded (batch {0})</value></data>
+  <data name="Audit.Edited" xml:space="preserve"><value>Saved version {0}</value></data>
+  <data name="Audit.Restored" xml:space="preserve"><value>Restored as version {0}</value></data>
+  <data name="Audit.StatusChanged" xml:space="preserve"><value>Changed the status to {0}</value></data>
+  <data name="Audit.Deleted" xml:space="preserve"><value>Deleted</value></data>
+</root>

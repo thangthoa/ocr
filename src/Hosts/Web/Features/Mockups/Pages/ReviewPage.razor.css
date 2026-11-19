@@ -1,0 +1,44 @@
+.review-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0;
+    background-color: #e0e0e0;
+    border: 1px solid #e0e0e0;
+    width: fit-content;
+    max-width: 100%;
+}
+
+    .review-summary > div {
+        padding: .75rem 1.25rem;
+        background-color: #fff;
+        min-width: 12rem;
+    }
+
+    .review-summary dt {
+        font-size: .875rem;
+        font-weight: 400;
+        color: #525252;
+    }
+
+    .review-summary dd {
+        margin: 0;
+        font-size: 1.5rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+.doc-title {
+    min-width: 12rem;
+}
+
+/* Paired with the number itself, so colour is not the only cue. */
+.low-confidence {
+    color: #a2191f;
+    font-weight: 600;
+}
+
+.empty-state {
+    padding: 2rem 1rem;
+    border: 1px dashed #8d8d8d;
+    text-align: center;
+}

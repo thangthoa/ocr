@@ -13,7 +13,7 @@ public enum RequiredMetadata
     Keywords,
 }
 
-/// <summary>Rules of the automatic check, set on the Administration page.</summary>
+/// <summary>Rules of the automatic check, set on the Settings page.</summary>
 /// <param name="MinDocumentConfidence">Percent; a document below it goes to the review queue.</param>
 /// <param name="MinPageConfidence">Percent; one page below it is enough to send the document to review.</param>
 /// <param name="FlagWarnings">Pages the OCR service reported a problem on go to review.</param>

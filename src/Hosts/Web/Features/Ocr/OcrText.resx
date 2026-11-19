@@ -5,7 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="UploadTitle" xml:space="preserve"><value>Capture</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>Choose the document type, one file or several images, and a file name, then upload. Several images are combined into one PDF, one page per image, and sent to the OCR service as one job.</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>Choose the document type, one file or several images, and a file name, then upload.</value></data>
   <data name="FolderPrompt" xml:space="preserve"><value>Or use every image in a folder, in file name order:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>Choose a folder</value></data>
   <data name="FolderSkipped" xml:space="preserve"><value>{0} file(s) in the folder were skipped because they are not supported images.</value></data>
@@ -44,7 +44,6 @@
   <data name="Uploading" xml:space="preserve"><value>Sending to the OCR service…</value></data>
   <data name="GoToJobs" xml:space="preserve"><value>View documents</value></data>
   <data name="History.Title" xml:space="preserve"><value>Just uploaded</value></data>
-  <data name="History.Empty" xml:space="preserve"><value>Documents you upload here are listed with their OCR progress.</value></data>
   <data name="History.Hint" xml:space="preserve"><value>Only documents uploaded on this page since you opened it. All documents are in Documents.</value></data>
   <data name="NewUpload" xml:space="preserve"><value>New upload</value></data>
   <data name="View" xml:space="preserve"><value>View</value></data>

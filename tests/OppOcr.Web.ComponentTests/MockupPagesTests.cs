@@ -46,6 +46,25 @@ public sealed class MockupPagesTests : BunitContext
     }
 
     [Fact]
+    public void Sign_in_offers_remember_me_unchecked_by_default()
+    {
+        Navigation.NavigateTo("login");
+        var cut = Render<LoginPage>();
+
+        var remember = cut.Find("#login-remember");
+        Assert.Equal("checkbox", remember.GetAttribute("type"));
+        Assert.False(remember.HasAttribute("checked"));
+        Assert.Equal("Remember me", cut.Find("label[for=login-remember]").TextContent);
+
+        cut.Find("#login-user").Change("admin");
+        cut.Find("#login-password").Change("admin");
+        cut.Find("#login-remember").Change(true);
+        cut.Find("form").Submit();
+
+        Assert.Equal(Navigation.BaseUri, Navigation.Uri);
+    }
+
+    [Fact]
     public void Dashboard_switches_between_day_week_and_month()
     {
         var cut = Render<DashboardPage>();

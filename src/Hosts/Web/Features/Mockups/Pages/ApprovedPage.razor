@@ -3,11 +3,8 @@
 
 <PageTitle>@Text["Approved.Title"]</PageTitle>
 
-<div class="d-flex flex-wrap align-items-end gap-3 mb-3">
-    <div class="me-auto">
-        <h1 class="h3 mb-1">@Text["Approved.Title"]</h1>
-        <p class="text-muted mb-0">@Text["Approved.Intro"]</p>
-    </div>
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <h1 class="h3 mb-0 me-auto">@Text["Approved.Title"]</h1>
     @if (_list is { JobsError: null } && _results.Count > 0)
     {
         <a id="export-csv" class="btn btn-primary" href="@ApprovedDocumentEndpoints.ExportUrl(Query)" download>

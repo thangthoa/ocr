@@ -137,15 +137,9 @@
     overflow-wrap: anywhere;
 }
 
-.account-role,
-.account-note {
+.account-role {
     font-size: .75rem;
     color: #525252;
-}
-
-.account-note {
-    margin: 0;
-    padding: 0 1rem .75rem;
 }
 
 .account-section {

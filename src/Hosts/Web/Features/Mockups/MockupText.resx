@@ -35,10 +35,10 @@
   <data name="Login.Intro" xml:space="preserve"><value>Sign in to the document archive.</value></data>
   <data name="Login.UserName" xml:space="preserve"><value>User name</value></data>
   <data name="Login.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login.RememberMe" xml:space="preserve"><value>Remember me</value></data>
   <data name="Login.Submit" xml:space="preserve"><value>Sign in</value></data>
   <data name="Login.Required" xml:space="preserve"><value>Enter your user name and password.</value></data>
   <data name="Login.Failed" xml:space="preserve"><value>Incorrect user name or password.</value></data>
-  <data name="Login.DemoNote" xml:space="preserve"><value>Demo only: sign in with admin / admin. No real authentication is performed yet, and pages are not protected.</value></data>
   <data name="Dashboard.Title" xml:space="preserve"><value>Dashboard</value></data>
   <data name="Dashboard.Range" xml:space="preserve"><value>{0} – {1}</value></data>
   <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>Open documents</value></data>
@@ -71,7 +71,6 @@
   <data name="Dept.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>Average confidence</value></data>
   <data name="Documents.Title" xml:space="preserve"><value>Documents</value></data>
-  <data name="Documents.Intro" xml:space="preserve"><value>Every uploaded file is a document. Select one to preview it, review it, edit it or see its versions.</value></data>
   <data name="Documents.JobsUnavailable" xml:space="preserve"><value>OCR jobs could not be loaded: {0} Sample documents are still shown.</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>Showing the newest {0} of {1} OCR jobs.</value></data>
   <data name="Documents.Upload" xml:space="preserve"><value>Upload files</value></data>
@@ -191,7 +190,6 @@
   <data name="Change.Edited" xml:space="preserve"><value>Edited</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>Restored from version {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>Review queue</value></data>
-  <data name="Review.Intro" xml:space="preserve"><value>Documents the automatic quality check flagged, or that were not checked yet, wait here for a person to check them against the scan before approval.</value></data>
   <data name="Review.Oldest" xml:space="preserve"><value>Oldest waiting since</value></data>
   <data name="Review.Start" xml:space="preserve"><value>Start reviewing</value></data>
   <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when the automatic quality check flags them.</value></data>
@@ -206,9 +204,8 @@
   <data name="Column.Waiting" xml:space="preserve"><value>Waiting</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>Back to the review queue</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>Batch</value></data>
-  <data name="Admin.Title" xml:space="preserve"><value>Administration</value></data>
-  <data name="Admin.Intro" xml:space="preserve"><value>Roles and access, classification and retention, the automatic quality check, connected systems and the activity log.</value></data>
-  <data name="Admin.Sections" xml:space="preserve"><value>Administration sections</value></data>
+  <data name="Admin.Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Admin.Sections" xml:space="preserve"><value>Settings sections</value></data>
   <data name="Admin.Tab.Roles" xml:space="preserve"><value>Roles &amp; access</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>Classification &amp; retention</value></data>
   <data name="Admin.Tab.Integrations" xml:space="preserve"><value>Connected systems</value></data>
@@ -299,7 +296,6 @@
   <data name="Change.EditedInWord" xml:space="preserve"><value>Edited in Word (file version {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>Saved Word file version {0}</value></data>
   <data name="Approved.Title" xml:space="preserve"><value>Approved documents</value></data>
-  <data name="Approved.Intro" xml:space="preserve"><value>Reviewed and approved documents, newest approval first. Download the final version or export the list.</value></data>
   <data name="Approved.Export" xml:space="preserve"><value>Export CSV ({0})</value></data>
   <data name="Approved.Empty" xml:space="preserve"><value>No approved documents yet. Documents appear here once they are approved in Review.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>Go to Review</value></data>
@@ -318,8 +314,6 @@
   <data name="Approved.Version" xml:space="preserve"><value>Version {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>Flagged by the automatic check</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>Approved automatically</value></data>
-  <data name="Review.ConfidenceNote" xml:space="preserve"><value>The OCR service does not report confidence yet, so the values for OCR jobs are made up for this demo.</value></data>
-  <data name="Review.Settings" xml:space="preserve"><value>Quality check settings</value></data>
   <data name="Review.NotChecked" xml:space="preserve"><value>Not checked yet (runs when the document is opened)</value></data>
   <data name="Review.PassedCheck" xml:space="preserve"><value>Passed the automatic check</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>Why it is here</value></data>

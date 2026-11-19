@@ -12,12 +12,11 @@
   <data name="NavDashboard" xml:space="preserve"><value>لوحة المعلومات</value></data>
   <data name="NavCapture" xml:space="preserve"><value>الرفع والمسح</value></data>
   <data name="NavReview" xml:space="preserve"><value>المراجعة</value></data>
-  <data name="NavAdmin" xml:space="preserve"><value>إدارة النظام</value></data>
+  <data name="NavAdmin" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="NavDocuments" xml:space="preserve"><value>المستندات</value></data>
   <data name="AccountMenu" xml:space="preserve"><value>قائمة حساب {0}</value></data>
   <data name="DemoRole" xml:space="preserve"><value>مسؤول النظام · حساب تجريبي</value></data>
   <data name="SignOut" xml:space="preserve"><value>تسجيل الخروج</value></data>
-  <data name="DemoUserNote" xml:space="preserve"><value>حساب تجريبي: تسجيل الدخول نموذج أولي ولا يحمي أي صفحة بعد.</value></data>
   <data name="UnhandledError" xml:space="preserve"><value>حدث خطأ غير متوقع.</value></data>
   <data name="Reload" xml:space="preserve"><value>إعادة التحميل</value></data>
   <data name="Language" xml:space="preserve"><value>اللغة</value></data>

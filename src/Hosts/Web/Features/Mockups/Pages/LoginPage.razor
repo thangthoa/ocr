@@ -14,10 +14,14 @@
             <input id="login-user" class="form-control" autocomplete="username" spellcheck="false" dir="ltr"
                    @bind="_userName" aria-describedby="@(_error is null ? null : "login-error")" />
         </div>
-        <div class="mb-4">
+        <div class="mb-3">
             <label for="login-password" class="form-label">@Text["Login.Password"]</label>
             <input id="login-password" type="password" class="form-control" autocomplete="current-password" dir="ltr"
                    @bind="_password" aria-describedby="@(_error is null ? null : "login-error")" />
+        </div>
+        <div class="form-check mb-4">
+            <input id="login-remember" type="checkbox" class="form-check-input" @bind="_rememberMe" />
+            <label for="login-remember" class="form-check-label">@Text["Login.RememberMe"]</label>
         </div>
 
         @if (_error is not null)
@@ -27,6 +31,4 @@
 
         <button type="submit" class="btn btn-primary w-100 login-submit">@Text["Login.Submit"]</button>
     </form>
-
-    <p class="login-note small mt-4 mb-0">@Text["Login.DemoNote"]</p>
 </section>

@@ -25,7 +25,7 @@ public sealed class ApprovedDocumentsTests : BunitContext
     {
         TestServices.SetCulture("en");
         (_ocr, _) = Services.AddOcrAndDocuments();
-        Services.AddHealthChecks(); // the activity log lives on the Administration page, which also shows health
+        Services.AddHealthChecks(); // the activity log lives on the Settings page, which also shows health
     }
 
     private static CancellationToken Ct => Xunit.TestContext.Current.CancellationToken;

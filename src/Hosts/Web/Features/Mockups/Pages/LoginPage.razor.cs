@@ -19,6 +19,13 @@ public sealed partial class LoginPage
 
     private string _userName = string.Empty;
     private string _password = string.Empty;
+
+    /// <summary>
+    /// Not acted on yet: with no authentication there is no session to keep. It becomes the
+    /// isPersistent flag of the Identity sign-in, so the cookie outlives the browser session.
+    /// </summary>
+    private bool _rememberMe;
+
     private string? _error;
 
     [Inject] private IStringLocalizer<MockupText> Text { get; set; } = default!;

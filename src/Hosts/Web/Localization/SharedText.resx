@@ -12,12 +12,11 @@
   <data name="NavDashboard" xml:space="preserve"><value>Dashboard</value></data>
   <data name="NavCapture" xml:space="preserve"><value>Capture</value></data>
   <data name="NavReview" xml:space="preserve"><value>Review</value></data>
-  <data name="NavAdmin" xml:space="preserve"><value>Administration</value></data>
+  <data name="NavAdmin" xml:space="preserve"><value>Settings</value></data>
   <data name="NavDocuments" xml:space="preserve"><value>Documents</value></data>
   <data name="AccountMenu" xml:space="preserve"><value>Account menu for {0}</value></data>
   <data name="DemoRole" xml:space="preserve"><value>Administrator · demo account</value></data>
   <data name="SignOut" xml:space="preserve"><value>Sign out</value></data>
-  <data name="DemoUserNote" xml:space="preserve"><value>Demo account: sign-in is a mockup and does not protect any page yet.</value></data>
   <data name="UnhandledError" xml:space="preserve"><value>An unhandled error has occurred.</value></data>
   <data name="Reload" xml:space="preserve"><value>Reload</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>

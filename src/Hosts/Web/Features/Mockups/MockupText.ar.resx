@@ -35,10 +35,10 @@
   <data name="Login.Intro" xml:space="preserve"><value>سجّل الدخول إلى أرشيف المستندات.</value></data>
   <data name="Login.UserName" xml:space="preserve"><value>اسم المستخدم</value></data>
   <data name="Login.Password" xml:space="preserve"><value>كلمة المرور</value></data>
+  <data name="Login.RememberMe" xml:space="preserve"><value>تذكرني</value></data>
   <data name="Login.Submit" xml:space="preserve"><value>تسجيل الدخول</value></data>
   <data name="Login.Required" xml:space="preserve"><value>أدخل اسم المستخدم وكلمة المرور.</value></data>
   <data name="Login.Failed" xml:space="preserve"><value>اسم المستخدم أو كلمة المرور غير صحيحة.</value></data>
-  <data name="Login.DemoNote" xml:space="preserve"><value>للعرض فقط: سجّل الدخول باستخدام admin / admin. لا يتم التحقق الفعلي من الهوية بعد، والصفحات غير محمية.</value></data>
   <data name="Dashboard.Title" xml:space="preserve"><value>لوحة المعلومات</value></data>
   <data name="Dashboard.Range" xml:space="preserve"><value>{0} – {1}</value></data>
   <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>فتح المستندات</value></data>
@@ -71,7 +71,6 @@
   <data name="Dept.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>متوسط الدقة</value></data>
   <data name="Documents.Title" xml:space="preserve"><value>المستندات</value></data>
-  <data name="Documents.Intro" xml:space="preserve"><value>كل ملف مرفوع هو مستند. اختر مستندًا لمعاينته أو مراجعته أو تعديله أو عرض إصداراته.</value></data>
   <data name="Documents.JobsUnavailable" xml:space="preserve"><value>تعذّر تحميل مهام OCR: {0} لا تزال المستندات التجريبية معروضة.</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>عرض أحدث {0} من أصل {1} مهمة OCR.</value></data>
   <data name="Documents.Upload" xml:space="preserve"><value>رفع ملفات</value></data>
@@ -191,7 +190,6 @@
   <data name="Change.Edited" xml:space="preserve"><value>تعديل</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>مستعاد من الإصدار {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>قائمة المراجعة</value></data>
-  <data name="Review.Intro" xml:space="preserve"><value>المستندات التي أشار إليها الفحص الآلي للجودة، أو التي لم تُفحص بعد، تنتظر هنا ليقارنها شخص بالنسخة الممسوحة قبل الاعتماد.</value></data>
   <data name="Review.Oldest" xml:space="preserve"><value>أقدم مستند ينتظر منذ</value></data>
   <data name="Review.Start" xml:space="preserve"><value>بدء المراجعة</value></data>
   <data name="Review.Empty" xml:space="preserve"><value>لا يوجد ما يُراجع. تظهر المستندات هنا عندما يشير إليها الفحص الآلي للجودة.</value></data>
@@ -206,9 +204,8 @@
   <data name="Column.Waiting" xml:space="preserve"><value>مدة الانتظار</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>العودة إلى قائمة المراجعة</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>الدفعة</value></data>
-  <data name="Admin.Title" xml:space="preserve"><value>إدارة النظام</value></data>
-  <data name="Admin.Intro" xml:space="preserve"><value>الأدوار والصلاحيات، والتصنيف والاحتفاظ، والفحص الآلي للجودة، والأنظمة المرتبطة، وسجل النشاط.</value></data>
-  <data name="Admin.Sections" xml:space="preserve"><value>أقسام إدارة النظام</value></data>
+  <data name="Admin.Title" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Admin.Sections" xml:space="preserve"><value>أقسام الإعدادات</value></data>
   <data name="Admin.Tab.Roles" xml:space="preserve"><value>الأدوار والصلاحيات</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>التصنيف والاحتفاظ</value></data>
   <data name="Admin.Tab.Integrations" xml:space="preserve"><value>الأنظمة المرتبطة</value></data>
@@ -299,7 +296,6 @@
   <data name="Change.EditedInWord" xml:space="preserve"><value>تعديل في Word (إصدار الملف {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>حفظ إصدار ملف Word رقم {0}</value></data>
   <data name="Approved.Title" xml:space="preserve"><value>المستندات المعتمدة</value></data>
-  <data name="Approved.Intro" xml:space="preserve"><value>المستندات التي تمت مراجعتها واعتمادها، الأحدث اعتمادًا أولًا. نزّل النسخة النهائية أو صدّر القائمة.</value></data>
   <data name="Approved.Export" xml:space="preserve"><value>تصدير CSV ({0})</value></data>
   <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات معتمدة بعد. تظهر المستندات هنا بعد اعتمادها في المراجعة.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى المراجعة</value></data>
@@ -318,8 +314,6 @@
   <data name="Approved.Version" xml:space="preserve"><value>الإصدار {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>أشار إليها الفحص الآلي</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>اعتُمدت آليًا</value></data>
-  <data name="Review.ConfidenceNote" xml:space="preserve"><value>لا تقدّم خدمة OCR دقة التعرّف بعد، لذلك القيم الخاصة بمهام OCR مُختلَقة لهذا العرض.</value></data>
-  <data name="Review.Settings" xml:space="preserve"><value>إعدادات فحص الجودة</value></data>
   <data name="Review.NotChecked" xml:space="preserve"><value>لم يُفحص بعد (يُفحص عند فتح المستند)</value></data>
   <data name="Review.PassedCheck" xml:space="preserve"><value>اجتاز الفحص الآلي</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>سبب وجوده هنا</value></data>

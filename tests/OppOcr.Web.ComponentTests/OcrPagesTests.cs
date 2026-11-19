@@ -240,7 +240,7 @@ public sealed class OcrPagesTests : BunitContext
     {
         _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000077", "earlier.png", OcrJobStatus.Done) with { PagesDone = 1 });
         var cut = Render<OcrUploadPage>();
-        Assert.Contains("Documents you upload here are listed", cut.Find(".scan-history").TextContent, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".scan-history table"));
 
         Upload(cut, "first");
         Upload(cut, "second");

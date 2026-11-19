@@ -5,28 +5,47 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="UploadTitle" xml:space="preserve"><value>الرفع والمسح</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>ارفع الملفات الممسوحة ضوئيًا أو مجلدًا كاملًا. يُرسَل كل ملف إلى خدمة OCR كمهمة مستقلة.</value></data>
-  <data name="FolderPrompt" xml:space="preserve"><value>أو ارفع كل الملفات المدعومة داخل مجلد:</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>اختر نوع المستند، وملفًا واحدًا أو عدة صور، واسم الملف، ثم ارفع. تُدمج الصور المتعددة في ملف PDF واحد، صفحة لكل صورة، وتُرسَل إلى خدمة OCR كمهمة واحدة.</value></data>
+  <data name="FolderPrompt" xml:space="preserve"><value>أو استخدم كل الصور داخل مجلد، مرتبة حسب اسم الملف:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>اختيار مجلد</value></data>
-  <data name="FolderSkipped" xml:space="preserve"><value>تم تخطي {0} ملف في المجلد لأن نوعه غير مدعوم.</value></data>
-  <data name="FolderEmpty" xml:space="preserve"><value>لا يحتوي المجلد على ملفات مدعومة ({0}).</value></data>
-  <data name="FolderTooManyFiles" xml:space="preserve"><value>يحتوي المجلد على {0} ملفًا مدعومًا؛ يمكنك رفع {1} ملفًا كحد أقصى في المرة الواحدة.</value></data>
+  <data name="FolderSkipped" xml:space="preserve"><value>تم تخطي {0} ملف في المجلد لأنه ليس صورة مدعومة.</value></data>
+  <data name="FolderEmpty" xml:space="preserve"><value>لا يحتوي المجلد على صور ({0}).</value></data>
+  <data name="FolderTooManyFiles" xml:space="preserve"><value>يحتوي المجلد على {0} صورة؛ يمكن أن يحتوي المستند على {1} صفحة كحد أقصى.</value></data>
   <data name="FolderTooLarge" xml:space="preserve"><value>يحتوي المجلد على أكثر من {0} ملف. اختر مجلدًا أصغر.</value></data>
   <data name="JobsTitle" xml:space="preserve"><value>مهام OCR</value></data>
   <data name="JobTitle" xml:space="preserve"><value>مهمة OCR</value></data>
   <data name="DocumentTypeLegend" xml:space="preserve"><value>نوع المستند</value></data>
-  <data name="DocumentTypeHint" xml:space="preserve"><value>اختر نوع المستند قبل اختيار الملفات.</value></data>
   <data name="DocumentType.Printed" xml:space="preserve"><value>مطبوع / مكتوب بالآلة</value></data>
   <data name="DocumentType.Handwritten" xml:space="preserve"><value>مكتوب بخط اليد</value></data>
-  <data name="DropZonePrompt" xml:space="preserve"><value>اسحب المستندات وأفلتها هنا، أو انقر للاختيار</value></data>
-  <data name="DropZoneHint" xml:space="preserve"><value>{0} · حتى {1} ميغابايت لكل ملف · حتى {2} ملفًا في المرة الواحدة · يُرسَل كل ملف كمهمة مستقلة</value></data>
-  <data name="TooManyFiles" xml:space="preserve"><value>يمكنك اختيار {0} ملفًا كحد أقصى في المرة الواحدة.</value></data>
+  <data name="DropZonePrompt" xml:space="preserve"><value>اسحب ملفًا وأفلته هنا، أو انقر للاختيار</value></data>
+  <data name="DropZoneHint" xml:space="preserve"><value>{0} · حتى {1} ميغابايت</value></data>
+  <data name="Options.Legend" xml:space="preserve"><value>خيارات الرفع</value></data>
+  <data name="Mode.Label" xml:space="preserve"><value>الملفات</value></data>
+  <data name="Mode.One" xml:space="preserve"><value>واحد</value></data>
+  <data name="Mode.Multi" xml:space="preserve"><value>متعدد</value></data>
+  <data name="Mode.One.Hint" xml:space="preserve"><value>صورة واحدة أو ملف PDF واحد.</value></data>
+  <data name="Mode.Multi.Hint" xml:space="preserve"><value>حتى {0} صورة، تُدمج في ملف PDF واحد (صفحة لكل صورة).</value></data>
+  <data name="FileName.Label" xml:space="preserve"><value>اسم الملف</value></data>
+  <data name="FileName.Hint" xml:space="preserve"><value>يُضاف الامتداد تلقائيًا.</value></data>
+  <data name="FileName.SavedAs" xml:space="preserve"><value>يُحفَظ باسم</value></data>
+  <data name="DropZonePrompt.Multi" xml:space="preserve"><value>اسحب الصور وأفلتها هنا، أو انقر للاختيار</value></data>
+  <data name="DropZoneHint.Multi" xml:space="preserve"><value>{0} · حتى {1} صورة · حتى {2} ميغابايت إجمالًا</value></data>
+  <data name="OneFileOnly" xml:space="preserve"><value>اختر ملفًا واحدًا، أو انتقل إلى «متعدد» لدمج عدة صور في مستند واحد.</value></data>
+  <data name="Selected.File" xml:space="preserve"><value>الملف المختار</value></data>
+  <data name="Selected.Pages" xml:space="preserve"><value>الصفحات ({0})</value></data>
+  <data name="Selected.MoveUp" xml:space="preserve"><value>نقل {0} إلى الأعلى</value></data>
+  <data name="Selected.MoveDown" xml:space="preserve"><value>نقل {0} إلى الأسفل</value></data>
+  <data name="Selected.Remove" xml:space="preserve"><value>إزالة {0}</value></data>
+  <data name="Selected.ReplaceHint" xml:space="preserve"><value>الصفحات مرتبة حسب اسم الملف؛ استخدم الأسهم لتغيير الترتيب. اختيار الملفات مجددًا يستبدل القائمة.</value></data>
+  <data name="Upload" xml:space="preserve"><value>رفع</value></data>
+  <data name="ClearSelection" xml:space="preserve"><value>مسح</value></data>
+  <data name="Result.Sent" xml:space="preserve"><value>تم إرسال {0} إلى خدمة OCR؛ سيصلك إشعار عند تغيّر حالته.</value></data>
+  <data name="Result.SentPages" xml:space="preserve"><value>تم إرسال {0} ({1} صفحات) إلى خدمة OCR كمستند واحد؛ سيصلك إشعار عند تغيّر حالته.</value></data>
   <data name="Uploading" xml:space="preserve"><value>جارٍ الإرسال إلى خدمة OCR…</value></data>
-  <data name="Uploaded" xml:space="preserve"><value>تم الإرسال</value></data>
-  <data name="UploadSummary" xml:space="preserve"><value>تم إنشاء {0} مهمة على خدمة OCR؛ سيصلك إشعار عند تغيّر حالة كل مهمة.</value></data>
   <data name="GoToJobs" xml:space="preserve"><value>عرض المستندات</value></data>
-  <data name="History.Title" xml:space="preserve"><value>الملفات الممسوحة مؤخرًا</value></data>
-  <data name="History.Empty" xml:space="preserve"><value>لم يتم مسح أي ملف بعد.</value></data>
+  <data name="History.Title" xml:space="preserve"><value>تم رفعها للتو</value></data>
+  <data name="History.Empty" xml:space="preserve"><value>تظهر هنا المستندات التي ترفعها مع تقدّم التعرف الضوئي عليها.</value></data>
+  <data name="History.Hint" xml:space="preserve"><value>المستندات المرفوعة من هذه الصفحة منذ فتحها فقط. كل المستندات موجودة في صفحة المستندات.</value></data>
   <data name="NewUpload" xml:space="preserve"><value>رفع جديد</value></data>
   <data name="View" xml:space="preserve"><value>عرض</value></data>
   <data name="Close" xml:space="preserve"><value>إغلاق</value></data>
@@ -40,7 +59,7 @@
   <data name="Column.Type" xml:space="preserve"><value>النوع</value></data>
   <data name="Column.Status" xml:space="preserve"><value>الحالة</value></data>
   <data name="Column.Progress" xml:space="preserve"><value>التقدّم</value></data>
-  <data name="Column.Created" xml:space="preserve"><value>تاريخ الإنشاء</value></data>
+  <data name="Column.Uploaded" xml:space="preserve"><value>وقت الرفع</value></data>
   <data name="Column.Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="Delete" xml:space="preserve"><value>حذف</value></data>
   <data name="DeleteJob" xml:space="preserve"><value>حذف المهمة {0}</value></data>
@@ -83,6 +102,11 @@
   <data name="ocr.document_type_required" xml:space="preserve"><value>اختر نوع المستند.</value></data>
   <data name="ocr.not_ready" xml:space="preserve"><value>النتيجة ليست جاهزة بعد.</value></data>
   <data name="ocr.service_unavailable" xml:space="preserve"><value>خدمة OCR غير متاحة حاليًا.</value></data>
+  <data name="ocr.file_name_invalid" xml:space="preserve"><value>يجب ألا يحتوي اسم الملف على / \ : * ? " &lt; &gt; | أو أحرف تحكم.</value></data>
+  <data name="ocr.pages_required" xml:space="preserve"><value>اختر صورة واحدة على الأقل.</value></data>
+  <data name="ocr.too_many_pages" xml:space="preserve"><value>يمكن أن يحتوي المستند على {0} صفحة كحد أقصى.</value></data>
+  <data name="ocr.unsupported_page_format" xml:space="preserve"><value>يمكن دمج صور {0} فقط في مستند واحد.</value></data>
+  <data name="ocr.image_not_supported" xml:space="preserve"><value>تعذّرت إضافة إحدى الصور كصفحة (مثل PNG متداخل). احفظها مجددًا كملف JPG أو PNG عادي.</value></data>
   <data name="JobError.unauthorized" xml:space="preserve"><value>رفضت خدمة OCR مفتاح API. تحقّق من الإعدادات.</value></data>
   <data name="JobError.not_found" xml:space="preserve"><value>لم تعثر خدمة OCR على هذه المهمة.</value></data>
   <data name="JobError.file_too_large" xml:space="preserve"><value>حجم الملف أكبر من 25 ميغابايت.</value></data>
@@ -111,17 +135,5 @@
   <data name="SearchPlaceholder" xml:space="preserve"><value>ابحث باسم الملف أو رقم المهمة</value></data>
   <data name="NoMatches" xml:space="preserve"><value>لا توجد مهام تطابق «{0}».</value></data>
   <data name="SearchLimited" xml:space="preserve"><value>جرى البحث في أحدث {0} مهمة فقط.</value></data>
-  <data name="Batch.Heading" xml:space="preserve"><value>بطاقة الدفعة</value></data>
-  <data name="Batch.Hint" xml:space="preserve"><value>اختياري. يُستخدم لمطابقة ما تم استلامه مع ما هو متوقع.</value></data>
-  <data name="Batch.Id" xml:space="preserve"><value>رقم الدفعة</value></data>
-  <data name="Batch.Box" xml:space="preserve"><value>باركود الصندوق</value></data>
-  <data name="Batch.Department" xml:space="preserve"><value>الإدارة</value></data>
-  <data name="Batch.NoDepartment" xml:space="preserve"><value>غير محدد</value></data>
-  <data name="Batch.Expected" xml:space="preserve"><value>عدد الملفات المتوقع</value></data>
-  <data name="Batch.Result" xml:space="preserve"><value>الدفعة {0}: رُفع {1} ملف، وفشل {2}.</value></data>
-  <data name="Batch.Matches" xml:space="preserve"><value>مطابق للعدد المتوقع ({0}).</value></data>
-  <data name="Batch.Short" xml:space="preserve"><value>أقل من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
-  <data name="Batch.Over" xml:space="preserve"><value>أكثر من العدد المتوقع ({1}) بـ {0} ملف.</value></data>
-  <data name="Column.Batch" xml:space="preserve"><value>الدفعة</value></data>
   <data name="DeleteTitle" xml:space="preserve"><value>حذف «{0}»؟</value></data>
 </root>

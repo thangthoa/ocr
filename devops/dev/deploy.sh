@@ -7,6 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 require_docker
 [[ -f "$ENV_FILE" ]] || die "$ENV_FILE is missing; run ./devops/dev/setup.sh first"
 grep -Eq '^OCR_API_KEY=.+' "$ENV_FILE" || die "OCR_API_KEY is empty in $ENV_FILE"
+grep -Eq '^DOCS_EDITOR_JWT_SECRET=.{32,}' "$ENV_FILE" || die "DOCS_EDITOR_JWT_SECRET is missing in $ENV_FILE; run ./devops/dev/setup.sh (it generates one)"
 
 cd "$REPO_ROOT"
 if [[ "${1:-}" == "--pull" ]]; then

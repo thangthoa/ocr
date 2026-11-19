@@ -141,6 +141,24 @@
   <data name="Preview.PageButton" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Preview.NoText" xml:space="preserve"><value>No recognized text yet.</value></data>
   <data name="Preview.SampleOnly" xml:space="preserve"><value>Sample preview: only the first page has text.</value></data>
+  <data name="Preview.Original" xml:space="preserve"><value>Original scan</value></data>
+  <data name="Preview.WordFile" xml:space="preserve"><value>Word file</value></data>
+  <data name="Preview.Text" xml:space="preserve"><value>Recognized text</value></data>
+  <data name="Preview.TextVersion" xml:space="preserve"><value>Text, version {0}</value></data>
+  <data name="Preview.Show" xml:space="preserve"><value>Show</value></data>
+  <data name="Preview.ShowText" xml:space="preserve"><value>Text</value></data>
+  <data name="Preview.Rendering" xml:space="preserve"><value>Rendering the Word file…</value></data>
+  <data name="Preview.WordUnavailable" xml:space="preserve"><value>The Word file cannot be shown right now, so the recognized text is shown instead.</value></data>
+  <data name="Preview.NoWordPage" xml:space="preserve"><value>The Word file has no page {0}.</value></data>
+  <data name="Preview.NoScanPage" xml:space="preserve"><value>The original has no page {0}.</value></data>
+  <data name="Preview.SampleScan" xml:space="preserve"><value>Sample document: there is no scanned original.</value></data>
+  <data name="Preview.Previous" xml:space="preserve"><value>Previous page</value></data>
+  <data name="Preview.Next" xml:space="preserve"><value>Next page</value></data>
+  <data name="Preview.WordPageAlt" xml:space="preserve"><value>Word file, page {0}</value></data>
+  <data name="Preview.WordAfterOcr" xml:space="preserve"><value>The Word file is created when OCR finishes.</value></data>
+  <data name="Meta.DocumentHeading" xml:space="preserve"><value>Document</value></data>
+  <data name="Preview.OpenFull" xml:space="preserve"><value>Open at full size</value></data>
+  <data name="Preview.OpenFullLabel" xml:space="preserve"><value>{0}: open at full size</value></data>
   <data name="Tab.Metadata" xml:space="preserve"><value>Metadata</value></data>
   <data name="Tab.Versions" xml:space="preserve"><value>Versions</value></data>
   <data name="Meta.Title" xml:space="preserve"><value>Title</value></data>
@@ -173,15 +191,15 @@
   <data name="Change.Edited" xml:space="preserve"><value>Edited</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>Restored from version {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>Review queue</value></data>
-  <data name="Review.Intro" xml:space="preserve"><value>Documents whose OCR text and metadata still need a person's check before approval.</value></data>
+  <data name="Review.Intro" xml:space="preserve"><value>Documents the automatic quality check flagged, or that were not checked yet, wait here for a person to check them against the scan before approval.</value></data>
   <data name="Review.Oldest" xml:space="preserve"><value>Oldest waiting since</value></data>
   <data name="Review.Start" xml:space="preserve"><value>Start reviewing</value></data>
-  <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when OCR finishes.</value></data>
+  <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when the automatic quality check flags them.</value></data>
   <data name="Review.Action" xml:space="preserve"><value>Review</value></data>
   <data name="Review.ActionLabel" xml:space="preserve"><value>Review {0}</value></data>
   <data name="Review.Hours" xml:space="preserve"><value>{0} h</value></data>
   <data name="Review.Days" xml:space="preserve"><value>{0} d</value></data>
-  <data name="Review.NoConfidence" xml:space="preserve"><value>Not reported by the OCR service</value></data>
+  <data name="Review.NoConfidence" xml:space="preserve"><value>Known once the document has been checked</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>OCR confidence</value></data>
   <data name="Column.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
@@ -189,7 +207,7 @@
   <data name="Detail.BackToReview" xml:space="preserve"><value>Back to the review queue</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>Batch</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>Administration</value></data>
-  <data name="Admin.Intro" xml:space="preserve"><value>Roles and access, classification and retention, connected systems and the activity log.</value></data>
+  <data name="Admin.Intro" xml:space="preserve"><value>Roles and access, classification and retention, the automatic quality check, connected systems and the activity log.</value></data>
   <data name="Admin.Sections" xml:space="preserve"><value>Administration sections</value></data>
   <data name="Admin.Tab.Roles" xml:space="preserve"><value>Roles &amp; access</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>Classification &amp; retention</value></data>
@@ -259,4 +277,98 @@
   <data name="Audit.Restored" xml:space="preserve"><value>Restored as version {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>Changed the status to {0}</value></data>
   <data name="Audit.Deleted" xml:space="preserve"><value>Deleted</value></data>
+  <data name="Word.Edit" xml:space="preserve"><value>Edit in Word</value></data>
+  <data name="Word.Title" xml:space="preserve"><value>Edit in Word</value></data>
+  <data name="Word.Back" xml:space="preserve"><value>Back to the document</value></data>
+  <data name="Word.Help" xml:space="preserve"><value>Press Save (Ctrl+S) to keep a new version. Closing the editor also saves your changes after a few seconds.</value></data>
+  <data name="Word.Opening" xml:space="preserve"><value>Opening the editor…</value></data>
+  <data name="Word.FileVersion" xml:space="preserve"><value>Word file version {0}</value></data>
+  <data name="Word.Unavailable" xml:space="preserve"><value>The Word editor is not configured on this server.</value></data>
+  <data name="Word.ServerUnreachable" xml:space="preserve"><value>The document server could not be reached. Try again later or contact the administrator.</value></data>
+  <data name="Word.ServerNotReady" xml:space="preserve"><value>The Word editor is still starting (this takes a minute or two after a deploy) or cannot be reached. Try again shortly.</value></data>
+  <data name="Word.Retry" xml:space="preserve"><value>Try again</value></data>
+  <data name="Word.Stalled" xml:space="preserve"><value>The editor has not finished loading. Ad or tracker blockers in the browser can stop it: turn the blocker off for this site (the editor loads from {0}) or open this page in a private window, then try again.</value></data>
+  <data name="Word.NotEditable" xml:space="preserve"><value>This document cannot be edited in its current status.</value></data>
+  <data name="Word.Heading" xml:space="preserve"><value>Word file</value></data>
+  <data name="Word.TextHeading" xml:space="preserve"><value>Text and metadata</value></data>
+  <data name="Word.Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Word.DownloadLabel" xml:space="preserve"><value>Download Word file version {0}</value></data>
+  <data name="Word.Source.Ocr" xml:space="preserve"><value>OCR result</value></data>
+  <data name="Word.Source.Generated" xml:space="preserve"><value>Created from the text</value></data>
+  <data name="Word.Source.Edited" xml:space="preserve"><value>Edited in Word</value></data>
+  <data name="Change.EditedInWord" xml:space="preserve"><value>Edited in Word (file version {0})</value></data>
+  <data name="Audit.EditedInWord" xml:space="preserve"><value>Saved Word file version {0}</value></data>
+  <data name="Approved.Title" xml:space="preserve"><value>Approved documents</value></data>
+  <data name="Approved.Intro" xml:space="preserve"><value>Reviewed and approved documents, newest approval first. Download the final version or export the list.</value></data>
+  <data name="Approved.Export" xml:space="preserve"><value>Export CSV ({0})</value></data>
+  <data name="Approved.Empty" xml:space="preserve"><value>No approved documents yet. Documents appear here once they are approved in Review.</value></data>
+  <data name="Approved.GoToReview" xml:space="preserve"><value>Go to Review</value></data>
+  <data name="Approved.DownloadLabel" xml:space="preserve"><value>Download {0} as {1}</value></data>
+  <data name="Approved.DownloadNote" xml:space="preserve"><value>Final version = the reviewed text. DOCX keeps the Word formatting when the document was last edited in Word.</value></data>
+  <data name="Column.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Column.Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Filter.AllConfidentiality" xml:space="preserve"><value>All levels</value></data>
+  <data name="Filter.ApprovedFrom" xml:space="preserve"><value>Approved from</value></data>
+  <data name="Filter.ApprovedTo" xml:space="preserve"><value>Approved to</value></data>
+  <data name="Meta.ApprovedBy" xml:space="preserve"><value>Approved by</value></data>
+  <data name="Meta.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Detail.FinalDownload" xml:space="preserve"><value>Final version</value></data>
+  <data name="Audit.Downloaded" xml:space="preserve"><value>Downloaded final version {1} as {0}</value></data>
+  <data name="Audit.Exported" xml:space="preserve"><value>Exported the approved list ({0} documents)</value></data>
+  <data name="Approved.Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Review.Flagged" xml:space="preserve"><value>Flagged by the automatic check</value></data>
+  <data name="Review.AutoApproved" xml:space="preserve"><value>Approved automatically</value></data>
+  <data name="Review.ConfidenceNote" xml:space="preserve"><value>The OCR service does not report confidence yet, so the values for OCR jobs are made up for this demo.</value></data>
+  <data name="Review.Settings" xml:space="preserve"><value>Quality check settings</value></data>
+  <data name="Review.NotChecked" xml:space="preserve"><value>Not checked yet (runs when the document is opened)</value></data>
+  <data name="Review.PassedCheck" xml:space="preserve"><value>Passed the automatic check</value></data>
+  <data name="Column.Issues" xml:space="preserve"><value>Why it is here</value></data>
+  <data name="Confidence.Simulated" xml:space="preserve"><value>Simulated</value></data>
+  <data name="Confidence.SimulatedNote" xml:space="preserve"><value>Made up for this demo: the OCR service does not report confidence yet.</value></data>
+  <data name="ListSeparator" xml:space="preserve"><value>, </value></data>
+  <data name="Quality.Issue.NoText" xml:space="preserve"><value>No text was recognised</value></data>
+  <data name="Quality.Issue.LowDocument" xml:space="preserve"><value>Document confidence {0} is below the threshold</value></data>
+  <data name="Quality.Issue.LowPage" xml:space="preserve"><value>Page {0}: confidence {1} is below the threshold</value></data>
+  <data name="Quality.Issue.Warnings" xml:space="preserve"><value>Page {0}: the OCR service reported problems ({1})</value></data>
+  <data name="Quality.Issue.EmptyPage" xml:space="preserve"><value>Page {0}: no text recognised</value></data>
+  <data name="Quality.Issue.Missing" xml:space="preserve"><value>Missing metadata: {0}</value></data>
+  <data name="Quality.Summary.LowPages" xml:space="preserve"><value>Low-confidence pages: {0}</value></data>
+  <data name="Quality.Summary.Warnings" xml:space="preserve"><value>Pages with OCR problems: {0}</value></data>
+  <data name="Quality.Summary.EmptyPages" xml:space="preserve"><value>Pages without text: {0}</value></data>
+  <data name="Quality.Heading" xml:space="preserve"><value>Automatic quality check</value></data>
+  <data name="Quality.Passed" xml:space="preserve"><value>Passed</value></data>
+  <data name="Quality.Flagged" xml:space="preserve"><value>Issues: {0}</value></data>
+  <data name="Quality.Checked" xml:space="preserve"><value>Checked {0} · thresholds: document {1}, page {2}</value></data>
+  <data name="Quality.PassedApproved" xml:space="preserve"><value>No issues found, so the document was approved without manual review.</value></data>
+  <data name="Quality.PassedNote" xml:space="preserve"><value>No issues found.</value></data>
+  <data name="Quality.ShowPage" xml:space="preserve"><value>Show page {0}: {1}</value></data>
+  <data name="Quality.PageFlagged" xml:space="preserve"><value>The automatic check found an issue on this page</value></data>
+  <data name="Quality.PageConfidence" xml:space="preserve"><value>Confidence of page {0}:</value></data>
+  <data name="Quality.BelowThreshold" xml:space="preserve"><value>below {0}</value></data>
+  <data name="Preview.PageButtonFlagged" xml:space="preserve"><value>Page {0}, has issues</value></data>
+  <data name="Admin.Tab.Quality" xml:space="preserve"><value>Quality check</value></data>
+  <data name="QualitySettings.Note" xml:space="preserve"><value>Review round 1: when OCR finishes, each document is compared with these rules. Documents with an issue go to the review queue. New settings apply to documents checked from now on; earlier results stay as they were. Confidence of OCR jobs is made up until the OCR service reports it, and the settings return to the defaults when the app restarts.</value></data>
+  <data name="QualitySettings.Thresholds" xml:space="preserve"><value>Confidence thresholds</value></data>
+  <data name="QualitySettings.MinDocument" xml:space="preserve"><value>Document</value></data>
+  <data name="QualitySettings.MinDocumentHint" xml:space="preserve"><value>Average of all pages; below it, the document goes to review.</value></data>
+  <data name="QualitySettings.MinPage" xml:space="preserve"><value>Each page</value></data>
+  <data name="QualitySettings.MinPageHint" xml:space="preserve"><value>One page below it is enough to send the document to review.</value></data>
+  <data name="QualitySettings.Rules" xml:space="preserve"><value>Also send to review</value></data>
+  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>Pages the OCR service reported problems on</value></data>
+  <data name="QualitySettings.FlagEmpty" xml:space="preserve"><value>Pages with no recognised text, or missing from the OCR result</value></data>
+  <data name="QualitySettings.Required" xml:space="preserve"><value>Required metadata</value></data>
+  <data name="QualitySettings.RequiredHint" xml:space="preserve"><value>Documents from the OCR service only have a title (from the file name), so each field ticked here sends every new document to review.</value></data>
+  <data name="QualitySettings.Passed" xml:space="preserve"><value>Documents that pass</value></data>
+  <data name="QualitySettings.AutoApprove" xml:space="preserve"><value>Approve automatically (they skip the review queue)</value></data>
+  <data name="QualitySettings.SendToReview" xml:space="preserve"><value>Send to the review queue as well</value></data>
+  <data name="QualitySettings.Save" xml:space="preserve"><value>Save settings</value></data>
+  <data name="QualitySettings.Defaults" xml:space="preserve"><value>Fill in the defaults</value></data>
+  <data name="QualitySettings.Saved" xml:space="preserve"><value>Saved. Documents checked from now on use these settings.</value></data>
+  <data name="QualitySettings.Range" xml:space="preserve"><value>Enter a number from 0 to 100.</value></data>
+  <data name="Audit.QualityApproved" xml:space="preserve"><value>Automatic quality check passed: approved</value></data>
+  <data name="Audit.QualityPassed" xml:space="preserve"><value>Automatic quality check passed: sent to review</value></data>
+  <data name="Audit.QualityFlagged" xml:space="preserve"><value>Automatic quality check: issues found ({0}), sent to review</value></data>
+  <data name="Audit.QualitySettingsChanged" xml:space="preserve"><value>Changed the quality check settings</value></data>
+
+
 </root>

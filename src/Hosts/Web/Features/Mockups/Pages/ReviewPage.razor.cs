@@ -2,23 +2,23 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Ocr;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
-/// Documents waiting for review: OCR has finished and nobody has approved them yet. Real
-/// documents come first, then the oldest. Reviewing itself happens on the document page.
+/// Review round 2: documents the automatic check flagged (or that were not checked yet) wait here until
+/// a person approves them. Real documents come first, then the oldest. Reviewing itself happens on the
+/// document page.
 /// </summary>
 public sealed partial class ReviewPage : IDisposable
 {
-    /// <summary>Below this OCR confidence a document is highlighted (samples only: the service reports none).</summary>
-    public const double LowConfidence = 80;
-
     private readonly CancellationTokenSource _disposed = new();
     private IDisposable? _subscription;
     private DocumentList? _list;
     private IReadOnlyList<DocumentRecord> _queue = [];
+    private int _autoApproved;
     private string? _loadError;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
@@ -61,6 +61,7 @@ public sealed partial class ReviewPage : IDisposable
                 .OrderBy(d => d.IsSample)
                 .ThenBy(d => d.UploadedAtUtc ?? DateTime.MaxValue)
                 .ToList();
+            _autoApproved = _list.Documents.Count(d => d.Approval?.By == DocumentStore.QualityCheckAuthor);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -79,6 +80,10 @@ public sealed partial class ReviewPage : IDisposable
             ? Text["Review.Days", (int)waited.TotalDays]
             : Text["Review.Hours", Math.Max(0, (int)waited.TotalHours)];
     }
+
+    /// <summary>Highlighted against the threshold the document was checked with.</summary>
+    private static bool IsLow(DocumentRecord document) =>
+        document.Quality?.Issues.Any(i => i.Kind == QualityIssueKind.LowDocumentConfidence) == true;
 
     private static string DetailUrl(string id) => OcrEndpoints.JobUrl(id);
 

@@ -141,6 +141,24 @@
   <data name="Preview.PageButton" xml:space="preserve"><value>الصفحة {0}</value></data>
   <data name="Preview.NoText" xml:space="preserve"><value>لا يوجد نص مستخرج بعد.</value></data>
   <data name="Preview.SampleOnly" xml:space="preserve"><value>معاينة تجريبية: الصفحة الأولى فقط تحتوي على نص.</value></data>
+  <data name="Preview.Original" xml:space="preserve"><value>المسح الأصلي</value></data>
+  <data name="Preview.WordFile" xml:space="preserve"><value>ملف Word</value></data>
+  <data name="Preview.Text" xml:space="preserve"><value>النص المستخرج</value></data>
+  <data name="Preview.TextVersion" xml:space="preserve"><value>النص، الإصدار {0}</value></data>
+  <data name="Preview.Show" xml:space="preserve"><value>عرض</value></data>
+  <data name="Preview.ShowText" xml:space="preserve"><value>النص</value></data>
+  <data name="Preview.Rendering" xml:space="preserve"><value>جارٍ عرض ملف Word…</value></data>
+  <data name="Preview.WordUnavailable" xml:space="preserve"><value>تعذّر عرض ملف Word حاليًا، لذا يُعرض النص المستخرج بدلًا منه.</value></data>
+  <data name="Preview.NoWordPage" xml:space="preserve"><value>لا يحتوي ملف Word على الصفحة {0}.</value></data>
+  <data name="Preview.NoScanPage" xml:space="preserve"><value>لا يحتوي الأصل على الصفحة {0}.</value></data>
+  <data name="Preview.SampleScan" xml:space="preserve"><value>مستند تجريبي: لا يوجد مسح أصلي.</value></data>
+  <data name="Preview.Previous" xml:space="preserve"><value>الصفحة السابقة</value></data>
+  <data name="Preview.Next" xml:space="preserve"><value>الصفحة التالية</value></data>
+  <data name="Preview.WordPageAlt" xml:space="preserve"><value>ملف Word، الصفحة {0}</value></data>
+  <data name="Preview.WordAfterOcr" xml:space="preserve"><value>يُنشأ ملف Word عند انتهاء التعرّف الضوئي.</value></data>
+  <data name="Meta.DocumentHeading" xml:space="preserve"><value>المستند</value></data>
+  <data name="Preview.OpenFull" xml:space="preserve"><value>فتح بالحجم الكامل</value></data>
+  <data name="Preview.OpenFullLabel" xml:space="preserve"><value>{0}: فتح بالحجم الكامل</value></data>
   <data name="Tab.Metadata" xml:space="preserve"><value>البيانات الوصفية</value></data>
   <data name="Tab.Versions" xml:space="preserve"><value>الإصدارات</value></data>
   <data name="Meta.Title" xml:space="preserve"><value>العنوان</value></data>
@@ -173,15 +191,15 @@
   <data name="Change.Edited" xml:space="preserve"><value>تعديل</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>مستعاد من الإصدار {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>قائمة المراجعة</value></data>
-  <data name="Review.Intro" xml:space="preserve"><value>مستندات تحتاج إلى تدقيق النص المستخرج والبيانات الوصفية قبل الاعتماد.</value></data>
+  <data name="Review.Intro" xml:space="preserve"><value>المستندات التي أشار إليها الفحص الآلي للجودة، أو التي لم تُفحص بعد، تنتظر هنا ليقارنها شخص بالنسخة الممسوحة قبل الاعتماد.</value></data>
   <data name="Review.Oldest" xml:space="preserve"><value>أقدم مستند ينتظر منذ</value></data>
   <data name="Review.Start" xml:space="preserve"><value>بدء المراجعة</value></data>
-  <data name="Review.Empty" xml:space="preserve"><value>لا يوجد ما يُراجع. تظهر المستندات هنا عند انتهاء التعرّف الضوئي.</value></data>
+  <data name="Review.Empty" xml:space="preserve"><value>لا يوجد ما يُراجع. تظهر المستندات هنا عندما يشير إليها الفحص الآلي للجودة.</value></data>
   <data name="Review.Action" xml:space="preserve"><value>مراجعة</value></data>
   <data name="Review.ActionLabel" xml:space="preserve"><value>مراجعة {0}</value></data>
   <data name="Review.Hours" xml:space="preserve"><value>{0} ساعة</value></data>
   <data name="Review.Days" xml:space="preserve"><value>{0} يوم</value></data>
-  <data name="Review.NoConfidence" xml:space="preserve"><value>لا تقدّمها خدمة OCR</value></data>
+  <data name="Review.NoConfidence" xml:space="preserve"><value>تُعرف بعد فحص المستند</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>دقة التعرّف</value></data>
   <data name="Column.Uploaded" xml:space="preserve"><value>تاريخ الرفع</value></data>
@@ -189,7 +207,7 @@
   <data name="Detail.BackToReview" xml:space="preserve"><value>العودة إلى قائمة المراجعة</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>الدفعة</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>إدارة النظام</value></data>
-  <data name="Admin.Intro" xml:space="preserve"><value>الأدوار والصلاحيات، والتصنيف والاحتفاظ، والأنظمة المرتبطة، وسجل النشاط.</value></data>
+  <data name="Admin.Intro" xml:space="preserve"><value>الأدوار والصلاحيات، والتصنيف والاحتفاظ، والفحص الآلي للجودة، والأنظمة المرتبطة، وسجل النشاط.</value></data>
   <data name="Admin.Sections" xml:space="preserve"><value>أقسام إدارة النظام</value></data>
   <data name="Admin.Tab.Roles" xml:space="preserve"><value>الأدوار والصلاحيات</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>التصنيف والاحتفاظ</value></data>
@@ -259,4 +277,98 @@
   <data name="Audit.Restored" xml:space="preserve"><value>استعاد كإصدار {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>غيّر الحالة إلى {0}</value></data>
   <data name="Audit.Deleted" xml:space="preserve"><value>حذف</value></data>
+  <data name="Word.Edit" xml:space="preserve"><value>تحرير في Word</value></data>
+  <data name="Word.Title" xml:space="preserve"><value>تحرير في Word</value></data>
+  <data name="Word.Back" xml:space="preserve"><value>العودة إلى المستند</value></data>
+  <data name="Word.Help" xml:space="preserve"><value>اضغط حفظ (Ctrl+S) لحفظ إصدار جديد. يحفظ إغلاق المحرر تغييراتك أيضًا بعد بضع ثوانٍ.</value></data>
+  <data name="Word.Opening" xml:space="preserve"><value>جارٍ فتح المحرر…</value></data>
+  <data name="Word.FileVersion" xml:space="preserve"><value>إصدار ملف Word رقم {0}</value></data>
+  <data name="Word.Unavailable" xml:space="preserve"><value>محرر Word غير مُعدّ على هذا الخادم.</value></data>
+  <data name="Word.ServerUnreachable" xml:space="preserve"><value>تعذّر الوصول إلى خادم المستندات. حاول لاحقًا أو تواصل مع المسؤول.</value></data>
+  <data name="Word.ServerNotReady" xml:space="preserve"><value>لا يزال محرر Word قيد التشغيل (يستغرق ذلك دقيقة أو دقيقتين بعد النشر) أو تعذّر الوصول إليه. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="Word.Retry" xml:space="preserve"><value>إعادة المحاولة</value></data>
+  <data name="Word.Stalled" xml:space="preserve"><value>لم يكتمل تحميل المحرر. قد تمنعه أدوات حظر الإعلانات أو التتبع في المتصفح: أوقف أداة الحظر لهذا الموقع (يُحمَّل المحرر من {0}) أو افتح هذه الصفحة في نافذة خاصة، ثم أعد المحاولة.</value></data>
+  <data name="Word.NotEditable" xml:space="preserve"><value>لا يمكن تعديل هذا المستند في حالته الحالية.</value></data>
+  <data name="Word.Heading" xml:space="preserve"><value>ملف Word</value></data>
+  <data name="Word.TextHeading" xml:space="preserve"><value>النص والبيانات الوصفية</value></data>
+  <data name="Word.Download" xml:space="preserve"><value>تنزيل</value></data>
+  <data name="Word.DownloadLabel" xml:space="preserve"><value>تنزيل إصدار ملف Word رقم {0}</value></data>
+  <data name="Word.Source.Ocr" xml:space="preserve"><value>نتيجة التعرّف الضوئي</value></data>
+  <data name="Word.Source.Generated" xml:space="preserve"><value>مُنشأ من النص</value></data>
+  <data name="Word.Source.Edited" xml:space="preserve"><value>مُعدّل في Word</value></data>
+  <data name="Change.EditedInWord" xml:space="preserve"><value>تعديل في Word (إصدار الملف {0})</value></data>
+  <data name="Audit.EditedInWord" xml:space="preserve"><value>حفظ إصدار ملف Word رقم {0}</value></data>
+  <data name="Approved.Title" xml:space="preserve"><value>المستندات المعتمدة</value></data>
+  <data name="Approved.Intro" xml:space="preserve"><value>المستندات التي تمت مراجعتها واعتمادها، الأحدث اعتمادًا أولًا. نزّل النسخة النهائية أو صدّر القائمة.</value></data>
+  <data name="Approved.Export" xml:space="preserve"><value>تصدير CSV ({0})</value></data>
+  <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات معتمدة بعد. تظهر المستندات هنا بعد اعتمادها في المراجعة.</value></data>
+  <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى المراجعة</value></data>
+  <data name="Approved.DownloadLabel" xml:space="preserve"><value>تنزيل {0} بصيغة {1}</value></data>
+  <data name="Approved.DownloadNote" xml:space="preserve"><value>النسخة النهائية هي النص بعد المراجعة. يحتفظ ملف DOCX بتنسيق Word إذا كان آخر تعديل للمستند في Word.</value></data>
+  <data name="Column.Approved" xml:space="preserve"><value>الاعتماد</value></data>
+  <data name="Column.Download" xml:space="preserve"><value>تنزيل</value></data>
+  <data name="Filter.AllConfidentiality" xml:space="preserve"><value>كل المستويات</value></data>
+  <data name="Filter.ApprovedFrom" xml:space="preserve"><value>معتمد من تاريخ</value></data>
+  <data name="Filter.ApprovedTo" xml:space="preserve"><value>معتمد حتى تاريخ</value></data>
+  <data name="Meta.ApprovedBy" xml:space="preserve"><value>اعتمده</value></data>
+  <data name="Meta.Approved" xml:space="preserve"><value>تاريخ الاعتماد</value></data>
+  <data name="Detail.FinalDownload" xml:space="preserve"><value>النسخة النهائية</value></data>
+  <data name="Audit.Downloaded" xml:space="preserve"><value>نزّل النسخة النهائية {1} بصيغة {0}</value></data>
+  <data name="Audit.Exported" xml:space="preserve"><value>صدّر قائمة المستندات المعتمدة ({0} مستند)</value></data>
+  <data name="Approved.Version" xml:space="preserve"><value>الإصدار {0}</value></data>
+  <data name="Review.Flagged" xml:space="preserve"><value>أشار إليها الفحص الآلي</value></data>
+  <data name="Review.AutoApproved" xml:space="preserve"><value>اعتُمدت آليًا</value></data>
+  <data name="Review.ConfidenceNote" xml:space="preserve"><value>لا تقدّم خدمة OCR دقة التعرّف بعد، لذلك القيم الخاصة بمهام OCR مُختلَقة لهذا العرض.</value></data>
+  <data name="Review.Settings" xml:space="preserve"><value>إعدادات فحص الجودة</value></data>
+  <data name="Review.NotChecked" xml:space="preserve"><value>لم يُفحص بعد (يُفحص عند فتح المستند)</value></data>
+  <data name="Review.PassedCheck" xml:space="preserve"><value>اجتاز الفحص الآلي</value></data>
+  <data name="Column.Issues" xml:space="preserve"><value>سبب وجوده هنا</value></data>
+  <data name="Confidence.Simulated" xml:space="preserve"><value>محاكاة</value></data>
+  <data name="Confidence.SimulatedNote" xml:space="preserve"><value>قيمة مُختلَقة لهذا العرض: لا تقدّم خدمة OCR دقة التعرّف بعد.</value></data>
+  <data name="ListSeparator" xml:space="preserve"><value>، </value></data>
+  <data name="Quality.Issue.NoText" xml:space="preserve"><value>لم يُتعرّف على أي نص</value></data>
+  <data name="Quality.Issue.LowDocument" xml:space="preserve"><value>دقة المستند {0} أقل من الحد الأدنى</value></data>
+  <data name="Quality.Issue.LowPage" xml:space="preserve"><value>الصفحة {0}: الدقة {1} أقل من الحد الأدنى</value></data>
+  <data name="Quality.Issue.Warnings" xml:space="preserve"><value>الصفحة {0}: أبلغت خدمة OCR عن مشكلات ({1})</value></data>
+  <data name="Quality.Issue.EmptyPage" xml:space="preserve"><value>الصفحة {0}: لم يُتعرّف على أي نص</value></data>
+  <data name="Quality.Issue.Missing" xml:space="preserve"><value>بيانات وصفية ناقصة: {0}</value></data>
+  <data name="Quality.Summary.LowPages" xml:space="preserve"><value>صفحات منخفضة الدقة: {0}</value></data>
+  <data name="Quality.Summary.Warnings" xml:space="preserve"><value>صفحات فيها مشكلات في التعرّف: {0}</value></data>
+  <data name="Quality.Summary.EmptyPages" xml:space="preserve"><value>صفحات بلا نص: {0}</value></data>
+  <data name="Quality.Heading" xml:space="preserve"><value>الفحص الآلي للجودة</value></data>
+  <data name="Quality.Passed" xml:space="preserve"><value>اجتاز</value></data>
+  <data name="Quality.Flagged" xml:space="preserve"><value>مشكلات: {0}</value></data>
+  <data name="Quality.Checked" xml:space="preserve"><value>فُحص في {0} · الحد الأدنى: المستند {1}، الصفحة {2}</value></data>
+  <data name="Quality.PassedApproved" xml:space="preserve"><value>لم تُوجد مشكلات، لذلك اعتُمد المستند دون مراجعة يدوية.</value></data>
+  <data name="Quality.PassedNote" xml:space="preserve"><value>لم تُوجد مشكلات.</value></data>
+  <data name="Quality.ShowPage" xml:space="preserve"><value>عرض الصفحة {0}: {1}</value></data>
+  <data name="Quality.PageFlagged" xml:space="preserve"><value>وجد الفحص الآلي مشكلة في هذه الصفحة</value></data>
+  <data name="Quality.PageConfidence" xml:space="preserve"><value>دقة الصفحة {0}:</value></data>
+  <data name="Quality.BelowThreshold" xml:space="preserve"><value>أقل من {0}</value></data>
+  <data name="Preview.PageButtonFlagged" xml:space="preserve"><value>الصفحة {0}، فيها مشكلات</value></data>
+  <data name="Admin.Tab.Quality" xml:space="preserve"><value>فحص الجودة</value></data>
+  <data name="QualitySettings.Note" xml:space="preserve"><value>المرحلة الأولى من المراجعة: عند انتهاء التعرّف يُقارن كل مستند بهذه القواعد، والمستندات التي فيها مشكلة تذهب إلى قائمة المراجعة. تنطبق الإعدادات الجديدة على المستندات التي تُفحص من الآن، وتبقى النتائج السابقة كما هي. دقة مهام OCR مُختلَقة إلى أن تقدّمها خدمة OCR، وتعود الإعدادات إلى القيم الافتراضية عند إعادة تشغيل التطبيق.</value></data>
+  <data name="QualitySettings.Thresholds" xml:space="preserve"><value>الحد الأدنى للدقة</value></data>
+  <data name="QualitySettings.MinDocument" xml:space="preserve"><value>المستند</value></data>
+  <data name="QualitySettings.MinDocumentHint" xml:space="preserve"><value>متوسط كل الصفحات؛ إذا كان أقل منه يذهب المستند إلى المراجعة.</value></data>
+  <data name="QualitySettings.MinPage" xml:space="preserve"><value>كل صفحة</value></data>
+  <data name="QualitySettings.MinPageHint" xml:space="preserve"><value>تكفي صفحة واحدة أقل منه لإرسال المستند إلى المراجعة.</value></data>
+  <data name="QualitySettings.Rules" xml:space="preserve"><value>أرسل أيضًا إلى المراجعة</value></data>
+  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>الصفحات التي أبلغت خدمة OCR عن مشكلات فيها</value></data>
+  <data name="QualitySettings.FlagEmpty" xml:space="preserve"><value>الصفحات التي لم يُتعرّف فيها على نص، أو الناقصة من نتيجة التعرّف</value></data>
+  <data name="QualitySettings.Required" xml:space="preserve"><value>البيانات الوصفية المطلوبة</value></data>
+  <data name="QualitySettings.RequiredHint" xml:space="preserve"><value>مستندات خدمة OCR ليس لها إلا عنوان (من اسم الملف)، لذلك كل حقل تختاره هنا يرسل كل مستند جديد إلى المراجعة.</value></data>
+  <data name="QualitySettings.Passed" xml:space="preserve"><value>المستندات التي تجتاز الفحص</value></data>
+  <data name="QualitySettings.AutoApprove" xml:space="preserve"><value>اعتمادها آليًا (دون المرور بقائمة المراجعة)</value></data>
+  <data name="QualitySettings.SendToReview" xml:space="preserve"><value>إرسالها أيضًا إلى قائمة المراجعة</value></data>
+  <data name="QualitySettings.Save" xml:space="preserve"><value>حفظ الإعدادات</value></data>
+  <data name="QualitySettings.Defaults" xml:space="preserve"><value>تعبئة القيم الافتراضية</value></data>
+  <data name="QualitySettings.Saved" xml:space="preserve"><value>حُفظت. تستخدم المستندات التي تُفحص من الآن هذه الإعدادات.</value></data>
+  <data name="QualitySettings.Range" xml:space="preserve"><value>أدخل رقمًا من 0 إلى 100.</value></data>
+  <data name="Audit.QualityApproved" xml:space="preserve"><value>اجتاز الفحص الآلي للجودة: اعتُمد</value></data>
+  <data name="Audit.QualityPassed" xml:space="preserve"><value>اجتاز الفحص الآلي للجودة: أُرسل إلى المراجعة</value></data>
+  <data name="Audit.QualityFlagged" xml:space="preserve"><value>الفحص الآلي للجودة: وُجدت مشكلات ({0})، أُرسل إلى المراجعة</value></data>
+  <data name="Audit.QualitySettingsChanged" xml:space="preserve"><value>غيّر إعدادات فحص الجودة</value></data>
+
+
 </root>

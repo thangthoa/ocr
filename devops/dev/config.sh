@@ -27,7 +27,7 @@ compose() {
     shift
     local cmd=(docker compose)
     docker compose version >/dev/null 2>&1 || cmd=(docker-compose)
-    IMAGE_TAG="$tag" IMAGE_NAME="$IMAGE_NAME" ENV_FILE="$ENV_FILE" CONTAINER_NAME="$CONTAINER_NAME" APP_PORT="$(app_port)" \
+    IMAGE_TAG="$tag" IMAGE_NAME="$IMAGE_NAME" ENV_FILE="$ENV_FILE" CONTAINER_NAME="$CONTAINER_NAME" APP_PORT="$(app_port)" DOCS_PORT="$(docs_port)" \
         "${cmd[@]}" -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR" -p "$CONTAINER_NAME" "$@"
 }
 
@@ -50,6 +50,17 @@ app_port() {
     local port
     port="$(grep -E '^APP_PORT=' "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2 || true)"
     echo "${port:-5286}"
+}
+
+# DOCS_PORT from the environment, else from the .env file, else 8085.
+docs_port() {
+    if [[ -n "${DOCS_PORT:-}" ]]; then
+        echo "$DOCS_PORT"
+        return
+    fi
+    local port
+    port="$(grep -E '^DOCS_PORT=' "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2 || true)"
+    echo "${port:-8085}"
 }
 
 current_tag() {

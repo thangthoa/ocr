@@ -25,3 +25,11 @@ if curl -fsS -o /dev/null "http://localhost:$PORT/health/ready" 2>/dev/null; the
 else
     echo "ready: NOT READY (this server cannot reach the OCR service)"
 fi
+
+# The Word editor (OnlyOffice) takes a minute or two to start after a deploy.
+DOCS="$(docs_port)"
+if curl -fsS "http://localhost:$DOCS/healthcheck" 2>/dev/null | grep -q true; then
+    echo "word:  ok   http://localhost:$DOCS"
+else
+    echo "word:  starting or down (http://localhost:$DOCS/healthcheck); check: docker logs ${CONTAINER_NAME}-docs"
+fi

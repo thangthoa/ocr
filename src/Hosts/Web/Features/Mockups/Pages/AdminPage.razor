@@ -82,6 +82,98 @@
             </div>
             break;
 
+        case AdminTab.Quality:
+            <p class="small text-muted"><span class="badge tag-gray me-1">@Text["Confidence.Simulated"]</span> @Text["QualitySettings.Note"]</p>
+            <form id="quality-form" class="quality-form" novalidate @onsubmit="SaveQuality">
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["QualitySettings.Thresholds"]</legend>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="min-document" class="form-label">@Text["QualitySettings.MinDocument"]</label>
+                            <div class="input-group has-validation">
+                                <input id="min-document" type="number" min="0" max="100" step="0.1" dir="ltr"
+                                       class="form-control @(_qualityErrors.ContainsKey(MinDocumentField) ? "is-invalid" : null)"
+                                       @bind="_quality.MinDocument" aria-describedby="min-document-hint @(_qualityErrors.ContainsKey(MinDocumentField) ? "min-document-error" : null)" />
+                                <span class="input-group-text">%</span>
+                                @if (_qualityErrors.TryGetValue(MinDocumentField, out var documentError))
+                                {
+                                    <div id="min-document-error" class="invalid-feedback">@documentError</div>
+                                }
+                            </div>
+                            <div id="min-document-hint" class="form-text">@Text["QualitySettings.MinDocumentHint"]</div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="min-page" class="form-label">@Text["QualitySettings.MinPage"]</label>
+                            <div class="input-group has-validation">
+                                <input id="min-page" type="number" min="0" max="100" step="0.1" dir="ltr"
+                                       class="form-control @(_qualityErrors.ContainsKey(MinPageField) ? "is-invalid" : null)"
+                                       @bind="_quality.MinPage" aria-describedby="min-page-hint @(_qualityErrors.ContainsKey(MinPageField) ? "min-page-error" : null)" />
+                                <span class="input-group-text">%</span>
+                                @if (_qualityErrors.TryGetValue(MinPageField, out var pageError))
+                                {
+                                    <div id="min-page-error" class="invalid-feedback">@pageError</div>
+                                }
+                            </div>
+                            <div id="min-page-hint" class="form-text">@Text["QualitySettings.MinPageHint"]</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["QualitySettings.Rules"]</legend>
+                    <div class="form-check">
+                        <input id="flag-warnings" type="checkbox" class="form-check-input" @bind="_quality.FlagWarnings" />
+                        <label for="flag-warnings" class="form-check-label">@Text["QualitySettings.FlagWarnings"]</label>
+                    </div>
+                    <div class="form-check">
+                        <input id="flag-empty" type="checkbox" class="form-check-input" @bind="_quality.FlagEmptyPages" />
+                        <label for="flag-empty" class="form-check-label">@Text["QualitySettings.FlagEmpty"]</label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mb-4" aria-describedby="required-hint">
+                    <legend class="h6">@Text["QualitySettings.Required"]</legend>
+                    <p id="required-hint" class="small text-muted mb-2">@Text["QualitySettings.RequiredHint"]</p>
+                    @foreach (var field in Enum.GetValues<RequiredMetadata>())
+                    {
+                        var id = $"require-{field}";
+                        <div class="form-check form-check-inline">
+                            <input id="@id" type="checkbox" class="form-check-input" checked="@_quality.Required.Contains(field)"
+                                   @onchange="e => SetRequired(field, e.Value is true)" />
+                            <label for="@id" class="form-check-label">@Text.Required(field)</label>
+                        </div>
+                    }
+                </fieldset>
+
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["QualitySettings.Passed"]</legend>
+                    <div class="form-check">
+                        <input id="passed-approve" type="radio" name="passed" class="form-check-input" checked="@_quality.AutoApprove"
+                               @onchange="() => _quality.AutoApprove = true" />
+                        <label for="passed-approve" class="form-check-label">@Text["QualitySettings.AutoApprove"]</label>
+                    </div>
+                    <div class="form-check">
+                        <input id="passed-review" type="radio" name="passed" class="form-check-input" checked="@(!_quality.AutoApprove)"
+                               @onchange="() => _quality.AutoApprove = false" />
+                        <label for="passed-review" class="form-check-label">@Text["QualitySettings.SendToReview"]</label>
+                    </div>
+                </fieldset>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="submit" id="quality-save" class="btn btn-primary">@Text["QualitySettings.Save"]</button>
+                    <button type="button" id="quality-defaults" class="btn btn-outline-secondary" @onclick="QualityDefaults">@Text["QualitySettings.Defaults"]</button>
+                    @if (_qualitySaved)
+                    {
+                        <span id="quality-saved" class="small" role="status">@Text["QualitySettings.Saved"]</span>
+                    }
+                    else if (_qualityErrors.Count > 0)
+                    {
+                        <span class="small text-danger" role="alert">@Text["Edit.FixErrors"]</span>
+                    }
+                </div>
+            </form>
+            break;
+
         case AdminTab.Integrations:
             <p class="small text-muted">@Text["Integrations.Note"]</p>
             <div class="table-responsive position-relative">

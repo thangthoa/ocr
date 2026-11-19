@@ -22,8 +22,10 @@ internal static class OcrTextExtensions
         ("a GPU worker failed while reading this page", "Warning.GpuRetry"),
     ];
 
-    public static string SupportedFormatsLabel =>
-        string.Join(", ", OcrFileFormats.SupportedExtensions.Select(e => e.TrimStart('.').ToUpperInvariant()));
+    public static string SupportedFormatsLabel => FormatsLabel(OcrFileFormats.SupportedExtensions);
+
+    /// <summary>The image types that can be combined into one multi-page document.</summary>
+    public static string PageFormatsLabel => FormatsLabel(OcrFileFormats.PageExtensions);
 
     /// <summary>
     /// Translates a use-case error. Errors the service returned (e.g. <c>too_many_pages</c>)
@@ -36,6 +38,8 @@ internal static class OcrTextExtensions
             OcrErrorCodes.TooLarge => text[error.Code, OcrRules.MaxSizeBytes / 1024 / 1024],
             OcrErrorCodes.FileNameTooLong => text[error.Code, OcrRules.MaxFileNameLength],
             OcrErrorCodes.UnsupportedFormat => text[error.Code, SupportedFormatsLabel],
+            OcrErrorCodes.UnsupportedPageFormat => text[error.Code, PageFormatsLabel],
+            OcrErrorCodes.TooManyPages => text[error.Code, OcrRules.MaxPagesPerDocument],
             _ => text[error.Code],
         };
         if (!localized.ResourceNotFound)
@@ -66,4 +70,7 @@ internal static class OcrTextExtensions
     public static string Status(this IStringLocalizer<OcrText> text, OcrJobStatus status) => text[$"Status.{status}"];
 
     public static string DocumentType(this IStringLocalizer<OcrText> text, OcrDocumentType type) => text[$"DocumentType.{type}"];
+
+    private static string FormatsLabel(IEnumerable<string> extensions) =>
+        string.Join(", ", extensions.Select(e => e.TrimStart('.').ToUpperInvariant()));
 }

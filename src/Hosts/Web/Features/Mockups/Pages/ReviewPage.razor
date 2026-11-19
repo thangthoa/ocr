@@ -45,10 +45,22 @@ else
             <dd id="review-count">@_queue.Count</dd>
         </div>
         <div>
+            <dt>@Text["Review.Flagged"]</dt>
+            <dd id="review-flagged">@_queue.Count(d => d.Quality is { Passed: false })</dd>
+        </div>
+        <div>
+            <dt>@Text["Review.AutoApproved"]</dt>
+            <dd id="review-auto-approved">@_autoApproved</dd>
+        </div>
+        <div>
             <dt>@Text["Review.Oldest"]</dt>
             <dd>@FormatDateTime(_queue.Min(d => d.UploadedAtUtc))</dd>
         </div>
     </dl>
+    <p class="small text-muted">
+        <span class="badge tag-gray me-1">@Text["Confidence.Simulated"]</span> @Text["Review.ConfidenceNote"]
+        <a href="admin?tab=Quality">@Text["Review.Settings"]</a>
+    </p>
 
     @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
     <div class="table-responsive position-relative">
@@ -60,6 +72,7 @@ else
                     <th scope="col">@Text["Column.Title"]</th>
                     <th scope="col" class="text-end">@Text["Column.Pages"]</th>
                     <th scope="col" class="text-end">@Text["Column.Confidence"]</th>
+                    <th scope="col">@Text["Column.Issues"]</th>
                     <th scope="col">@Text["Column.Uploaded"]</th>
                     <th scope="col">@Text["Column.Waiting"]</th>
                     <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
@@ -84,11 +97,30 @@ else
                         <td class="text-end">
                             @if (document.Confidence is { } confidence)
                             {
-                                <span class="@(confidence < LowConfidence ? "low-confidence" : null)">@FormatPercent(confidence)</span>
+                                <span class="@(IsLow(document) ? "low-confidence" : null)">@FormatPercent(confidence)</span>
                             }
                             else
                             {
                                 <span class="text-muted" title="@Text["Review.NoConfidence"]">@Missing</span>
+                            }
+                        </td>
+                        <td class="issues">
+                            @if (document.Quality is not { } check)
+                            {
+                                <span class="text-muted small">@Text["Review.NotChecked"]</span>
+                            }
+                            else if (check.Passed)
+                            {
+                                <span class="small">@Text["Review.PassedCheck"]</span>
+                            }
+                            else
+                            {
+                                <ul class="issue-list">
+                                    @foreach (var line in Text.IssueSummary(check))
+                                    {
+                                        <li>@line</li>
+                                    }
+                                </ul>
                             }
                         </td>
                         <td class="small text-nowrap">@FormatDateTime(document.UploadedAtUtc)</td>

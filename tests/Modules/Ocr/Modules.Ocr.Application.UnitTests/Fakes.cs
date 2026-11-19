@@ -119,4 +119,28 @@ internal static class TestJobs
     }
 
     public static byte[] Pdf() => "%PDF-1.4\n%%EOF"u8.ToArray();
+
+    public static byte[] Jpeg(int size = 64)
+    {
+        var bytes = new byte[size];
+        ((ReadOnlySpan<byte>)[0xFF, 0xD8, 0xFF, 0xE0]).CopyTo(bytes);
+        return bytes;
+    }
+}
+
+internal sealed class FakePdfComposer : IPdfComposer
+{
+    public static readonly byte[] Output = "%PDF-1.4\ncomposed\n%%EOF"u8.ToArray();
+
+    public List<IReadOnlyList<PageImage>> Calls { get; } = [];
+
+    public Result Result { get; set; } = Result.Success();
+
+    public async Task<Result> ComposeAsync(IReadOnlyList<PageImage> pages, Stream destination, CancellationToken cancellationToken)
+    {
+        Calls.Add(pages);
+        if (Result.IsSuccess)
+            await destination.WriteAsync(Output, cancellationToken);
+        return Result;
+    }
 }

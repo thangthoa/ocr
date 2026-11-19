@@ -1,0 +1,201 @@
+@page "/approved"
+@rendermode InteractiveServer
+
+<PageTitle>@Text["Approved.Title"]</PageTitle>
+
+<div class="d-flex flex-wrap align-items-end gap-3 mb-3">
+    <div class="me-auto">
+        <h1 class="h3 mb-1">@Text["Approved.Title"]</h1>
+        <p class="text-muted mb-0">@Text["Approved.Intro"]</p>
+    </div>
+    @if (_list is { JobsError: null } && _results.Count > 0)
+    {
+        <a id="export-csv" class="btn btn-primary" href="@ApprovedDocumentEndpoints.ExportUrl(Query)" download>
+            @Text["Approved.Export", _results.Count]
+        </a>
+    }
+</div>
+
+@if (_list?.JobsError is { } jobsError)
+{
+    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+else if (_loadError is not null)
+{
+    <div class="alert alert-danger d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+        <span class="me-auto">@_loadError</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+    </div>
+}
+@if (_list is { } list && list.JobsTotal > DocumentCatalog.MaxJobs)
+{
+    <div class="alert alert-secondary py-2 small" role="note">@Text["Documents.NewestOnly", DocumentCatalog.MaxJobs, list.JobsTotal]</div>
+}
+
+<div class="doc-filters mb-3" role="search">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label for="approved-search" class="form-label">@Text["Search.Label"]</label>
+            <div class="input-group">
+                <label for="approved-field" class="visually-hidden">@Text["Search.Field"]</label>
+                <select id="approved-field" class="form-select doc-field" @bind="_field" @bind:after="() => Apply()">
+                    @foreach (var field in Enum.GetValues<DocumentSearchField>())
+                    {
+                        <option value="@field">@Text.Field(field)</option>
+                    }
+                </select>
+                <input id="approved-search" type="search" class="form-control" dir="auto" autocomplete="off" spellcheck="false"
+                       placeholder="@Text["Search.Placeholder"]" @bind="_search" @bind:event="oninput" @bind:after="() => Apply()" />
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="approved-department" class="form-label">@Text["Filter.Department"]</label>
+            <select id="approved-department" class="form-select" @bind="_department" @bind:after="() => Apply()">
+                <option value="">@Text["Filter.AllDepartments"]</option>
+                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                {
+                    <option value="@department">@Text.Department(department)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="approved-kind" class="form-label">@Text["Filter.Kind"]</label>
+            <select id="approved-kind" class="form-select" @bind="_kind" @bind:after="() => Apply()">
+                <option value="">@Text["Filter.AllKinds"]</option>
+                @foreach (var kind in Enum.GetValues<DocumentKind>())
+                {
+                    <option value="@kind">@Text.Kind(kind)</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-lg-4">
+            <label for="approved-confidentiality" class="form-label">@Text["Meta.Confidentiality"]</label>
+            <select id="approved-confidentiality" class="form-select" @bind="_confidentiality" @bind:after="() => Apply()">
+                <option value="">@Text["Filter.AllConfidentiality"]</option>
+                @foreach (var value in Enum.GetValues<DocumentConfidentiality>())
+                {
+                    <option value="@value">@Text.Confidentiality(value)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-4">
+            <label for="approved-from" class="form-label">@Text["Filter.ApprovedFrom"]</label>
+            <input id="approved-from" type="date" class="form-control" @bind="_approvedFrom" @bind:after="() => Apply()" />
+        </div>
+        <div class="col-6 col-lg-4">
+            <label for="approved-to" class="form-label">@Text["Filter.ApprovedTo"]</label>
+            <input id="approved-to" type="date" class="form-control" @bind="_approvedTo" @bind:after="() => Apply()" />
+        </div>
+    </div>
+</div>
+
+@if (_list is null && _loadError is null)
+{
+    <p class="text-muted" role="status">@OcrText["Loading"]</p>
+}
+else
+{
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <p id="approved-count" class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", _results.Count]</p>
+        @if (HasFilters)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
+        }
+    </div>
+
+    @if (_results.Count == 0)
+    {
+        <div class="empty-state">
+            <p class="mb-2">@(HasFilters ? Text["Documents.None"] : Text["Approved.Empty"])</p>
+            @if (HasFilters)
+            {
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
+            }
+            else
+            {
+                <a class="btn btn-sm btn-outline-primary" href="review">@Text["Approved.GoToReview"]</a>
+            }
+        </div>
+    }
+    else
+    {
+        @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
+        <div class="table-responsive position-relative">
+            <table class="table align-middle approved-table">
+                <caption class="visually-hidden">@Text["Approved.Title"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Text["Column.File"]</th>
+                        <th scope="col">@Text["Column.Title"]</th>
+                        <th scope="col">@Text["Column.Reference"]</th>
+                        <th scope="col">@Text["Column.Department"] / @Text["Column.Kind"]</th>
+                        <th scope="col">@Text["Meta.Confidentiality"]</th>
+                        <th scope="col">@Text["Column.Approved"]</th>
+                        <th scope="col">@Text["Column.Download"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var document in PageItems)
+                    {
+                        var metadata = document.Metadata;
+                        <tr @key="document.Id">
+                            <td class="text-nowrap">
+                                <a href="@DetailUrl(document.Id)" dir="auto">@document.FileName</a>
+                                <div class="small text-muted">
+                                    @if (document.IsSample)
+                                    {
+                                        <span class="badge tag-gray me-1">@Text["SampleTag"]</span>
+                                    }
+                                    <span dir="ltr">@document.Id</span>
+                                </div>
+                            </td>
+                            <td class="doc-title" lang="ar" dir="auto">@metadata.Title</td>
+                            <td class="text-nowrap" dir="ltr">@OrMissing(metadata.Reference)</td>
+                            <td class="text-nowrap">
+                                @(metadata.Department is { } department ? Text.Department(department) : Missing)
+                                <div class="small text-muted">@(metadata.Kind is { } kind ? Text.Kind(kind) : Missing)</div>
+                            </td>
+                            <td class="text-nowrap">@Text.Confidentiality(metadata.Confidentiality)</td>
+                            <td class="text-nowrap approved-by">
+                                @if (document.Approval is { } approval)
+                                {
+                                    <span dir="ltr">@approval.By</span>
+                                    <div class="small text-muted" title="@FormatDateTime(approval.AtUtc)">@FormatShortDate(approval.AtUtc)</div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">@Missing</span>
+                                }
+                            </td>
+                            <td class="text-nowrap">
+                                <div class="d-flex gap-1">
+                                    @foreach (var format in Enum.GetValues<FinalFileFormat>())
+                                    {
+                                        var label = format.ToString().ToUpperInvariant();
+                                        <a class="btn btn-sm btn-outline-primary download-@format.ToString().ToLowerInvariant()"
+                                           href="@ApprovedDocumentEndpoints.FinalFileUrl(document.Id, format)" download
+                                           aria-label="@Text["Approved.DownloadLabel", document.FileName, label]">@label</a>
+                                    }
+                                </div>
+                                <div class="small text-muted mt-1">@Text["Approved.Version", document.CurrentVersion?.Number ?? Missing]</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted">@Text["Approved.DownloadNote"]</p>
+
+        @if (TotalPages > 1)
+        {
+            <nav class="d-flex align-items-center gap-2" aria-label="@Text["Pager.Label"]">
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page <= 1)" @onclick="() => _page--">@Text["Pager.Previous"]</button>
+                <span class="small">@Text["Pager.PageOf", _page, TotalPages]</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page >= TotalPages)" @onclick="() => _page++">@Text["Pager.Next"]</button>
+            </nav>
+        }
+    }
+}

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Localization;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Quality;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
@@ -31,16 +32,26 @@ public sealed partial class AdminPage : IDisposable
 
     private static readonly string[] PlannedSystems = ["Ad", "SharePoint", "Cms", "Internal", "Siem"];
 
+    // Mockup: no authentication yet, so changes are made by the demo account.
+    private const string CurrentUser = LoginPage.DemoUserName;
+
+    private const string MinDocumentField = "min-document";
+    private const string MinPageField = "min-page";
+
     private readonly CancellationTokenSource _disposed = new();
+    private readonly Dictionary<string, string> _qualityErrors = [];
     private AdminTab _tab = AdminTab.Roles;
     private HealthStatus? _ocrHealth;
     private bool _checking;
     private DocumentList? _documents;
+    private QualityForm _quality = new();
+    private bool _qualitySaved;
 
     private enum AdminTab
     {
         Roles,
         Retention,
+        Quality,
         Integrations,
         Audit,
     }
@@ -49,6 +60,8 @@ public sealed partial class AdminPage : IDisposable
     public string? QueryTab { get; set; }
 
     [Inject] private AuditLog Audit { get; set; } = default!;
+
+    [Inject] private QualitySettingsStore QualityStore { get; set; } = default!;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
 
@@ -72,6 +85,8 @@ public sealed partial class AdminPage : IDisposable
 
     private async Task SelectAsync(AdminTab tab)
     {
+        if (tab == AdminTab.Quality && _tab != AdminTab.Quality)
+            ShowSavedQuality();
         _tab = tab;
         if (tab == AdminTab.Integrations && _ocrHealth is null)
             await CheckAsync();
@@ -111,6 +126,50 @@ public sealed partial class AdminPage : IDisposable
         }
     }
 
+    private void ShowSavedQuality()
+    {
+        _quality = QualityForm.From(QualityStore.Current);
+        _qualityErrors.Clear();
+        _qualitySaved = false;
+    }
+
+    /// <summary>Fills the form with the defaults; nothing changes until it is saved.</summary>
+    private void QualityDefaults()
+    {
+        _quality = QualityForm.From(QualitySettings.Default);
+        _qualityErrors.Clear();
+        _qualitySaved = false;
+    }
+
+    private void SetRequired(RequiredMetadata field, bool required)
+    {
+        if (required)
+            _quality.Required.Add(field);
+        else
+            _quality.Required.Remove(field);
+        _qualitySaved = false;
+    }
+
+    private void SaveQuality()
+    {
+        _qualityErrors.Clear();
+        _qualitySaved = false;
+        if (!IsThreshold(_quality.MinDocument))
+            _qualityErrors[MinDocumentField] = Text["QualitySettings.Range"];
+        if (!IsThreshold(_quality.MinPage))
+            _qualityErrors[MinPageField] = Text["QualitySettings.Range"];
+        if (_qualityErrors.Count > 0)
+            return;
+
+        QualityStore.Save(_quality.ToSettings(), CurrentUser);
+        _quality = QualityForm.From(QualityStore.Current);
+        _qualitySaved = true;
+    }
+
+    private static bool IsThreshold(double? value) =>
+        value is { } number && double.IsFinite(number)
+        && number >= QualitySettings.MinThreshold && number <= QualitySettings.MaxThreshold;
+
     private string DocumentsUnder(RetentionRule rule) =>
         _documents is null
             ? MockupTextExtensions.Missing
@@ -125,6 +184,13 @@ public sealed partial class AdminPage : IDisposable
         AuditAction.Restored => Text["Audit.Restored", entry.Version ?? "?"],
         AuditAction.StatusChanged => Text["Audit.StatusChanged", entry.Status is { } status ? Text.Status(status) : "?"],
         AuditAction.Deleted => Text["Audit.Deleted"],
+        AuditAction.EditedInWord => Text["Audit.EditedInWord", entry.Version ?? "?"],
+        AuditAction.Downloaded => Text["Audit.Downloaded", entry.Detail ?? "?", entry.Version ?? "?"],
+        AuditAction.Exported => Text["Audit.Exported", entry.Detail ?? "?"],
+        AuditAction.QualityChecked when entry.Status == DocumentStatus.Approved => Text["Audit.QualityApproved"],
+        AuditAction.QualityChecked when entry.Detail == "0" => Text["Audit.QualityPassed"],
+        AuditAction.QualityChecked => Text["Audit.QualityFlagged", entry.Detail ?? "?"],
+        AuditAction.QualitySettingsChanged => Text["Audit.QualitySettingsChanged"],
         _ => entry.Action.ToString(),
     };
 
@@ -135,4 +201,42 @@ public sealed partial class AdminPage : IDisposable
 
     /// <param name="Years">Null keeps the records permanently.</param>
     private sealed record RetentionRule(DocumentDepartment Department, DocumentKind Kind, int? Years, string From, string Then);
+
+    /// <summary>The quality check settings while they are edited; thresholds are null when the box is empty.</summary>
+    private sealed class QualityForm
+    {
+        public double? MinDocument { get; set; }
+
+        public double? MinPage { get; set; }
+
+        public bool FlagWarnings { get; set; }
+
+        public bool FlagEmptyPages { get; set; }
+
+        public HashSet<RequiredMetadata> Required { get; } = [];
+
+        public bool AutoApprove { get; set; }
+
+        public static QualityForm From(QualitySettings settings)
+        {
+            var form = new QualityForm
+            {
+                MinDocument = settings.MinDocumentConfidence,
+                MinPage = settings.MinPageConfidence,
+                FlagWarnings = settings.FlagWarnings,
+                FlagEmptyPages = settings.FlagEmptyPages,
+                AutoApprove = settings.AutoApprove,
+            };
+            form.Required.UnionWith(settings.RequiredMetadata);
+            return form;
+        }
+
+        public QualitySettings ToSettings() => new(
+            Math.Round(MinDocument!.Value, 1),
+            Math.Round(MinPage!.Value, 1),
+            FlagWarnings,
+            FlagEmptyPages,
+            [.. Required.Order()],
+            AutoApprove);
+    }
 }

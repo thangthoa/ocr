@@ -8,6 +8,22 @@ Nên dùng v2: `docker-compose` v1 (1.29) đã ngừng hỗ trợ và không rec
 (`KeyError: 'ContainerConfig'`). Script vẫn chạy được với v1 vì luôn xoá container cũ rồi mới tạo container mới.
 Không cần .NET SDK: Dockerfile ([devops/docker/Dockerfile](../docker/Dockerfile)) build bên trong container.
 
+## Sửa Word trực tiếp (OnlyOffice, ADR 0004)
+
+docker-compose chạy thêm container `<CONTAINER_NAME>-docs` (OnlyOffice Docs, cổng `DOCS_PORT`, mặc định 8085).
+Server cần thêm khoảng 4 GB RAM; editor khởi động 1–2 phút sau mỗi lần deploy (`status.sh` báo `word: ok` khi sẵn sàng).
+
+- `DOCS_EDITOR_PUBLIC_URL`: địa chỉ **trình duyệt** mở được tới editor. Dùng `http://localhost:8085` khi chỉ
+  dùng trên máy này; khi người khác truy cập: `http://<địa chỉ server>:8085`.
+- `DOCS_EDITOR_JWT_SECRET`: secret dùng chung giữa app và OnlyOffice (≥ 32 ký tự). `setup.sh` tự sinh.
+- File Word đã sửa nằm trên volume `<CONTAINER_NAME>_documents`; deploy và `stop.sh` không xoá volume.
+- Bản Community giới hạn 20 người sửa cùng lúc; production cần license Enterprise.
+- Editor đứng mãi ở khung xám, Console báo `Analytics.js net::ERR_FAILED` / `ERR_BLOCKED_BY_CLIENT`: extension chặn
+  quảng cáo trên trình duyệt đang chặn editor. Tắt extension cho trang app (đang mở trang nào thì cho phép trang đó;
+  với `localhost` là cả hai cổng), hoặc mở bằng cửa sổ ẩn danh.
+
+Server đã cài từ trước: chạy lại `./devops/dev/setup.sh` một lần để thêm các biến trên vào `.env`, rồi deploy.
+
 ## Lần đầu trên server
 
 ```bash

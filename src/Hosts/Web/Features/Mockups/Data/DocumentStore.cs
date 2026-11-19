@@ -1,5 +1,6 @@
 using System.Globalization;
 using Modules.Ocr.Domain.Jobs;
+using OppOcr.Web.Features.Mockups.Quality;
 
 namespace OppOcr.Web.Features.Mockups.Data;
 
@@ -9,9 +10,12 @@ namespace OppOcr.Web.Features.Mockups.Data;
 /// lost when the app restarts and is shared by everyone using this instance (no database, ADR 0003).
 /// Every change is written to the <see cref="AuditLog"/>.
 /// </summary>
-public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, AuditLog audit)
+public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, AuditLog audit, QualitySettingsStore quality)
 {
     public const string OcrAuthor = "ocr-service";
+
+    /// <summary>Who approves the documents that pass the automatic check.</summary>
+    public const string QualityCheckAuthor = "quality-check";
 
     private readonly Lock _lock = new();
     private readonly Dictionary<string, DocumentRecord> _records =
@@ -35,7 +39,9 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
 
     /// <summary>
     /// The document view of an OCR job. A finished job read with its pages gets a record here the
-    /// first time (version 1.0 = the OCR text), so it can be reviewed, edited and versioned.
+    /// first time (version 1.0 = the OCR text), so it can be reviewed, edited and versioned. That is
+    /// also when the automatic check runs: the document is approved if it passes (and the settings
+    /// allow it), otherwise it waits in the review queue.
     /// </summary>
     public DocumentRecord FromJob(OcrJob job)
     {
@@ -44,10 +50,11 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
         {
             _records.TryGetValue(job.Id.Value, out var saved);
             var batch = batches.ForJob(job.Id.Value);
-            var metadata = saved?.Metadata ?? DefaultMetadata(job.FileName) with { Department = batch?.Department };
+            var metadata = saved?.Metadata ?? DefaultMetadata(job.FileName);
             if (saved is null && job.Status == OcrJobStatus.Done && job.Pages.Count > 0)
             {
-                saved = FirstVersion(job, metadata, time.GetUtcNow().UtcDateTime);
+                var now = time.GetUtcNow().UtcDateTime;
+                saved = CheckQuality(FirstVersion(job, metadata, now), job, now);
                 _records[job.Id.Value] = saved;
             }
 
@@ -60,8 +67,9 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
             };
 
             return new DocumentRecord(job.Id.Value, IsSample: false, job.FileName, job.PagesTotal, SizeBytes: null,
-                job.CreatedAtUtc, batch?.UploadedBy, Confidence: null, status, metadata,
-                saved?.PageTexts ?? OcrPageTexts(job), saved?.Versions ?? [], job, batch?.Id);
+                job.CreatedAtUtc, batch?.UploadedBy, saved?.Confidence, status, metadata,
+                saved?.PageTexts ?? OcrPageTexts(job), saved?.Versions ?? [], job, batch?.Id, saved?.Approval,
+                saved?.PageConfidences, saved?.Quality);
         }
     }
 
@@ -95,13 +103,49 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
         }
     }
 
+    /// <summary>
+    /// Approving records who approved and when; archiving keeps that record; any other status (sent
+    /// back to review, OCR run again) clears it.
+    /// </summary>
     public void ChangeStatus(string id, DocumentStatus status, string author)
     {
         lock (_lock)
         {
             var record = Get(id);
-            _records[record.Id] = record with { Status = status };
+            var approval = status switch
+            {
+                DocumentStatus.Approved => new DocumentApproval(author, time.GetUtcNow().UtcDateTime),
+                DocumentStatus.Archived => record.Approval,
+                _ => null,
+            };
+            _records[record.Id] = record with { Status = status, Approval = approval };
             audit.Record(author, AuditAction.StatusChanged, record.Id, record.FileName, status: status);
+        }
+    }
+
+    /// <summary>
+    /// Takes the text of a file saved in the Word editor as the document's text (for preview and search).
+    /// Ignored when nothing is stored for the document or it can no longer be edited.
+    /// </summary>
+    public void RecordWordEdit(string id, IReadOnlyList<string> pageTexts, string author, int wordVersion)
+    {
+        lock (_lock)
+        {
+            if (!_records.TryGetValue(id, out var record) || !record.CanEdit)
+                return;
+
+            List<string> pages = [.. pageTexts];
+            var version = new DocumentVersion(NextNumber(record), time.GetUtcNow().UtcDateTime, author,
+                DocumentVersionChange.EditedInWord, null, null, pages, record.Metadata, wordVersion);
+            _records[record.Id] = record with { PageTexts = pages, Versions = [.. record.Versions, version] };
+        }
+    }
+
+    public string? FileNameOf(string id)
+    {
+        lock (_lock)
+        {
+            return _records.TryGetValue(id, out var record) ? record.FileName : null;
         }
     }
 
@@ -126,11 +170,18 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
             .Where(d => query.Kind is null || d.Metadata.Kind == query.Kind)
             .Where(d => query.From is null || d.Metadata.DocumentDate >= query.From)
             .Where(d => query.To is null || d.Metadata.DocumentDate <= query.To)
+            .Where(d => query.Confidentiality is null || d.Metadata.Confidentiality == query.Confidentiality)
+            .Where(d => query.ApprovedFrom is null || ApprovedOn(d) >= query.ApprovedFrom)
+            .Where(d => query.ApprovedTo is null || ApprovedOn(d) <= query.ApprovedTo)
             .Where(d => Matches(d, query.Text, query.Field))
             .OrderBy(d => d.IsSample)
             .ThenByDescending(d => d.UpdatedAtUtc ?? DateTime.MinValue)
             .ToList();
     }
+
+    /// <summary>The local day of approval, as the pages show it.</summary>
+    private static DateOnly? ApprovedOn(DocumentRecord document) =>
+        document.Approval is { } approval ? DateOnly.FromDateTime(approval.AtUtc.ToLocalTime()) : null;
 
     /// <summary>Only documents between OCR and archiving change; the pages never offer it otherwise.</summary>
     private DocumentRecord Get(string id, bool forEdit = false)
@@ -149,6 +200,35 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
             DocumentVersionChange.OcrResult, null, null, pages, metadata);
         return new DocumentRecord(job.Id.Value, IsSample: false, job.FileName, job.PagesTotal, null, job.CreatedAtUtc, null, null,
             DocumentStatus.NeedsReview, metadata, pages, [ocr]);
+    }
+
+    /// <summary>Review round 1, with the settings in force now; the result is kept with the document.</summary>
+    private DocumentRecord CheckQuality(DocumentRecord record, OcrJob job, DateTime nowUtc)
+    {
+        var confidences = SimulatedConfidence.ForJob(job);
+        var pages = confidences
+            .Select((confidence, index) =>
+            {
+                var page = job.Pages.FirstOrDefault(p => p.PageNumber == index + 1);
+                return new PageQuality(index + 1, confidence, !string.IsNullOrWhiteSpace(page?.Text), page?.Warnings.Count ?? 0);
+            })
+            .ToList();
+        var documentConfidence = QualityCheck.DocumentConfidence(confidences);
+        var settings = quality.Current;
+        var result = QualityCheck.Run(pages, documentConfidence, record.Metadata, settings, nowUtc);
+
+        var approve = result.Passed && settings.AutoApprove;
+        var status = approve ? DocumentStatus.Approved : DocumentStatus.NeedsReview;
+        audit.Record(QualityCheckAuthor, AuditAction.QualityChecked, record.Id, record.FileName, status: status,
+            detail: result.Issues.Count.ToString(CultureInfo.InvariantCulture));
+        return record with
+        {
+            Status = status,
+            Approval = approve ? new DocumentApproval(QualityCheckAuthor, nowUtc) : null,
+            Confidence = documentConfidence,
+            PageConfidences = confidences,
+            Quality = result,
+        };
     }
 
     private static List<string> OcrPageTexts(OcrJob job) =>

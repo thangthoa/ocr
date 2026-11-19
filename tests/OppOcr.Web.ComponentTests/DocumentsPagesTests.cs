@@ -129,7 +129,7 @@ public sealed class DocumentsPagesTests : BunitContext
 
         cut.WaitForAssertion(() =>
         {
-            var text = cut.Find(".page-ocr-text");
+            var text = cut.Find("#pane-result .page-text");
             Assert.Equal("rtl", text.GetAttribute("dir"));
             Assert.Equal("ar", text.GetAttribute("lang"));
             Assert.Equal("لما كان القانون", text.TextContent);
@@ -163,7 +163,8 @@ public sealed class DocumentsPagesTests : BunitContext
     [Fact]
     public void Finished_job_can_be_corrected_as_a_new_version_and_approved()
     {
-        var page = new OcrPage(1, OcrDocumentType.Printed, "نص خطا", 10, "A v2", [], Cached: false);
+        // A warning from the OCR service makes the automatic check send the document to review.
+        var page = new OcrPage(1, OcrDocumentType.Printed, "نص خطا", 10, "A v2", ["line detection (Kraken) failed"], Cached: false);
         var job = InMemoryOcr.NewJob("job_0000000000000004", "memo.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] };
         _ocr.SetOnService(job);
         var cut = RenderDocument("job_0000000000000004");

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Quality;
 
 namespace OppOcr.Web.Features.Mockups;
 
@@ -17,6 +18,48 @@ internal static class MockupTextExtensions
     public static string Field(this IStringLocalizer<MockupText> text, DocumentSearchField field) => text[$"Field.{field}"];
 
     public static string Period(this IStringLocalizer<MockupText> text, ReportPeriod period) => text[$"Period.{period}"];
+
+    public static string Required(this IStringLocalizer<MockupText> text, RequiredMetadata field) => text[$"Meta.{field}"];
+
+    /// <summary>One issue of the automatic check, in full (document page).</summary>
+    public static string Issue(this IStringLocalizer<MockupText> text, QualityIssue issue)
+    {
+        ArgumentNullException.ThrowIfNull(issue);
+        return issue.Kind switch
+        {
+            QualityIssueKind.NoText => text["Quality.Issue.NoText"],
+            QualityIssueKind.LowDocumentConfidence => text["Quality.Issue.LowDocument", FormatPercent(issue.Confidence ?? 0)],
+            QualityIssueKind.LowPageConfidence => text["Quality.Issue.LowPage", issue.Page ?? 0, FormatPercent(issue.Confidence ?? 0)],
+            QualityIssueKind.PageWarnings => text["Quality.Issue.Warnings", issue.Page ?? 0, issue.Count ?? 0],
+            QualityIssueKind.EmptyPage => text["Quality.Issue.EmptyPage", issue.Page ?? 0],
+            QualityIssueKind.MissingMetadata => text["Quality.Issue.Missing", issue.Field is { } field ? text.Required(field) : "?"],
+            _ => issue.Kind.ToString(),
+        };
+    }
+
+    /// <summary>The issues of a check grouped by kind, one short line each (review queue).</summary>
+    public static IReadOnlyList<string> IssueSummary(this IStringLocalizer<MockupText> text, QualityCheckResult check)
+    {
+        ArgumentNullException.ThrowIfNull(check);
+        var separator = text["ListSeparator"].Value;
+        string Pages(QualityIssueKind kind) => string.Join(separator, check.Issues.Where(i => i.Kind == kind).Select(i => FormatNumber(i.Page ?? 0)));
+
+        return check.Issues
+            .Select(i => i.Kind)
+            .Distinct()
+            .Select(kind => kind switch
+            {
+                QualityIssueKind.NoText => text["Quality.Issue.NoText"].Value,
+                QualityIssueKind.LowDocumentConfidence => text.Issue(check.Issues.First(i => i.Kind == kind)),
+                QualityIssueKind.LowPageConfidence => text["Quality.Summary.LowPages", Pages(kind)].Value,
+                QualityIssueKind.PageWarnings => text["Quality.Summary.Warnings", Pages(kind)].Value,
+                QualityIssueKind.EmptyPage => text["Quality.Summary.EmptyPages", Pages(kind)].Value,
+                QualityIssueKind.MissingMetadata => text["Quality.Issue.Missing",
+                    string.Join(separator, check.Issues.Where(i => i.Field is not null).Select(i => text.Required(i.Field!.Value)))].Value,
+                _ => kind.ToString(),
+            })
+            .ToList();
+    }
 
     /// <summary>Carbon tag colour per status; the label is always shown, so colour is never the only cue.</summary>
     public static string StatusTagClass(DocumentStatus status) => status switch

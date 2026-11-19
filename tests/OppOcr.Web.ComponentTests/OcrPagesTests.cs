@@ -19,7 +19,9 @@ namespace OppOcr.Web.ComponentTests;
 public sealed class OcrPagesTests : BunitContext
 {
     private static readonly byte[] PngBytes = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
+    private static readonly byte[] JpegBytes = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0, 0, 0, 0, 0, 0, 0];
     private readonly InMemoryOcr _ocr = new();
+    private readonly FakePdfComposer _composer = new();
     private readonly OcrJobNotifications _notifications = new(NullLogger<OcrJobNotifications>.Instance);
 
     public OcrPagesTests()
@@ -30,139 +32,260 @@ public sealed class OcrPagesTests : BunitContext
         Services.AddOcrApplication();
         Services.AddSingleton<IOcrApiClient>(_ocr);
         Services.AddSingleton<IOcrJobRegistry>(_ocr);
+        Services.AddSingleton<IPdfComposer>(_composer);
         Services.AddSingleton(_notifications);
         Services.AddSingleton<IOcrJobNotifier>(_notifications);
-        Services.AddMockups();
+        Services.AddDocumentsMockup();
     }
 
     [Fact]
-    public void Upload_is_disabled_until_a_document_type_is_chosen()
+    public void Capture_options_default_to_printed_and_one_file_without_a_batch_ticket()
     {
         var cut = Render<OcrUploadPage>();
 
-        Assert.True(cut.Find("#ocr-files").HasAttribute("disabled"));
-        cut.Find("#doc-type-Printed").Change(true);
-        Assert.False(cut.Find("#ocr-files").HasAttribute("disabled"));
+        Assert.Equal(nameof(OcrDocumentType.Printed), cut.Find("#doc-type").GetAttribute("value"));
+        Assert.True(cut.Find("#mode-One").HasAttribute("checked"));
+        Assert.Empty(cut.Find("#file-name").GetAttribute("value") ?? string.Empty);
+        Assert.False(cut.Find("#ocr-files").HasAttribute("multiple"));
+        Assert.Empty(cut.FindAll("#ocr-folder"));
+        Assert.True(cut.Find("#upload-button").HasAttribute("disabled"));
+        Assert.Empty(cut.FindAll("#batch-id, #batch-box, #batch-department, #batch-expected"));
     }
 
     [Fact]
-    public void Each_file_is_sent_to_the_service_and_unsupported_files_are_rejected()
+    public void One_file_is_sent_with_the_typed_name_and_document_type()
     {
         var cut = Render<OcrUploadPage>();
-        cut.Find("#doc-type-Handwritten").Change(true);
+        cut.Find("#doc-type").Change(nameof(OcrDocumentType.Handwritten));
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "IMG_0042.png"));
+        cut.Find("#file-name").Input("Invoice 17");
 
-        cut.FindComponent<InputFile>().UploadFiles(
-            InputFileContent.CreateFromBinary(PngBytes, "a.png"),
-            InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "b.pdf"),
-            InputFileContent.CreateFromBinary(PngBytes, "c.gif"));
+        Assert.Contains("Invoice 17.png", cut.Find("#file-name-help").TextContent, StringComparison.Ordinal);
+        cut.Find("#upload-button").Click();
 
         cut.WaitForAssertion(() =>
         {
-            Assert.Equal(2, _ocr.Registry.Count);
-            Assert.All(_ocr.Registry, j => Assert.Equal(OcrDocumentType.Handwritten, j.DocumentType));
-            Assert.Contains("Only JPG, JPEG, PNG", cut.Markup, StringComparison.Ordinal);
-            Assert.Contains("2 job(s) created on the OCR service", cut.Markup, StringComparison.Ordinal);
-            Assert.Equal(2, cut.FindAll(".upload-results a[href^='documents/job_']").Count);
+            var job = Assert.Single(_ocr.Registry);
+            Assert.Equal(("Invoice 17.png", OcrDocumentType.Handwritten), (job.FileName, job.DocumentType));
+            Assert.Contains("Invoice 17.png was sent to the OCR service", cut.Find("#upload-result").TextContent, StringComparison.Ordinal);
+            Assert.NotNull(cut.Find($"#upload-result a[href='{OcrEndpoints.JobUrl(job.Id.Value)}']"));
+            Assert.Empty(cut.FindAll(".selected-files"));
+            Assert.Empty(cut.Find("#file-name").GetAttribute("value") ?? string.Empty);
         });
+        Assert.Empty(_composer.Calls);
     }
 
     [Fact]
-    public void Folder_upload_sends_supported_files_and_skips_the_rest()
+    public void A_pdf_can_be_sent_as_one_file()
     {
         var cut = Render<OcrUploadPage>();
-        cut.Find("#doc-type-Printed").Change(true);
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "scan.pdf"));
+        cut.Find("#file-name").Input("contract.PDF");
+        cut.Find("#upload-button").Click();
 
-        cut.FindComponents<InputFile>()[1].UploadFiles(
-            InputFileContent.CreateFromBinary(PngBytes, "scan-1.png"),
-            InputFileContent.CreateFromText("notes", "readme.txt"),
-            InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "scan-2.pdf"));
-
-        cut.WaitForAssertion(() =>
-        {
-            Assert.Equal(["scan-1.png", "scan-2.pdf"], _ocr.Registry.Select(j => j.FileName).Order(StringComparer.Ordinal));
-            Assert.Contains("1 file(s) in the folder were skipped", cut.Markup, StringComparison.Ordinal);
-            Assert.Equal(2, cut.FindAll(".upload-results a[href^='documents/job_']").Count);
-        });
+        cut.WaitForAssertion(() => Assert.Equal("contract.PDF", Assert.Single(_ocr.Registry).FileName));
     }
 
     [Fact]
-    public void Folder_without_supported_files_uploads_nothing()
+    public void File_name_is_required_before_anything_is_sent()
     {
         var cut = Render<OcrUploadPage>();
-        cut.Find("#doc-type-Printed").Change(true);
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "a.png"));
 
-        cut.FindComponents<InputFile>()[1].UploadFiles(InputFileContent.CreateFromText("notes", "readme.txt"));
+        cut.Find("#upload-button").Click();
 
-        cut.WaitForAssertion(() => Assert.Contains("The folder has no supported files", cut.Markup, StringComparison.Ordinal));
+        Assert.Contains("File name is required.", cut.Find("#file-name-help.invalid-feedback").TextContent, StringComparison.Ordinal);
+        Assert.Equal("true", cut.Find("#file-name").GetAttribute("aria-invalid"));
+        Assert.Empty(_ocr.Registry);
+
+        cut.Find("#file-name").Input("a");
+        Assert.Empty(cut.FindAll(".invalid-feedback"));
+    }
+
+    [Fact]
+    public void Invalid_characters_in_the_file_name_are_rejected()
+    {
+        var cut = Render<OcrUploadPage>();
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "a.png"));
+        cut.Find("#file-name").Input("../secret");
+        cut.Find("#upload-button").Click();
+
+        cut.WaitForAssertion(() => Assert.Contains("must not contain", cut.Find("#capture-error").TextContent, StringComparison.Ordinal));
         Assert.Empty(_ocr.Registry);
     }
 
     [Fact]
-    public void Capture_lists_recent_scans_and_adds_new_uploads()
+    public void One_mode_accepts_a_single_supported_file()
     {
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000077", "earlier.png", OcrJobStatus.Done) with { PagesDone = 1 });
         var cut = Render<OcrUploadPage>();
-        cut.WaitForAssertion(() => Assert.NotNull(cut.Find(".scan-history a[href='documents/job_0000000000000077']")));
+        var input = cut.FindComponent<InputFile>();
 
-        cut.Find("#doc-type-Printed").Change(true);
-        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "new-scan.png"));
+        input.UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "a.png"), InputFileContent.CreateFromBinary(PngBytes, "b.png"));
+        Assert.Contains("Choose a single file", cut.Find("#capture-error").TextContent, StringComparison.Ordinal);
 
-        cut.WaitForAssertion(() =>
-        {
-            var history = cut.Find(".scan-history").TextContent;
-            Assert.Contains("earlier.png", history, StringComparison.Ordinal);
-            Assert.Contains("new-scan.png", history, StringComparison.Ordinal);
-        });
+        input.UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "c.gif"));
+        Assert.Contains("Only JPG, JPEG, PNG", cut.Find("#capture-error").TextContent, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".selected-files"));
     }
 
     [Fact]
-    public void Batch_ticket_is_reconciled_and_kept_with_the_documents()
+    public void Multi_combines_images_into_one_pdf_in_the_order_shown()
     {
         var cut = Render<OcrUploadPage>();
-        var batchId = cut.WaitForElement("#batch-id").GetAttribute("value")!;
-        Assert.StartsWith("B-", batchId, StringComparison.Ordinal);
+        cut.Find("#mode-Multi").Change(true);
+        Assert.True(cut.Find("#ocr-files").HasAttribute("multiple"));
 
-        cut.Find("#doc-type-Printed").Change(true);
-        cut.Find("#batch-box").Change("BX-00731");
-        cut.Find("#batch-department").Change(nameof(DocumentDepartment.Finance));
-        cut.Find("#batch-expected").Change("3");
+        cut.FindComponent<InputFile>().UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "page-10.png"),
+            InputFileContent.CreateFromBinary(JpegBytes, "page-2.jpg"),
+            InputFileContent.CreateFromBinary(PngBytes, "page-1.png"));
+
+        // File name order counts numbers as numbers; the arrows then change it.
+        Assert.Equal(["page-1.png", "page-2.jpg", "page-10.png"], SelectedNames(cut));
+        cut.FindAll(".selected-files .move-up")[2].Click();
+        Assert.Equal(["page-1.png", "page-10.png", "page-2.jpg"], SelectedNames(cut));
+
+        cut.Find("#file-name").Input("Contract");
+        Assert.Contains("Contract.pdf", cut.Find("#file-name-help").TextContent, StringComparison.Ordinal);
+        cut.Find("#upload-button").Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            var job = Assert.Single(_ocr.Registry);
+            Assert.Equal(("Contract.pdf", OcrDocumentType.Printed), (job.FileName, job.DocumentType));
+            Assert.Contains("Contract.pdf (3 pages) was sent", cut.Find("#upload-result").TextContent, StringComparison.Ordinal);
+        });
+        var pages = Assert.Single(_composer.Calls);
+        Assert.Equal([OcrFileFormat.Png, OcrFileFormat.Png, OcrFileFormat.Jpeg], pages.Select(p => p.Format));
+    }
+
+    [Fact]
+    public void Multi_pages_can_be_removed_and_switching_mode_clears_the_selection()
+    {
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
         cut.FindComponent<InputFile>().UploadFiles(
             InputFileContent.CreateFromBinary(PngBytes, "a.png"),
             InputFileContent.CreateFromBinary(PngBytes, "b.png"));
 
-        cut.WaitForAssertion(() =>
-        {
-            var result = cut.Find("#batch-result").TextContent;
-            Assert.Contains($"Batch {batchId}: 2 file(s) uploaded, 0 failed.", result, StringComparison.Ordinal);
-            Assert.Contains("1 file(s) fewer than the 3 expected.", result, StringComparison.Ordinal);
-            Assert.NotEqual(batchId, cut.Find("#batch-id").GetAttribute("value"));
-        });
+        cut.FindAll(".selected-files .remove")[0].Click();
+        Assert.Equal(["b.png"], SelectedNames(cut));
 
-        var batch = Services.GetRequiredService<CaptureBatchStore>().ForJob(_ocr.Registry[0].Id.Value)!;
-        Assert.Equal(("BX-00731", DocumentDepartment.Finance, 3), (batch.BoxBarcode, batch.Department, batch.ExpectedFiles));
-        var document = Services.GetRequiredService<DocumentStore>().FromJob(_ocr.Registry[0]);
-        Assert.Equal(batchId, document.BatchId);
-        Assert.Equal(DocumentDepartment.Finance, document.Metadata.Department);
-        Assert.Equal(2, Services.GetRequiredService<AuditLog>().Latest().Count(e => e.Action == AuditAction.Uploaded && e.BatchId == batchId));
+        cut.Find("#mode-One").Change(true);
+        Assert.Empty(cut.FindAll(".selected-files"));
     }
 
     [Fact]
-    public void Capture_history_explains_when_the_ocr_service_is_down()
+    public void Multi_accepts_only_images()
     {
-        _ocr.Unavailable = true;
-
         var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
 
-        cut.WaitForAssertion(() => Assert.Contains("not available", cut.Find(".scan-history [role=alert]").TextContent, StringComparison.Ordinal));
+        cut.FindComponent<InputFile>().UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "a.png"),
+            InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "b.pdf"));
+
+        Assert.Contains("Only JPG, JPEG, PNG images can be combined", cut.Find("#capture-error").TextContent, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".selected-files"));
     }
 
     [Fact]
-    public void Folder_button_is_disabled_until_a_document_type_is_chosen()
+    public void Multi_shows_why_the_pages_could_not_be_combined()
+    {
+        _composer.Fail = true;
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
+        cut.FindComponent<InputFile>().UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "a.png"),
+            InputFileContent.CreateFromBinary(PngBytes, "b.png"));
+        cut.Find("#file-name").Input("scan");
+        cut.Find("#upload-button").Click();
+
+        cut.WaitForAssertion(() => Assert.Contains("cannot be added as a page", cut.Find("#capture-error").TextContent, StringComparison.Ordinal));
+        Assert.Empty(_ocr.Registry);
+        Assert.Equal(["a.png", "b.png"], SelectedNames(cut));
+    }
+
+    [Fact]
+    public void Folder_images_become_pages_in_name_order_and_other_files_are_skipped()
     {
         var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
 
-        Assert.True(cut.Find("#ocr-folder").HasAttribute("disabled"));
+        cut.FindComponents<InputFile>()[1].UploadFiles(
+            InputFileContent.CreateFromBinary(PngBytes, "scan-2.png"),
+            InputFileContent.CreateFromText("notes", "readme.txt"),
+            InputFileContent.CreateFromBinary("%PDF-1.4"u8.ToArray(), "other.pdf"),
+            InputFileContent.CreateFromBinary(JpegBytes, "scan-1.jpg"));
+
+        Assert.Equal(["scan-1.jpg", "scan-2.png"], SelectedNames(cut));
+        Assert.Contains("2 file(s) in the folder were skipped", cut.Markup, StringComparison.Ordinal);
         Assert.True(cut.Find("#ocr-folder").HasAttribute("webkitdirectory"));
+    }
+
+    [Fact]
+    public void Folder_without_images_selects_nothing()
+    {
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
+
+        cut.FindComponents<InputFile>()[1].UploadFiles(InputFileContent.CreateFromText("notes", "readme.txt"));
+
+        Assert.Contains("The folder has no images", cut.Find("#capture-error").TextContent, StringComparison.Ordinal);
+        Assert.Empty(cut.FindAll(".selected-files"));
+    }
+
+    [Fact]
+    public void Just_uploaded_lists_only_documents_uploaded_on_this_page_newest_first()
+    {
+        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000077", "earlier.png", OcrJobStatus.Done) with { PagesDone = 1 });
+        var cut = Render<OcrUploadPage>();
+        Assert.Contains("Documents you upload here are listed", cut.Find(".scan-history").TextContent, StringComparison.Ordinal);
+
+        Upload(cut, "first");
+        Upload(cut, "second");
+
+        cut.WaitForAssertion(() => Assert.Equal(["second.png", "first.png"], HistoryNames(cut)));
+        Assert.DoesNotContain("earlier.png", cut.Find(".scan-history").TextContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Just_uploaded_follows_progress_and_drops_deleted_documents()
+    {
+        var cut = Render<OcrUploadPage>();
+        Upload(cut, "scan");
+        cut.WaitForAssertion(() => Assert.Equal(["scan.png"], HistoryNames(cut)));
+        var job = _ocr.Registry[0];
+
+        _ocr.SetOnService(job with { Status = OcrJobStatus.Running, PagesTotal = 3, PagesDone = 1 });
+        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Running, OcrJobChangeKind.Updated), Ct);
+        cut.WaitForAssertion(() => Assert.Equal("Running", cut.Find(".scan-history tbody .badge").TextContent));
+
+        // When the service cannot be asked, the status carried by the notification is still shown.
+        _ocr.Unavailable = true;
+        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Done, OcrJobChangeKind.Updated), Ct);
+        cut.WaitForAssertion(() => Assert.Equal("Done", cut.Find(".scan-history tbody .badge").TextContent));
+
+        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Done, OcrJobChangeKind.Deleted), Ct);
+        cut.WaitForAssertion(() => Assert.Empty(HistoryNames(cut)));
+    }
+
+    [Fact]
+    public void Upload_is_kept_with_the_document_and_in_the_audit_log()
+    {
+        var cut = Render<OcrUploadPage>();
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "a.png"));
+        cut.Find("#file-name").Input("receipt");
+        cut.Find("#upload-button").Click();
+        cut.WaitForAssertion(() => Assert.Single(_ocr.Registry));
+
+        var job = _ocr.Registry[0];
+        var capture = Services.GetRequiredService<CaptureBatchStore>().ForJob(job.Id.Value)!;
+        Assert.Equal([job.Id.Value], capture.JobIds);
+        var document = Services.GetRequiredService<DocumentStore>().FromJob(job);
+        Assert.Equal((capture.Id, capture.UploadedBy), (document.BatchId, document.UploadedBy));
+        var entry = Assert.Single(Services.GetRequiredService<AuditLog>().Latest(), e => e.Action == AuditAction.Uploaded);
+        Assert.Equal((job.Id.Value, "receipt.png", capture.Id), (entry.DocumentId, entry.DocumentName, entry.BatchId));
     }
 
     [Fact]
@@ -181,6 +304,22 @@ public sealed class OcrPagesTests : BunitContext
 
         cut.WaitForAssertion(() => Assert.Contains("اكتمل التعرف الضوئي", cut.Markup, StringComparison.Ordinal));
     }
+
+    private static CancellationToken Ct => Xunit.TestContext.Current.CancellationToken;
+
+    private static void Upload(IRenderedComponent<OcrUploadPage> cut, string name)
+    {
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "IMG_1.png"));
+        cut.Find("#file-name").Input(name);
+        cut.Find("#upload-button").Click();
+        cut.WaitForAssertion(() => Assert.Contains($"{name}.png was sent", cut.Find("#upload-result").TextContent, StringComparison.Ordinal));
+    }
+
+    private static string[] HistoryNames(IRenderedComponent<OcrUploadPage> cut) =>
+        [.. cut.FindAll(".scan-history tbody a").Select(e => e.TextContent)];
+
+    private static string[] SelectedNames(IRenderedComponent<OcrUploadPage> cut) =>
+        [.. cut.FindAll(".selected-files li bdi").Select(e => e.TextContent)];
 
     private static void SetCulture(string name) =>
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = LocalizationSetup.CreateCulture(name);

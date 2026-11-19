@@ -21,4 +21,5 @@
   <data name="UnhandledError" xml:space="preserve"><value>An unhandled error has occurred.</value></data>
   <data name="Reload" xml:space="preserve"><value>Reload</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="NavApproved" xml:space="preserve"><value>Approved</value></data>
 </root>

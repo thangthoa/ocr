@@ -17,6 +17,8 @@ RUN dotnet publish src/Hosts/Web/OppOcr.Web.csproj -c Release -o /app --no-resto
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app ./
+# Saved Word versions (ADR 0004) are written here; a volume mounted on it inherits this owner.
+RUN mkdir -p /app/data && chown "$APP_UID" /app/data
 USER $APP_UID
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080

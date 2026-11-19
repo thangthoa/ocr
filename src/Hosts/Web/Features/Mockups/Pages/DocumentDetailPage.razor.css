@@ -2,51 +2,27 @@
     min-width: 0;
 }
 
-.detail-grid {
+/* Preview: the scanned original next to the same page of the Word file. */
+.page-pager {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    align-items: flex-start;
+    align-items: center;
+    gap: .25rem;
 }
 
-.detail-preview {
-    flex: 3 1 30rem;
-    min-width: 0;
-}
-
-.detail-side {
-    flex: 2 1 22rem;
-    min-width: 0;
-    border: 1px solid #e0e0e0;
-}
-
-.preview-body {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-}
-
-.page-thumbs {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    flex: none;
-}
-
-.page-thumb {
-    width: 3rem;
-    height: 3.75rem;
+.page-thumb,
+.pager-step {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 .5rem;
     border: 1px solid #c6c6c6;
     background-color: #fff;
     color: #525252;
-    font-size: .75rem;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: .25rem;
+    font-size: .8125rem;
 }
 
-    .page-thumb:hover {
+    .page-thumb:hover,
+    .pager-step:hover:not(:disabled) {
         border-color: #8d8d8d;
         color: #161616;
     }
@@ -57,31 +33,154 @@
         font-weight: 600;
     }
 
-    .page-thumb:focus-visible {
+    .pager-step:disabled {
+        color: #c6c6c6;
+    }
+
+    .page-thumb:focus-visible,
+    .pager-step:focus-visible {
         outline: 2px solid #0f62fe;
         outline-offset: 2px;
     }
 
-.page-more {
-    text-align: center;
+    /* A page with an issue from the automatic check; the label and title say so too. */
+    .page-thumb.flagged {
+        border-bottom: 3px solid #da1e28;
+        color: #a2191f;
+    }
+
+/* Result of the automatic check: a Carbon-style notification with a coloured edge. */
+.quality-panel {
+    padding: .75rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-inline-start: 3px solid #24a148;
+    background-color: #f4f4f4;
 }
 
-.preview-main {
-    flex: 1;
+    .quality-panel.flagged {
+        border-inline-start-color: #da1e28;
+    }
+
+.quality-issues {
+    padding-inline-start: 1.25rem;
+    font-size: .875rem;
+}
+
+.issue-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #0f62fe;
+    text-align: start;
+    text-decoration: underline;
+}
+
+    .issue-link:hover {
+        color: #0043ce;
+    }
+
+    .issue-link:focus-visible {
+        outline: 2px solid #0f62fe;
+        outline-offset: 1px;
+    }
+
+/* Paired with the number itself, so colour is not the only cue. */
+.low-confidence {
+    color: #a2191f;
+    font-weight: 600;
+}
+
+.preview-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+
+@media (min-width: 992px) {
+    .preview-pair {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.preview-pane {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+}
+
+.pane-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    min-height: 3rem;
+    padding: .375rem .75rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.pane-title {
+    margin: 0;
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+/* Carbon content switcher. */
+.pane-switch {
+    display: inline-flex;
+    border: 1px solid #8d8d8d;
+}
+
+    .pane-switch button {
+        min-height: 2rem;
+        padding: 0 .75rem;
+        border: 0;
+        background-color: #fff;
+        color: #525252;
+        font-size: .8125rem;
+    }
+
+        .pane-switch button + button {
+            border-inline-start: 1px solid #8d8d8d;
+        }
+
+        .pane-switch button[aria-pressed="true"] {
+            background-color: #161616;
+            color: #fff;
+        }
+
+        .pane-switch button:focus-visible {
+            outline: 2px solid #0f62fe;
+            outline-offset: -2px;
+        }
+
+.pane-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .75rem;
+    border-top: 1px solid #e0e0e0;
+    font-size: .8125rem;
+    color: #525252;
 }
 
 .page-stage {
+    flex: 1;
     background-color: #e0e0e0;
-    padding: 1.5rem;
+    padding: 1rem;
     display: flex;
     justify-content: center;
+    align-items: flex-start;
+    min-height: 24rem;
 }
 
 .page-paper {
     width: 100%;
     max-width: 34rem;
     min-height: 32rem;
+    align-self: stretch;
     background-color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
     padding: 2.5rem 2.25rem;
@@ -109,24 +208,51 @@
         background-color: #e0e0e0;
     }
 
-/* A real scanned page from the OCR service. */
+/* Sample documents have no scan: a faded page stands in for it. */
+.page-scan {
+    background-color: #f4f4f4;
+}
+
+/* Lines pulse while the document server renders the Word file. */
+.page-loading span {
+    animation: page-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes page-pulse {
+    50% {
+        opacity: .45;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-loading span {
+        animation: none;
+    }
+}
+
+/* A scanned page from the OCR service, or a page of the Word file rendered by the document server. */
 .page-image {
     display: block;
     max-width: 100%;
-    max-height: 70vh;
+    max-height: 75vh;
     background-color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
 }
 
-.page-ocr-text {
-    white-space: pre-wrap;
-    font-family: "IBM Plex Sans Arabic", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
-    font-size: 1.05rem;
-    line-height: 1.9;
-    background-color: #f4f4f4;
-    padding: .75rem 1rem;
-    max-height: 50vh;
-    overflow: auto;
+/* A whole page is small next to another; opening it shows it at full size. */
+.page-link {
+    display: block;
+    max-width: 100%;
+    cursor: zoom-in;
+}
+
+    .page-link:focus-visible {
+        outline: 2px solid #0f62fe;
+        outline-offset: 2px;
+    }
+
+.page-ocr-info {
+    overflow-wrap: anywhere;
 }
 
 .page-empty {
@@ -140,6 +266,17 @@
     font-size: 1.05rem;
     line-height: 2;
     min-height: 32rem;
+    align-self: stretch;
+}
+
+.detail-meta {
+    border: 1px solid #e0e0e0;
+}
+
+.meta-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1.5rem 2.5rem;
 }
 
 .detail-tabs {
@@ -148,7 +285,7 @@
 }
 
     .detail-tabs button {
-        flex: 1;
+        flex: 0 1 12rem;
         min-height: 3rem;
         padding: 0 1rem;
         border: 0;

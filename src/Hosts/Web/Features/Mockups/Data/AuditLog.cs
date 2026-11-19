@@ -9,10 +9,19 @@ public enum AuditAction
     Restored,
     StatusChanged,
     Deleted,
+    EditedInWord,
+    Downloaded,
+    Exported,
+    QualityChecked,
+    QualitySettingsChanged,
 }
 
 /// <param name="Version">The version an edit or restore created.</param>
 /// <param name="Status">The status a document was moved to.</param>
+/// <param name="Detail">
+/// Extra detail for the action (the file format of a download, the number of exported documents, the number of
+/// issues the quality check found).
+/// </param>
 public sealed record AuditEntry(
     DateTime AtUtc,
     string User,
@@ -21,7 +30,8 @@ public sealed record AuditEntry(
     string? DocumentName = null,
     string? BatchId = null,
     string? Version = null,
-    DocumentStatus? Status = null);
+    DocumentStatus? Status = null,
+    string? Detail = null);
 
 /// <summary>
 /// Activity log for the mockup: what people did in this app since it started. In memory only and
@@ -35,9 +45,9 @@ public sealed class AuditLog(TimeProvider time)
     private readonly LinkedList<AuditEntry> _entries = new();
 
     public void Record(string user, AuditAction action, string? documentId = null, string? documentName = null,
-        string? batchId = null, string? version = null, DocumentStatus? status = null)
+        string? batchId = null, string? version = null, DocumentStatus? status = null, string? detail = null)
     {
-        var entry = new AuditEntry(time.GetUtcNow().UtcDateTime, user, action, documentId, documentName, batchId, version, status);
+        var entry = new AuditEntry(time.GetUtcNow().UtcDateTime, user, action, documentId, documentName, batchId, version, status, detail);
         lock (_lock)
         {
             _entries.AddFirst(entry);

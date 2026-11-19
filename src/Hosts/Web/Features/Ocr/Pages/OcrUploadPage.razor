@@ -4,131 +4,144 @@
 @using System.Globalization
 @using Modules.Ocr.Domain.Jobs
 @using OppOcr.Web.Features.Ocr.Components
-@using OppOcr.Web.Features.Mockups
-@using OppOcr.Web.Features.Mockups.Data
 
 <PageTitle>@Text["UploadTitle"]</PageTitle>
 
 <h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
 <p class="text-muted mb-4">@Text["UploadIntro"]</p>
 
-<fieldset class="mb-3" disabled="@_uploading">
-    <legend class="h6">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></legend>
-    @foreach (var type in Enum.GetValues<OcrDocumentType>())
-    {
-        var id = $"doc-type-{type}";
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="doc-type" id="@id" value="@type"
-                   checked="@(_documentType == type)" @onchange="() => _documentType = type" />
-            <label class="form-check-label" for="@id">@Text.DocumentType(type)</label>
-        </div>
-    }
-    @if (_documentType is null)
-    {
-        <div class="form-text">@Text["DocumentTypeHint"]</div>
-    }
-</fieldset>
-
-<fieldset class="batch-ticket mb-3" disabled="@_uploading">
-    <legend class="h6 mb-1">@Text["Batch.Heading"]</legend>
-    <p class="form-text mt-0 mb-2">@Text["Batch.Hint"]</p>
+<fieldset class="capture-options mb-3" disabled="@_uploading">
+    <legend class="visually-hidden">@Text["Options.Legend"]</legend>
     <div class="row g-3">
-        <div class="col-6 col-lg-3">
-            <label for="batch-id" class="form-label">@Text["Batch.Id"]</label>
-            <input id="batch-id" class="form-control" value="@_batchId" readonly dir="ltr" />
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="batch-box" class="form-label">@Text["Batch.Box"]</label>
-            <input id="batch-box" class="form-control" dir="ltr" autocomplete="off" @bind="_boxBarcode" />
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="batch-department" class="form-label">@Text["Batch.Department"]</label>
-            <select id="batch-department" class="form-select" @bind="_batchDepartment">
-                <option value="">@Text["Batch.NoDepartment"]</option>
-                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+        <div class="col-12 col-md-4">
+            <label for="doc-type" class="form-label">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></label>
+            <select id="doc-type" class="form-select" aria-required="true" @bind="_documentType">
+                @foreach (var type in Enum.GetValues<OcrDocumentType>())
                 {
-                    <option value="@department">@MockupText.Department(department)</option>
+                    <option value="@type">@Text.DocumentType(type)</option>
                 }
             </select>
         </div>
-        <div class="col-6 col-lg-3">
-            <label for="batch-expected" class="form-label">@Text["Batch.Expected"]</label>
-            <input id="batch-expected" type="number" min="1" class="form-control" @bind="_expectedFiles" />
+
+        <div class="col-12 col-md-4">
+            <span id="mode-label" class="form-label d-block">@Text["Mode.Label"]</span>
+            <div class="btn-group" role="radiogroup" aria-labelledby="mode-label" aria-describedby="mode-hint">
+                @foreach (var mode in Enum.GetValues<CaptureMode>())
+                {
+                    var id = $"mode-{mode}";
+                    <input type="radio" class="btn-check" name="capture-mode" id="@id" autocomplete="off"
+                           checked="@(_mode == mode)" @onchange="() => SetMode(mode)" />
+                    <label class="btn btn-outline-primary" for="@id">@Text[$"Mode.{mode}"]</label>
+                }
+            </div>
+            <div id="mode-hint" class="form-text">
+                @(_mode == CaptureMode.One ? Text["Mode.One.Hint"] : Text["Mode.Multi.Hint", OcrRules.MaxPagesPerDocument])
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <label for="file-name" class="form-label">@Text["FileName.Label"] <span class="text-danger" aria-hidden="true">*</span></label>
+            <input id="file-name" class="form-control @(ShowNameError ? "is-invalid" : null)" dir="auto" autocomplete="off"
+                   maxlength="@OcrRules.MaxFileNameLength" aria-required="true" aria-invalid="@(ShowNameError ? "true" : null)"
+                   aria-describedby="file-name-help" @bind="_fileName" @bind:event="oninput" />
+            @if (ShowNameError)
+            {
+                <div id="file-name-help" class="invalid-feedback">@Text["ocr.file_name_required"]</div>
+            }
+            else
+            {
+                <div id="file-name-help" class="form-text text-truncate">
+                    @if (SavedName is { } saved)
+                    {
+                        <text>@Text["FileName.SavedAs"] <bdi>@saved</bdi></text>
+                    }
+                    else
+                    {
+                        <text>@Text["FileName.Hint"]</text>
+                    }
+                </div>
+            }
         </div>
     </div>
 </fieldset>
 
-<FileDropZone Id="ocr-files" Accept="@Accept" Prompt="@Text["DropZonePrompt"]" OnFilesSelected="UploadAsync"
-              Disabled="@(_uploading || _documentType is null)"
-              Hint="@Text["DropZoneHint", OcrTextExtensions.SupportedFormatsLabel, OcrRules.MaxSizeBytes / 1024 / 1024, MaxFilesPerBatch]" />
+<FileDropZone Id="ocr-files" Accept="@Accept" Multiple="@(_mode == CaptureMode.Multi)" OnFilesSelected="SelectFiles"
+              Disabled="@_uploading"
+              Prompt="@(_mode == CaptureMode.One ? Text["DropZonePrompt"] : Text["DropZonePrompt.Multi"])"
+              Hint="@DropZoneHint" />
 
-<div class="folder-upload mt-3">
-    <span id="ocr-folder-hint" class="small text-muted">@Text["FolderPrompt"]</span>
-    @* webkitdirectory lets the browser pick a whole folder (all current browsers support it). *@
-    <InputFile id="ocr-folder" class="folder-input" OnChange="UploadFolderAsync" multiple webkitdirectory="true"
-               disabled="@(_uploading || _documentType is null)" aria-describedby="ocr-folder-hint" />
-    <label for="ocr-folder" class="btn btn-sm btn-outline-primary @(_uploading || _documentType is null ? "disabled" : null)">@Text["ChooseFolder"]</label>
+@if (_mode == CaptureMode.Multi)
+{
+    <div class="folder-upload mt-3">
+        <span id="ocr-folder-hint" class="small text-muted">@Text["FolderPrompt"]</span>
+        @* webkitdirectory lets the browser pick a whole folder (all current browsers support it). *@
+        <InputFile id="ocr-folder" class="folder-input" OnChange="SelectFolder" multiple webkitdirectory="true"
+                   disabled="@_uploading" aria-describedby="ocr-folder-hint" />
+        <label for="ocr-folder" class="btn btn-sm btn-outline-primary @(_uploading ? "disabled" : null)">@Text["ChooseFolder"]</label>
+    </div>
+}
+
+@if (_error is not null)
+{
+    <div id="capture-error" class="alert alert-danger mt-3" role="alert">@_error</div>
+}
+
+@if (_note is not null)
+{
+    <div class="alert alert-info mt-3 py-2" role="status">@_note</div>
+}
+
+@if (_files.Count > 0)
+{
+    <section class="selected-files mt-3" aria-labelledby="selected-title">
+        <h2 id="selected-title" class="h6 mb-2">
+            @(_mode == CaptureMode.Multi ? Text["Selected.Pages", _files.Count] : Text["Selected.File"])
+        </h2>
+        <ol class="list-group list-group-numbered">
+            @for (var i = 0; i < _files.Count; i++)
+            {
+                var index = i;
+                var file = _files[i];
+                <li @key="file" class="list-group-item d-flex align-items-center gap-2">
+                    <span class="text-truncate me-auto"><bdi>@file.Name</bdi> <span class="text-muted small">(@FileSizeFormatter.Format(file.Size))</span></span>
+                    @if (_mode == CaptureMode.Multi)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-secondary move-up" disabled="@(_uploading || index == 0)"
+                                title="@Text["Selected.MoveUp", file.Name]" aria-label="@Text["Selected.MoveUp", file.Name]"
+                                @onclick="() => Move(index, -1)"><span aria-hidden="true">↑</span></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary move-down" disabled="@(_uploading || index == _files.Count - 1)"
+                                title="@Text["Selected.MoveDown", file.Name]" aria-label="@Text["Selected.MoveDown", file.Name]"
+                                @onclick="() => Move(index, 1)"><span aria-hidden="true">↓</span></button>
+                    }
+                    <button type="button" class="btn btn-sm btn-outline-danger remove" disabled="@_uploading"
+                            title="@Text["Selected.Remove", file.Name]" aria-label="@Text["Selected.Remove", file.Name]"
+                            @onclick="() => Remove(index)"><span aria-hidden="true">×</span></button>
+                </li>
+            }
+        </ol>
+        @if (_mode == CaptureMode.Multi)
+        {
+            <p class="form-text mb-0">@Text["Selected.ReplaceHint"]</p>
+        }
+    </section>
+}
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+    <button type="button" id="upload-button" class="btn btn-primary" disabled="@(_uploading || _files.Count == 0)" @onclick="UploadAsync">
+        @(_uploading ? Text["Uploading"] : Text["Upload"])
+    </button>
+    @if (_files.Count > 0 && !_uploading)
+    {
+        <button type="button" class="btn btn-outline-secondary" @onclick="ClearSelection">@Text["ClearSelection"]</button>
+    }
 </div>
 
-@if (_batchError is not null)
+@if (_sent is { } sent)
 {
-    <div class="alert alert-danger mt-3" role="alert">@_batchError</div>
-}
-
-@if (_folderNote is not null)
-{
-    <div class="alert alert-info mt-3 py-2" role="status">@_folderNote</div>
-}
-
-@if (_uploads.Count > 0)
-{
-    <ul class="list-group mt-3 upload-results" aria-live="polite">
-        @foreach (var item in _uploads)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span class="text-truncate"><bdi>@item.FileName</bdi> <span class="text-muted small">(@FileSizeFormatter.Format(item.SizeBytes))</span></span>
-                @switch (item.Status)
-                {
-                    case UploadStatus.Uploading:
-                        <span class="badge text-bg-secondary">@Text["Uploading"]</span>
-                        break;
-                    case UploadStatus.Succeeded:
-                        <span><span class="badge text-bg-success">@Text["Uploaded"]</span> <a href="@OcrEndpoints.JobUrl(item.JobId!)">@Text["View"]</a></span>
-                        break;
-                    default:
-                        <span class="text-danger small text-end">@item.ErrorMessage</span>
-                        break;
-                }
-            </li>
-        }
-    </ul>
-
-    @if (_lastBatch is { } last && !_uploading)
-    {
-        var matches = last.FailedFiles == 0 && last.Difference is null or 0;
-        <div id="batch-result" class="alert @(matches ? "alert-success" : "alert-warning") mt-3 py-2" role="status">
-            <div>@Text["Batch.Result", last.Id, last.UploadedFiles, last.FailedFiles]</div>
-            @if (last.ExpectedFiles is { } expected)
-            {
-                <div>
-                    @(last.Difference switch
-                    {
-                        0 => Text["Batch.Matches", expected],
-                        < 0 => Text["Batch.Short", -last.Difference!.Value, expected],
-                        _ => Text["Batch.Over", last.Difference!.Value, expected],
-                    })
-                </div>
-            }
-        </div>
-    }
-
-    @if (!_uploading && _uploads.Exists(x => x.Status == UploadStatus.Succeeded))
-    {
-        <p class="mt-3">
-            @Text["UploadSummary", _uploads.Count(x => x.Status == UploadStatus.Succeeded)]
-            <a href="documents">@Text["GoToJobs"]</a>
-        </p>
-    }
+    <div id="upload-result" class="alert alert-success mt-3 py-2" role="status">
+        @(sent.Pages > 1 ? Text["Result.SentPages", sent.FileName, sent.Pages] : Text["Result.Sent", sent.FileName])
+        <a href="@OcrEndpoints.JobUrl(sent.JobId)">@Text["View"]</a>
+    </div>
 }
 
 <section class="scan-history mt-5" aria-labelledby="history-title">
@@ -137,27 +150,13 @@
         <a class="small" href="documents">@Text["GoToJobs"]</a>
     </div>
 
-    @if (_historyError is not null)
-    {
-        <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
-            <span class="me-auto">@_historyError</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadHistoryAsync">@Text["Retry"]</button>
-        </div>
-    }
-    else if (_history is null)
-    {
-        <p class="text-muted" role="status">@Text["Loading"]</p>
-    }
-    else if (_history.Jobs.Items.Count == 0)
+    @if (_uploaded.Count == 0)
     {
         <p class="text-muted">@Text["History.Empty"]</p>
     }
     else
     {
-        @if (!_history.FromService)
-        {
-            <p class="small text-muted">@Text["ListFromMemoryNotice"]</p>
-        }
+        <p class="small text-muted mb-2">@Text["History.Hint"]</p>
         @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
         <div class="table-responsive position-relative">
             <table class="table align-middle">
@@ -166,19 +165,17 @@
                     <tr>
                         <th scope="col" style="min-width: 12rem">@Text["Column.File"]</th>
                         <th scope="col">@Text["Column.Type"]</th>
-                        <th scope="col">@Text["Column.Batch"]</th>
                         <th scope="col">@Text["Column.Status"]</th>
                         <th scope="col">@Text["Column.Progress"]</th>
-                        <th scope="col">@Text["Column.Created"]</th>
+                        <th scope="col">@Text["Column.Uploaded"]</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var job in _history.Jobs.Items)
+                    @foreach (var (job, uploadedAtUtc) in _uploaded)
                     {
                         <tr @key="job.Id">
                             <td class="text-break"><a href="@OcrEndpoints.JobUrl(job.Id.Value)" dir="auto">@job.FileName</a></td>
                             <td class="text-nowrap">@Text.DocumentType(job.DocumentType)</td>
-                            <td class="small text-nowrap" dir="ltr">@(Batches.ForJob(job.Id.Value)?.Id ?? "—")</td>
                             <td><OcrStatusBadge Status="job.Status" /></td>
                             <td style="min-width: 12rem">
                                 @if (job.Status == OcrJobStatus.Failed)
@@ -191,7 +188,7 @@
                                                  CurrentStep="@job.CurrentStep" QueuePosition="job.QueuePosition" />
                                 }
                             </td>
-                            <td class="small text-nowrap">@job.CreatedAtUtc?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)</td>
+                            <td class="small text-nowrap">@uploadedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)</td>
                         </tr>
                     }
                 </tbody>

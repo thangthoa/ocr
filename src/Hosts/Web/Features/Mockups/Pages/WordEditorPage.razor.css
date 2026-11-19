@@ -1,0 +1,11 @@
+/* The editor fills the rest of the window under the header and the page's own title. */
+.word-frame {
+    height: calc(100vh - 13rem);
+    min-height: 32rem;
+    border: 1px solid #e0e0e0;
+}
+
+    .word-frame ::deep iframe {
+        display: block;
+        border: 0;
+    }

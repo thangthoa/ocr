@@ -19,8 +19,21 @@ public static class OcrFileFormats
 
     public static IReadOnlyCollection<string> SupportedExtensions => FormatsByExtension.Keys;
 
+    /// <summary>Images that can be combined, one per page, into a single PDF document.</summary>
+    public static IReadOnlyList<OcrFileFormat> PageFormats { get; } = [OcrFileFormat.Jpeg, OcrFileFormat.Png];
+
+    public static IReadOnlyCollection<string> PageExtensions { get; } =
+        [.. FormatsByExtension.Where(e => PageFormats.Contains(e.Value)).Select(e => e.Key)];
+
     public static OcrFileFormat? FromFileName(string fileName) =>
         FormatsByExtension.TryGetValue(Path.GetExtension(fileName), out var format) ? format : null;
+
+    /// <summary>
+    /// Adds the format's extension to a name the user typed, unless it already ends with one of
+    /// that format's extensions (<c>scan.JPEG</c> stays as it is for a JPEG).
+    /// </summary>
+    public static string WithExtension(string name, OcrFileFormat format) =>
+        FromFileName(name) == format ? name : name + format.Extension();
 
     public static string Extension(this OcrFileFormat format) => format switch
     {

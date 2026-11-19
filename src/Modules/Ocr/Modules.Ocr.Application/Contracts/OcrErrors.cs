@@ -8,6 +8,7 @@ public static class OcrErrorCodes
 {
     public const string FileNameRequired = "ocr.file_name_required";
     public const string FileNameTooLong = "ocr.file_name_too_long";
+    public const string FileNameInvalid = "ocr.file_name_invalid";
     public const string UnsupportedFormat = "ocr.unsupported_format";
     public const string Empty = "ocr.empty";
     public const string TooLarge = "ocr.too_large";
@@ -16,6 +17,10 @@ public static class OcrErrorCodes
     public const string NotFound = "ocr.not_found";
     public const string NotReady = "ocr.not_ready";
     public const string ServiceUnavailable = "ocr.service_unavailable";
+    public const string PagesRequired = "ocr.pages_required";
+    public const string TooManyPages = "ocr.too_many_pages";
+    public const string UnsupportedPageFormat = "ocr.unsupported_page_format";
+    public const string ImageNotSupported = "ocr.image_not_supported";
 }
 
 /// <summary>
@@ -41,6 +46,9 @@ public static class OcrErrors
         OcrErrorCodes.ContentMismatch, "File content is not a supported document or does not match its extension.");
 
     public static readonly Error TooLarge = Error.Validation(OcrErrorCodes.TooLarge, $"File exceeds {OcrRules.MaxSizeBytes} bytes.");
+
+    public static readonly Error ImageNotSupported = Error.Validation(
+        OcrErrorCodes.ImageNotSupported, "An image cannot be placed on a PDF page (for example an interlaced PNG).");
 
     public static Error ServiceUnavailable(Error cause) =>
         Error.Failure(OcrErrorCodes.ServiceUnavailable, $"OCR service request failed: {cause.Code}.");

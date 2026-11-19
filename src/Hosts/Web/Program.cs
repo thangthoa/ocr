@@ -5,6 +5,8 @@ using Modules.Ocr.Infrastructure;
 using OppOcr.Web.Components;
 using OppOcr.Web.Extensions;
 using OppOcr.Web.Features.Mockups;
+using OppOcr.Web.Features.Mockups.Approved;
+using OppOcr.Web.Features.Mockups.Word;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 using Serilog;
@@ -26,7 +28,7 @@ builder.Services.AddOcrApplication();
 builder.Services.AddOcrInfrastructure(builder.Configuration);
 builder.Services.AddSingleton<OcrJobNotifications>();
 builder.Services.AddSingleton<IOcrJobNotifier>(sp => sp.GetRequiredService<OcrJobNotifications>());
-builder.Services.AddMockups();
+builder.Services.AddMockups(builder.Configuration);
 
 builder.Services.AddHealthChecks()
     .AddOcrHealthChecks(HealthCheckTags.Ready);
@@ -51,6 +53,8 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapOcrEndpoints();
+app.MapWordEditorEndpoints();
+app.MapApprovedDocumentEndpoints();
 app.MapCultureEndpoint();
 
 // Liveness only proves the process responds; readiness also checks dependencies.

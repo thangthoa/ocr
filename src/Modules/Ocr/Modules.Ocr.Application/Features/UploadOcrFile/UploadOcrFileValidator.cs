@@ -16,6 +16,8 @@ public sealed class UploadOcrFileValidator : AbstractValidator<UploadOcrFileComm
             .NotEmpty().WithErrorCode(OcrErrorCodes.FileNameRequired).WithMessage("File name is required.")
             .MaximumLength(OcrRules.MaxFileNameLength).WithErrorCode(OcrErrorCodes.FileNameTooLong)
             .WithMessage($"File name must not exceed {OcrRules.MaxFileNameLength} characters.")
+            .Must(OcrRules.IsValidFileName).WithErrorCode(OcrErrorCodes.FileNameInvalid)
+            .WithMessage("File name must not contain / \\ : * ? \" < > | or control characters.")
             .Must(name => OcrFileFormats.FromFileName(name) is not null).WithErrorCode(OcrErrorCodes.UnsupportedFormat)
             .WithMessage(_ => $"Supported extensions: {string.Join(", ", OcrFileFormats.SupportedExtensions)}.");
 

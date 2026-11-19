@@ -3,6 +3,9 @@
 #   LOCAL_PORT=8096 docker-compose -f devops/local/docker-compose.yml up -d --build   (if 8080 is taken)
 # Settings (OCR_API_BASE_URL, OCR_API_KEY) come from the repository's .env, which is git-ignored.
 # Port 8080 so it does not clash with `dotnet run` on 5286.
+#
+# Word editor (ADR 0004) is optional: put DOCS_EDITOR_JWT_SECRET (32+ characters) in .env, then
+#   docker-compose -f devops/local/docker-compose.yml --profile word up -d --build   → editor on http://localhost:8085
 services:
   oppocr-web:
     build:
@@ -12,5 +15,26 @@ services:
     container_name: oppocr-local
     # Sends documents to the third-party OCR server over plain HTTP.
     env_file: ../../.env
+    environment:
+      DOCS_EDITOR_PUBLIC_URL: http://localhost:${DOCS_PORT:-8085}
+      DOCS_EDITOR_INTERNAL_URL: http://documentserver
+      DOCS_EDITOR_APP_URL: http://oppocr-web:8080
+      DOCS_STORAGE_PATH: /app/data/documents
+    volumes:
+      - documents:/app/data
     ports:
       - "127.0.0.1:${LOCAL_PORT:-8080}:8080"
+
+  documentserver:
+    profiles: ["word"]
+    image: onlyoffice/documentserver:9.4.0.1
+    container_name: oppocr-local-docs
+    environment:
+      JWT_ENABLED: "true"
+      JWT_SECRET: ${DOCS_EDITOR_JWT_SECRET:-}
+      ALLOW_PRIVATE_IP_ADDRESS: "true"
+    ports:
+      - "127.0.0.1:${DOCS_PORT:-8085}:80"
+
+volumes:
+  documents:

@@ -2,25 +2,15 @@ using System.Globalization;
 
 namespace OppOcr.Web.Features.Mockups.Data;
 
-/// <summary>A batch ticket: what one capture session was expected to contain and what it produced.</summary>
-/// <param name="JobIds">OCR jobs created by the batch, in upload order.</param>
+/// <summary>One upload from the Capture page: who sent which document, and when.</summary>
+/// <param name="JobIds">OCR jobs created by the upload (one per upload since files are combined into one document).</param>
 public sealed record CaptureBatch(
     string Id,
     DateTime CreatedAtUtc,
     string UploadedBy,
-    string? BoxBarcode,
-    DocumentDepartment? Department,
-    int? ExpectedFiles,
-    IReadOnlyList<string> JobIds,
-    int FailedFiles)
-{
-    public int UploadedFiles => JobIds.Count;
+    IReadOnlyList<string> JobIds);
 
-    /// <summary>Uploaded minus expected: negative when files are missing, positive when there are extra ones.</summary>
-    public int? Difference => ExpectedFiles is { } expected ? UploadedFiles - expected : null;
-}
-
-/// <summary>Batches recorded by the Capture page (in memory, like the rest of the mockup).</summary>
+/// <summary>Uploads recorded by the Capture page (in memory, like the rest of the mockup).</summary>
 public sealed class CaptureBatchStore(TimeProvider time)
 {
     private readonly Lock _lock = new();

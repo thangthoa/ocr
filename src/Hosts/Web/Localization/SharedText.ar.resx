@@ -21,4 +21,5 @@
   <data name="UnhandledError" xml:space="preserve"><value>حدث خطأ غير متوقع.</value></data>
   <data name="Reload" xml:space="preserve"><value>إعادة التحميل</value></data>
   <data name="Language" xml:space="preserve"><value>اللغة</value></data>
+  <data name="NavApproved" xml:space="preserve"><value>المعتمدة</value></data>
 </root>

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Modules.Ocr.Application.Ports;
 using Modules.Ocr.Infrastructure.Api;
 using Modules.Ocr.Infrastructure.Health;
+using Modules.Ocr.Infrastructure.Pdf;
 using Modules.Ocr.Infrastructure.Registry;
 using Modules.Ocr.Infrastructure.Worker;
 
@@ -29,6 +30,7 @@ public static class DependencyInjection
             http.DefaultRequestHeaders.Add(OcrApiClient.ApiKeyHeader, options.ApiKey);
         });
         services.AddTransient<IOcrApiClient>(sp => sp.GetRequiredService<OcrApiClient>());
+        services.AddSingleton<IPdfComposer, ImagePdfComposer>();
 
         services.AddOptions<OcrWorkerOptions>().Bind(configuration.GetSection(OcrWorkerOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<IOcrJobRegistry>(sp => new InMemoryOcrJobRegistry(sp.GetRequiredService<IOptions<OcrWorkerOptions>>().Value.RegistryCapacity));

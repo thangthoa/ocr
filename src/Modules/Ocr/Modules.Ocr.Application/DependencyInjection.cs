@@ -7,6 +7,7 @@ using Modules.Ocr.Application.Features.GetOcrPageImage;
 using Modules.Ocr.Application.Features.ListOcrJobs;
 using Modules.Ocr.Application.Features.SyncTrackedOcrJobs;
 using Modules.Ocr.Application.Features.UploadOcrFile;
+using Modules.Ocr.Application.Features.UploadOcrPages;
 
 namespace Modules.Ocr.Application;
 
@@ -15,8 +16,10 @@ public static class DependencyInjection
     public static IServiceCollection AddOcrApplication(this IServiceCollection services)
     {
         services.AddSingleton<IValidator<UploadOcrFileCommand>, UploadOcrFileValidator>();
+        services.AddSingleton<IValidator<UploadOcrPagesCommand>, UploadOcrPagesValidator>();
 
         services.AddScoped<UploadOcrFileHandler>();
+        services.AddScoped<UploadOcrPagesHandler>();
         services.AddScoped<GetOcrJobHandler>();
         services.AddScoped<ListOcrJobsHandler>();
         services.AddScoped<DeleteOcrJobHandler>();

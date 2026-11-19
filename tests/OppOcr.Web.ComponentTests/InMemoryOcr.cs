@@ -14,6 +14,9 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
 
     public List<string> Cancelled { get; } = [];
 
+    /// <summary>What <c>download?format=docx</c> returns; null answers 404 like a job without a result.</summary>
+    public byte[]? Docx { get; set; }
+
     /// <summary>Makes every call fail as if the OCR service could not be reached.</summary>
     public bool Unavailable { get; set; }
 
@@ -60,7 +63,9 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
         throw new NotSupportedException();
 
     public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+        Task.FromResult<Result<FileContent>>(Docx is { } docx && format == OcrResultFormat.Docx
+            ? new FileContent(new MemoryStream(docx, writable: false), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "result.docx")
+            : Error.NotFound("not_found", "no result"));
 
     void IOcrJobRegistry.Add(OcrJob job) => _registry.Add(job);
 

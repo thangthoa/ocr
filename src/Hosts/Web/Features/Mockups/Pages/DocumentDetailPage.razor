@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using System.Globalization
 @using Modules.Ocr.Application.Contracts
+@using OppOcr.Web.Features.Mockups.Word
 
 <PageTitle>@(_document?.FileName ?? Text["Detail.TitleFallback"])</PageTitle>
 
@@ -62,7 +63,11 @@ else
                 }
                 @if (document.Confidence is { } confidence)
                 {
-                    <span> · @Text["Detail.Confidence", FormatPercent(confidence)]</span>
+                    <span id="document-confidence"> · @Text["Detail.Confidence", FormatPercent(confidence)]</span>
+                    @if (!document.IsSample)
+                    {
+                        <span class="badge tag-gray ms-1" title="@Text["Confidence.SimulatedNote"]">@Text["Confidence.Simulated"]</span>
+                    }
                 }
             </p>
         </div>
@@ -90,6 +95,10 @@ else
                 @if (document.CanEdit)
                 {
                     <button type="button" id="action-edit" class="btn btn-outline-primary" @onclick="StartEdit">@Text["Action.Edit"]</button>
+                    @if (Word.Enabled)
+                    {
+                        <a id="action-word" class="btn btn-outline-primary" href="@WordEditorEndpoints.EditorUrl(document.Id)">@Text["Word.Edit"]</a>
+                    }
                 }
                 @if (job is not null)
                 {
@@ -152,6 +161,56 @@ else
             break;
     }
 
+    @if (document.Quality is { } check && !_editing)
+    {
+        <section id="quality-check" class="quality-panel @(check.Passed ? "passed" : "flagged") mb-3" aria-labelledby="quality-title">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <h2 id="quality-title" class="h6 mb-0">@Text["Quality.Heading"]</h2>
+                <span id="quality-outcome" class="badge @(check.Passed ? "tag-green" : "tag-red")">
+                    @(check.Passed ? Text["Quality.Passed"] : Text["Quality.Flagged", check.Issues.Count])
+                </span>
+                <span class="small text-muted">
+                    @Text["Quality.Checked", FormatDateTime(check.CheckedAtUtc), FormatPercent(check.Settings.MinDocumentConfidence), FormatPercent(check.Settings.MinPageConfidence)]
+                </span>
+            </div>
+            @if (check.Passed)
+            {
+                <p class="small mb-0 mt-1">@(document.Approval?.By == DocumentStore.QualityCheckAuthor ? Text["Quality.PassedApproved"] : Text["Quality.PassedNote"])</p>
+            }
+            else
+            {
+                <ul class="quality-issues mb-0 mt-1">
+                    @foreach (var issue in check.Issues)
+                    {
+                        <li>
+                            @if (issue.Page is { } issuePage)
+                            {
+                                <button type="button" class="issue-link" aria-label="@Text["Quality.ShowPage", issuePage, Text.Issue(issue)]"
+                                        @onclick="() => ShowPage(issuePage)">@Text.Issue(issue)</button>
+                            }
+                            else
+                            {
+                                @Text.Issue(issue)
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+
+    @if (document.IsFinal && !_editing)
+    {
+        <div id="final-download" class="mb-3 d-flex flex-wrap align-items-center gap-2">
+            <span class="small">@Text["Detail.FinalDownload"]:</span>
+            @foreach (var format in Enum.GetValues<FinalFileFormat>())
+            {
+                <a class="btn btn-sm btn-primary" href="@ApprovedDocumentEndpoints.FinalFileUrl(document.Id, format)" download>@format.ToString().ToUpperInvariant()</a>
+            }
+            <span class="small text-muted">@Text["Approved.DownloadNote"]</span>
+        </div>
+    }
+
     @if (job is { Status: OcrJobStatus.Done } && !_editing)
     {
         <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
@@ -164,340 +223,453 @@ else
         </div>
     }
 
-    <div class="detail-grid">
-        <section class="detail-preview" aria-labelledby="preview-title">
-            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                <h2 id="preview-title" class="h5 mb-0 me-auto">@(_editing ? Text["Edit.PageText", _page] : Text["Preview.Heading"])</h2>
-                @if (document.Pages > 0)
-                {
-                    <span class="small text-muted">@Text["Preview.Page", _page, document.Pages]</span>
-                }
-            </div>
-
-            @if (_viewing is not null)
+    <section class="detail-preview mb-4" aria-labelledby="preview-title">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <h2 id="preview-title" class="h5 mb-0 me-auto">@Text["Preview.Heading"]</h2>
+            @if (PageCount > 0)
             {
-                <div class="alert alert-info d-flex flex-wrap align-items-center gap-2 py-2" role="status">
-                    <span>@Text["Preview.ViewingVersion", _viewing.Number]</span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" @onclick="ShowCurrent">@Text["Preview.BackToCurrent"]</button>
-                </div>
+                @* ‹ and › are mirrored by the browser in Arabic, so they keep pointing the right way. *@
+                <nav class="page-pager" aria-label="@Text["Preview.Pages"]">
+                    <button type="button" class="pager-step" id="page-previous" disabled="@(_page <= 1)" aria-label="@Text["Preview.Previous"]"
+                            @onclick="() => ShowPage(_page - 1)"><span aria-hidden="true">‹</span></button>
+                    @for (var i = 1; i <= Math.Min(PageCount, MaxThumbnails); i++)
+                    {
+                        var number = i;
+                        var flagged = IsFlagged(number);
+                        <button type="button" class="page-thumb @(number == _page ? "active" : null) @(flagged ? "flagged" : null)"
+                                aria-pressed="@(number == _page ? "true" : "false")"
+                                aria-label="@(flagged ? Text["Preview.PageButtonFlagged", number] : Text["Preview.PageButton", number])"
+                                title="@(flagged ? Text["Quality.PageFlagged"].Value : null)" @onclick="() => ShowPage(number)">@number</button>
+                    }
+                    @if (PageCount > MaxThumbnails)
+                    {
+                        <span class="small text-muted" aria-hidden="true">…</span>
+                    }
+                    <button type="button" class="pager-step" id="page-next" disabled="@(_page >= PageCount)" aria-label="@Text["Preview.Next"]"
+                            @onclick="() => ShowPage(_page + 1)"><span aria-hidden="true">›</span></button>
+                    <span class="small text-muted ms-1" aria-live="polite">@Text["Preview.Page", _page, PageCount]</span>
+                </nav>
             }
+        </div>
 
-            <div class="preview-body">
-                @if (document.Pages > 0)
-                {
-                    <div class="page-thumbs" role="group" aria-label="@Text["Preview.Pages"]">
-                        @for (var i = 1; i <= Math.Min(document.Pages, MaxThumbnails); i++)
-                        {
-                            var number = i;
-                            <button type="button" class="page-thumb @(number == _page ? "active" : null)" aria-pressed="@(number == _page ? "true" : "false")"
-                                    aria-label="@Text["Preview.PageButton", number]" @onclick="() => _page = number">@number</button>
-                        }
-                        @if (document.Pages > MaxThumbnails)
-                        {
-                            <span class="small text-muted page-more">+@(document.Pages - MaxThumbnails)</span>
-                        }
-                    </div>
-                }
+        @if (_viewing is not null)
+        {
+            <div class="alert alert-info d-flex flex-wrap align-items-center gap-2 py-2" role="status">
+                <span>@Text["Preview.ViewingVersion", _viewing.Number]</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" @onclick="ShowCurrent">@Text["Preview.BackToCurrent"]</button>
+            </div>
+        }
 
-                <div class="preview-main">
+        @* In Arabic the grid flips, so the original stays first in reading order. *@
+        <div class="preview-pair">
+            <section class="preview-pane" aria-labelledby="pane-original-title">
+                <div class="pane-head">
+                    <h3 id="pane-original-title" class="pane-title">@Text["Preview.Original"]</h3>
+                </div>
+                <div class="page-stage" id="pane-original">
+                    @if (job is not null)
+                    {
+                        var ocrPage = job.Pages.FirstOrDefault(p => p.PageNumber == _page);
+                        if (ocrPage is not null)
+                        {
+                            var scanUrl = OcrEndpoints.PageImageUrl(document.Id, _page);
+                            <a class="page-link" href="@scanUrl" target="_blank" rel="noopener" title="@Text["Preview.OpenFull"]"
+                               aria-label="@Text["Preview.OpenFullLabel", OcrText["PageImageAlt", _page]]">
+                                <img src="@scanUrl" class="page-image" alt="@OcrText["PageImageAlt", _page]" loading="lazy" />
+                            </a>
+                        }
+                        else
+                        {
+                            <p class="page-empty">@(job.IsFinished ? Text["Preview.NoScanPage", _page] : OcrText["PagesPending"])</p>
+                        }
+                    }
+                    else
+                    {
+                        <div class="page-paper page-scan">
+                            <div class="page-lines" aria-hidden="true">
+                                @for (var line = 0; line < 9; line++)
+                                {
+                                    <span style="width: @(LineWidth(line))"></span>
+                                }
+                            </div>
+                            <p class="page-empty small">@Text["Preview.SampleScan"]</p>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="preview-pane" aria-labelledby="pane-result-title">
+                <div class="pane-head">
+                    <h3 id="pane-result-title" class="pane-title me-auto">@ResultPaneTitle</h3>
+                    @if (_wordVersions.Count > 0 && !_editing && _viewing is null)
+                    {
+                        var latestWord = _wordVersions[^1];
+                        <span class="small text-muted" title="@FormatDateTime(latestWord.SavedAtUtc)">v@(latestWord.Number) · @WordSource(latestWord)</span>
+                        <a id="word-latest" class="btn btn-sm btn-outline-primary" href="@WordEditorEndpoints.VersionDownloadUrl(document.Id, latestWord.Number)"
+                           download aria-label="@Text["Word.DownloadLabel", latestWord.Number]">DOCX</a>
+                    }
+                    @if (_previewState == PreviewState.Ready && !_editing && _viewing is null)
+                    {
+                        <div class="pane-switch" role="group" aria-label="@Text["Preview.Show"]">
+                            <button type="button" id="show-word" aria-pressed="@(_showText ? "false" : "true")" @onclick="() => _showText = false">Word</button>
+                            <button type="button" id="show-text" aria-pressed="@(_showText ? "true" : "false")" @onclick="() => _showText = true">@Text["Preview.ShowText"]</button>
+                        </div>
+                    }
+                </div>
+                <div class="page-stage" id="pane-result">
                     @if (_editing)
                     {
                         <label for="edit-text" class="visually-hidden">@Text["Edit.PageText", _page]</label>
                         <textarea id="edit-text" class="form-control edit-text" lang="ar" dir="rtl" rows="14"
                                   @bind:get="_form.PageText(_page)" @bind:set="value => _form.SetPageText(_page, value)"></textarea>
                     }
-                    else if (job is not null)
+                    else if (ShowsWord)
                     {
-                        var ocrPage = job.Pages.FirstOrDefault(p => p.PageNumber == _page);
-                        <div class="page-stage">
-                            @if (ocrPage is null)
+                        if (_page <= _wordPreview!.PageCount)
+                        {
+                            var wordUrl = WordEditorEndpoints.PreviewPageUrl(document.Id, _wordPreview.Version.Number, _page);
+                            <a class="page-link" href="@wordUrl" target="_blank" rel="noopener" title="@Text["Preview.OpenFull"]"
+                               aria-label="@Text["Preview.OpenFullLabel", Text["Preview.WordPageAlt", _page]]">
+                                <img src="@wordUrl" class="page-image word-page" alt="@Text["Preview.WordPageAlt", _page]" loading="lazy" />
+                            </a>
+                        }
+                        else
+                        {
+                            <p class="page-empty">@Text["Preview.NoWordPage", _page]</p>
+                        }
+                    }
+                    else if (_previewState == PreviewState.Loading && _viewing is null && !_showText)
+                    {
+                        <div class="page-paper" role="status">
+                            <div class="page-lines page-loading" aria-hidden="true">
+                                @for (var line = 0; line < 9; line++)
+                                {
+                                    <span style="width: @(LineWidth(line))"></span>
+                                }
+                            </div>
+                            <p class="page-empty small">@Text["Preview.Rendering"]</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="page-paper">
+                            @if (!string.IsNullOrEmpty(ShownPageText))
                             {
-                                <p class="page-empty">@OcrText["PagesPending"]</p>
+                                <div class="page-text" lang="ar" dir="rtl">@ShownPageText</div>
+                            }
+                            else if (document.PageTexts.Count == 0)
+                            {
+                                <p class="page-empty">@(document.Status == DocumentStatus.Processing ? Text["Preview.WordAfterOcr"] : Text["Preview.NoText"])</p>
                             }
                             else
                             {
-                                <img src="@OcrEndpoints.PageImageUrl(document.Id, _page)" class="page-image"
-                                     alt="@OcrText["PageImageAlt", _page]" loading="lazy" />
-                            }
-                        </div>
-                        @if (ocrPage is not null)
-                        {
-                            <div class="page-ocr mt-3">
-                                <div class="d-flex flex-wrap gap-2 align-items-baseline mb-2">
-                                    <h3 class="h6 mb-0 me-auto">@Text["Edit.Text"]</h3>
-                                    <span class="small text-muted">
-                                        @OcrText["Seconds", ocrPage.Seconds.ToString("0", CultureInfo.CurrentCulture)]
-                                        @(ocrPage.Cached ? $" · {OcrText["Cached"]}" : null)
-                                    </span>
+                                <div class="page-lines" aria-hidden="true">
+                                    @for (var line = 0; line < 9; line++)
+                                    {
+                                        <span style="width: @(LineWidth(line))"></span>
+                                    }
                                 </div>
-                                @if (ocrPage.Warnings.Count > 0)
-                                {
-                                    <ul class="list-unstyled small text-warning-emphasis mb-2">
-                                        @foreach (var warning in ocrPage.Warnings)
-                                        {
-                                            <li><span aria-hidden="true">⚠</span> <span title="@warning">@OcrText.Warning(warning)</span></li>
-                                        }
-                                    </ul>
-                                }
-                                <div class="ocr-text page-ocr-text" dir="rtl" lang="ar">@ShownPageText</div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="page-stage">
-                            <div class="page-paper">
-                                @if (!string.IsNullOrEmpty(ShownPageText))
-                                {
-                                    <div class="page-text" lang="ar" dir="rtl">@ShownPageText</div>
-                                }
-                                else if (document.PageTexts.Count == 0)
-                                {
-                                    <p class="page-empty">@Text["Preview.NoText"]</p>
-                                }
-                                else
-                                {
-                                    <div class="page-lines" aria-hidden="true">
-                                        @for (var line = 0; line < 9; line++)
-                                        {
-                                            <span style="width: @(LineWidth(line))"></span>
-                                        }
-                                    </div>
-                                    <p class="page-empty small">@Text["Preview.SampleOnly"]</p>
-                                }
-                            </div>
+                                <p class="page-empty small">@Text["Preview.SampleOnly"]</p>
+                            }
                         </div>
                     }
                 </div>
+                @if (_previewState == PreviewState.Unavailable && !_editing && _viewing is null)
+                {
+                    <div class="pane-note" role="status">
+                        <span class="me-auto">@Text["Preview.WordUnavailable"]</span>
+                        <button type="button" id="preview-retry" class="btn btn-sm btn-outline-secondary" @onclick="RetryPreview">@Text["Word.Retry"]</button>
+                    </div>
+                }
+            </section>
+        </div>
+
+        @if (document.PageConfidence(_page) is { } pageConfidence)
+        {
+            <div id="page-confidence" class="small mt-2">
+                @Text["Quality.PageConfidence", _page]
+                <span class="@(IsLowPage(_page) ? "low-confidence" : null)">@FormatPercent(pageConfidence)</span>
+                @if (IsLowPage(_page))
+                {
+                    <span class="text-muted">(@Text["Quality.BelowThreshold", FormatPercent(document.Quality!.Settings.MinPageConfidence)])</span>
+                }
             </div>
-        </section>
-
-        <section class="detail-side" aria-label="@Text["Detail.Sections"]">
-            <div role="tablist" class="detail-tabs" aria-label="@Text["Detail.Sections"]">
-                <button type="button" role="tab" id="tab-metadata" aria-controls="panel-metadata"
-                        aria-selected="@(_tab == DetailTab.Metadata ? "true" : "false")" @onclick="() => _tab = DetailTab.Metadata">@Text["Tab.Metadata"]</button>
-                <button type="button" role="tab" id="tab-versions" aria-controls="panel-versions" disabled="@_editing"
-                        aria-selected="@(_tab == DetailTab.Versions ? "true" : "false")" @onclick="() => _tab = DetailTab.Versions">
-                    @Text["Tab.Versions"] <span class="badge tag-gray">@document.Versions.Count</span>
-                </button>
+        }
+        @if (job?.Pages.FirstOrDefault(p => p.PageNumber == _page) is { } shownPage)
+        {
+            <div class="page-ocr-info small text-muted mt-2">
+                <span>@OcrText["Seconds", shownPage.Seconds.ToString("0", CultureInfo.CurrentCulture)]@(shownPage.Cached ? $" · {OcrText["Cached"]}" : null)</span>
+                @if (shownPage.Warnings.Count > 0)
+                {
+                    <ul class="list-unstyled text-warning-emphasis mb-0 mt-1">
+                        @foreach (var warning in shownPage.Warnings)
+                        {
+                            <li><span aria-hidden="true">⚠</span> <span title="@warning">@OcrText.Warning(warning)</span></li>
+                        }
+                    </ul>
+                }
             </div>
+        }
+    </section>
 
-            @if (_tab == DetailTab.Metadata)
-            {
-                <div id="panel-metadata" role="tabpanel" aria-labelledby="tab-metadata" class="tab-body">
-                    @if (_editing)
-                    {
-                        <div class="mb-3">
-                            <label for="edit-title" class="form-label">@Text["Meta.Title"]</label>
-                            <input id="edit-title" class="form-control @(_errors.ContainsKey(TitleField) ? "is-invalid" : null)" lang="ar" dir="auto"
-                                   @bind="_form.Title" aria-describedby="@(_errors.ContainsKey(TitleField) ? "edit-title-error" : null)" />
-                            @if (_errors.TryGetValue(TitleField, out var titleError))
-                            {
-                                <div id="edit-title-error" class="invalid-feedback d-block">@titleError</div>
-                            }
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-6">
-                                <label for="edit-reference" class="form-label">@Text["Meta.Reference"]</label>
-                                <input id="edit-reference" class="form-control" dir="ltr" @bind="_form.Reference" />
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="edit-date" class="form-label">@Text["Meta.DocumentDate"]</label>
-                                <input id="edit-date" type="date" class="form-control" @bind="_form.DocumentDate" />
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="edit-department" class="form-label">@Text["Meta.Department"]</label>
-                                <select id="edit-department" class="form-select" @bind="_form.Department">
-                                    <option value="">@Text["Meta.NotSet"]</option>
-                                    @foreach (var department in Enum.GetValues<DocumentDepartment>())
-                                    {
-                                        <option value="@department">@Text.Department(department)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="edit-kind" class="form-label">@Text["Meta.Kind"]</label>
-                                <select id="edit-kind" class="form-select" @bind="_form.Kind">
-                                    <option value="">@Text["Meta.NotSet"]</option>
-                                    @foreach (var kind in Enum.GetValues<DocumentKind>())
-                                    {
-                                        <option value="@kind">@Text.Kind(kind)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="edit-confidentiality" class="form-label">@Text["Meta.Confidentiality"]</label>
-                                <select id="edit-confidentiality" class="form-select" @bind="_form.Confidentiality">
-                                    @foreach (var value in Enum.GetValues<DocumentConfidentiality>())
-                                    {
-                                        <option value="@value">@Text.Confidentiality(value)</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-keywords" class="form-label">@Text["Meta.Keywords"]</label>
-                            <input id="edit-keywords" class="form-control" lang="ar" dir="auto" @bind="_form.Keywords" aria-describedby="edit-keywords-hint" />
-                            <div id="edit-keywords-hint" class="form-text">@Text["Edit.KeywordsHint"]</div>
-                        </div>
-                        <div class="mb-1">
-                            <label for="edit-note" class="form-label">@Text["Edit.Note"]</label>
-                            <input id="edit-note" class="form-control" dir="auto" @bind="_form.Note" />
-                        </div>
-                    }
-                    else
-                    {
-                        <dl class="meta-list">
-                            <dt>@Text["Meta.Title"]</dt>
-                            <dd lang="ar" dir="auto"><a href="@SearchUrl(DocumentSearchField.Title, metadata.Title)" title="@Text["Meta.FindSimilar"]">@metadata.Title</a></dd>
-                            <dt>@Text["Meta.Reference"]</dt>
-                            <dd dir="ltr">
-                                @if (string.IsNullOrWhiteSpace(metadata.Reference))
-                                {
-                                    <span class="text-muted">@Missing</span>
-                                }
-                                else
-                                {
-                                    <a href="@SearchUrl(DocumentSearchField.Reference, metadata.Reference)" title="@Text["Meta.FindSimilar"]">@metadata.Reference</a>
-                                }
-                            </dd>
-                            <dt>@Text["Meta.DocumentDate"]</dt>
-                            <dd>@FormatDate(metadata.DocumentDate)</dd>
-                            <dt>@Text["Meta.Department"]</dt>
-                            <dd>
-                                @if (metadata.Department is { } department)
-                                {
-                                    <a href="@($"documents?department={department}")" title="@Text["Meta.FindSimilar"]">@Text.Department(department)</a>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">@Missing</span>
-                                }
-                            </dd>
-                            <dt>@Text["Meta.Kind"]</dt>
-                            <dd>
-                                @if (metadata.Kind is { } kind)
-                                {
-                                    <a href="@($"documents?kind={kind}")" title="@Text["Meta.FindSimilar"]">@Text.Kind(kind)</a>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">@Missing</span>
-                                }
-                            </dd>
-                            <dt>@Text["Meta.Confidentiality"]</dt>
-                            <dd>@Text.Confidentiality(metadata.Confidentiality)</dd>
-                            <dt>@Text["Meta.Keywords"]</dt>
-                            <dd>
-                                @if (metadata.Keywords.Count == 0)
-                                {
-                                    <span class="text-muted">@Missing</span>
-                                }
-                                else
-                                {
-                                    <span class="keyword-list">
-                                        @foreach (var keyword in metadata.Keywords)
-                                        {
-                                            <a class="keyword" lang="ar" href="@SearchUrl(DocumentSearchField.Keyword, keyword)" title="@Text["Meta.FindSimilar"]">@keyword</a>
-                                        }
-                                    </span>
-                                }
-                            </dd>
-                        </dl>
-                        <p class="small text-muted">@Text["Meta.SearchHint"]</p>
+    <section class="detail-meta" aria-label="@Text["Detail.Sections"]">
+        <div role="tablist" class="detail-tabs" aria-label="@Text["Detail.Sections"]">
+            <button type="button" role="tab" id="tab-metadata" aria-controls="panel-metadata"
+                    aria-selected="@(_tab == DetailTab.Metadata ? "true" : "false")" @onclick="() => _tab = DetailTab.Metadata">@Text["Tab.Metadata"]</button>
+            <button type="button" role="tab" id="tab-versions" aria-controls="panel-versions" disabled="@_editing"
+                    aria-selected="@(_tab == DetailTab.Versions ? "true" : "false")" @onclick="() => _tab = DetailTab.Versions">
+                @Text["Tab.Versions"] <span class="badge tag-gray">@document.Versions.Count</span>
+            </button>
+        </div>
 
-                        <h3 class="h6 mt-4">@Text["Meta.FileHeading"]</h3>
-                        <dl class="meta-list">
-                            <dt>@Text["Meta.FileName"]</dt>
-                            <dd dir="auto">@document.FileName</dd>
-                            <dt>@Text["Meta.Pages"]</dt>
-                            <dd>@(document.Pages > 0 ? document.Pages.ToString(CultureInfo.CurrentCulture) : Missing)</dd>
-                            @if (document.SizeBytes is { } size)
-                            {
-                                <dt>@Text["Meta.Size"]</dt>
-                                <dd dir="ltr">@FileSizeFormatter.Format(size)</dd>
-                            }
-                            <dt>@Text["Meta.Uploaded"]</dt>
-                            <dd>@FormatDateTime(document.UploadedAtUtc)</dd>
-                            @if (document.UploadedBy is not null)
-                            {
-                                <dt>@Text["Meta.UploadedBy"]</dt>
-                                <dd dir="ltr">@document.UploadedBy</dd>
-                            }
-                            @if (document.BatchId is { } batchId)
-                            {
-                                <dt>@Text["Meta.Batch"]</dt>
-                                <dd dir="ltr">@batchId</dd>
-                            }
-                            <dt>@Text["Meta.Id"]</dt>
-                            <dd><code dir="ltr">@document.Id</code></dd>
-                        </dl>
-
+        @if (_tab == DetailTab.Metadata)
+        {
+            <div id="panel-metadata" role="tabpanel" aria-labelledby="tab-metadata" class="tab-body">
+                @if (_editing)
+                {
+                    <div class="mb-3">
+                        <label for="edit-title" class="form-label">@Text["Meta.Title"]</label>
+                        <input id="edit-title" class="form-control @(_errors.ContainsKey(TitleField) ? "is-invalid" : null)" lang="ar" dir="auto"
+                               @bind="_form.Title" aria-describedby="@(_errors.ContainsKey(TitleField) ? "edit-title-error" : null)" />
+                        @if (_errors.TryGetValue(TitleField, out var titleError))
+                        {
+                            <div id="edit-title-error" class="invalid-feedback d-block">@titleError</div>
+                        }
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="edit-reference" class="form-label">@Text["Meta.Reference"]</label>
+                            <input id="edit-reference" class="form-control" dir="ltr" @bind="_form.Reference" />
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="edit-date" class="form-label">@Text["Meta.DocumentDate"]</label>
+                            <input id="edit-date" type="date" class="form-control" @bind="_form.DocumentDate" />
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="edit-department" class="form-label">@Text["Meta.Department"]</label>
+                            <select id="edit-department" class="form-select" @bind="_form.Department">
+                                <option value="">@Text["Meta.NotSet"]</option>
+                                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                                {
+                                    <option value="@department">@Text.Department(department)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="edit-kind" class="form-label">@Text["Meta.Kind"]</label>
+                            <select id="edit-kind" class="form-select" @bind="_form.Kind">
+                                <option value="">@Text["Meta.NotSet"]</option>
+                                @foreach (var kind in Enum.GetValues<DocumentKind>())
+                                {
+                                    <option value="@kind">@Text.Kind(kind)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="edit-confidentiality" class="form-label">@Text["Meta.Confidentiality"]</label>
+                            <select id="edit-confidentiality" class="form-select" @bind="_form.Confidentiality">
+                                @foreach (var value in Enum.GetValues<DocumentConfidentiality>())
+                                {
+                                    <option value="@value">@Text.Confidentiality(value)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-keywords" class="form-label">@Text["Meta.Keywords"]</label>
+                        <input id="edit-keywords" class="form-control" lang="ar" dir="auto" @bind="_form.Keywords" aria-describedby="edit-keywords-hint" />
+                        <div id="edit-keywords-hint" class="form-text">@Text["Edit.KeywordsHint"]</div>
+                    </div>
+                    <div class="mb-1">
+                        <label for="edit-note" class="form-label">@Text["Edit.Note"]</label>
+                        <input id="edit-note" class="form-control" dir="auto" @bind="_form.Note" />
+                    </div>
+                }
+                else
+                {
+                    <div class="meta-columns">
+                        <div class="meta-group">
+                            <h3 class="h6">@Text["Meta.DocumentHeading"]</h3>
+                            <dl class="meta-list">
+                                <dt>@Text["Meta.Title"]</dt>
+                                <dd lang="ar" dir="auto"><a href="@SearchUrl(DocumentSearchField.Title, metadata.Title)" title="@Text["Meta.FindSimilar"]">@metadata.Title</a></dd>
+                                <dt>@Text["Meta.Reference"]</dt>
+                                <dd dir="ltr">
+                                    @if (string.IsNullOrWhiteSpace(metadata.Reference))
+                                    {
+                                        <span class="text-muted">@Missing</span>
+                                    }
+                                    else
+                                    {
+                                        <a href="@SearchUrl(DocumentSearchField.Reference, metadata.Reference)" title="@Text["Meta.FindSimilar"]">@metadata.Reference</a>
+                                    }
+                                </dd>
+                                <dt>@Text["Meta.DocumentDate"]</dt>
+                                <dd>@FormatDate(metadata.DocumentDate)</dd>
+                                <dt>@Text["Meta.Department"]</dt>
+                                <dd>
+                                    @if (metadata.Department is { } department)
+                                    {
+                                        <a href="@($"documents?department={department}")" title="@Text["Meta.FindSimilar"]">@Text.Department(department)</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">@Missing</span>
+                                    }
+                                </dd>
+                                <dt>@Text["Meta.Kind"]</dt>
+                                <dd>
+                                    @if (metadata.Kind is { } kind)
+                                    {
+                                        <a href="@($"documents?kind={kind}")" title="@Text["Meta.FindSimilar"]">@Text.Kind(kind)</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">@Missing</span>
+                                    }
+                                </dd>
+                                <dt>@Text["Meta.Confidentiality"]</dt>
+                                <dd>@Text.Confidentiality(metadata.Confidentiality)</dd>
+                                <dt>@Text["Meta.Keywords"]</dt>
+                                <dd>
+                                    @if (metadata.Keywords.Count == 0)
+                                    {
+                                        <span class="text-muted">@Missing</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="keyword-list">
+                                            @foreach (var keyword in metadata.Keywords)
+                                            {
+                                                <a class="keyword" lang="ar" href="@SearchUrl(DocumentSearchField.Keyword, keyword)" title="@Text["Meta.FindSimilar"]">@keyword</a>
+                                            }
+                                        </span>
+                                    }
+                                </dd>
+                            </dl>
+                            <p class="small text-muted">@Text["Meta.SearchHint"]</p>
+                        </div>
+                        <div class="meta-group">
+                            <h3 class="h6">@Text["Meta.FileHeading"]</h3>
+                            <dl class="meta-list">
+                                <dt>@Text["Meta.FileName"]</dt>
+                                <dd dir="auto">@document.FileName</dd>
+                                <dt>@Text["Meta.Pages"]</dt>
+                                <dd>@(document.Pages > 0 ? document.Pages.ToString(CultureInfo.CurrentCulture) : Missing)</dd>
+                                @if (document.SizeBytes is { } size)
+                                {
+                                    <dt>@Text["Meta.Size"]</dt>
+                                    <dd dir="ltr">@FileSizeFormatter.Format(size)</dd>
+                                }
+                                <dt>@Text["Meta.Uploaded"]</dt>
+                                <dd>@FormatDateTime(document.UploadedAtUtc)</dd>
+                                @if (document.UploadedBy is not null)
+                                {
+                                    <dt>@Text["Meta.UploadedBy"]</dt>
+                                    <dd dir="ltr">@document.UploadedBy</dd>
+                                }
+                                @if (document.Approval is { } approval)
+                                {
+                                    <dt>@Text["Meta.ApprovedBy"]</dt>
+                                    <dd id="approved-by" dir="ltr">@approval.By</dd>
+                                    <dt>@Text["Meta.Approved"]</dt>
+                                    <dd id="approved-at">@FormatDateTime(approval.AtUtc)</dd>
+                                }
+                                @if (document.BatchId is { } batchId)
+                                {
+                                    <dt>@Text["Meta.Batch"]</dt>
+                                    <dd dir="ltr">@batchId</dd>
+                                }
+                                <dt>@Text["Meta.Id"]</dt>
+                                <dd><code dir="ltr">@document.Id</code></dd>
+                            </dl>
+                        </div>
                         @if (job is not null)
                         {
-                            <h3 class="h6 mt-4">@Text["Meta.OcrHeading"]</h3>
-                            <dl class="meta-list">
-                                <dt>@OcrText["Column.Status"]</dt>
-                                <dd><OcrStatusBadge Status="job.Status" /></dd>
-                                <dt>@OcrText["Column.Type"]</dt>
-                                <dd>@OcrText.DocumentType(job.DocumentType)</dd>
-                                <dt>@OcrText["Detail.Completed"]</dt>
-                                <dd>@FormatDateTime(job.FinishedAtUtc)</dd>
-                            </dl>
+                            <div class="meta-group">
+                                <h3 class="h6">@Text["Meta.OcrHeading"]</h3>
+                                <dl class="meta-list">
+                                    <dt>@OcrText["Column.Status"]</dt>
+                                    <dd><OcrStatusBadge Status="job.Status" /></dd>
+                                    <dt>@OcrText["Column.Type"]</dt>
+                                    <dd>@OcrText.DocumentType(job.DocumentType)</dd>
+                                    <dt>@OcrText["Detail.Completed"]</dt>
+                                    <dd>@FormatDateTime(job.FinishedAtUtc)</dd>
+                                </dl>
+                            </div>
                         }
-                    }
-                </div>
-            }
-            else
-            {
-                <div id="panel-versions" role="tabpanel" aria-labelledby="tab-versions" class="tab-body">
-                    @if (document.Versions.Count == 0)
-                    {
-                        <p class="text-muted small">@Text["Version.None"]</p>
-                    }
-                    else
-                    {
-                        <ol class="version-list">
-                            @foreach (var version in Enumerable.Reverse(document.Versions))
-                            {
-                                var isCurrent = version.Number == document.CurrentVersion?.Number;
-                                var isViewing = _viewing?.Number == version.Number || (_viewing is null && isCurrent);
-                                <li class="version-item @(isViewing ? "viewing" : null)" @key="version.Number">
-                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <span class="version-number" dir="ltr">v@(version.Number)</span>
-                                        @if (isCurrent)
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div id="panel-versions" role="tabpanel" aria-labelledby="tab-versions" class="tab-body">
+                @if (_wordVersions.Count > 0)
+                {
+                    <h3 class="h6">@Text["Word.Heading"]</h3>
+                    <ol class="version-list mb-4" id="word-versions">
+                        @foreach (var word in Enumerable.Reverse(_wordVersions))
+                        {
+                            <li class="version-item" @key="word.Number">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="version-number" dir="ltr">v@(word.Number)</span>
+                                    <span class="small">@WordSource(word)</span>
+                                    <a class="ms-auto small" href="@WordEditorEndpoints.VersionDownloadUrl(document.Id, word.Number)" download
+                                       aria-label="@Text["Word.DownloadLabel", word.Number]">@Text["Word.Download"]</a>
+                                </div>
+                                <div class="small text-muted">@Text["Version.Meta", FormatDateTime(word.SavedAtUtc), word.Author] · <span dir="ltr">@FileSizeFormatter.Format(word.SizeBytes)</span></div>
+                            </li>
+                        }
+                    </ol>
+                    <h3 class="h6">@Text["Word.TextHeading"]</h3>
+                }
+                @if (document.Versions.Count == 0)
+                {
+                    <p class="text-muted small">@Text["Version.None"]</p>
+                }
+                else
+                {
+                    <ol class="version-list">
+                        @foreach (var version in Enumerable.Reverse(document.Versions))
+                        {
+                            var isCurrent = version.Number == document.CurrentVersion?.Number;
+                            var isViewing = _viewing?.Number == version.Number || (_viewing is null && isCurrent);
+                            <li class="version-item @(isViewing ? "viewing" : null)" @key="version.Number">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="version-number" dir="ltr">v@(version.Number)</span>
+                                    @if (isCurrent)
+                                    {
+                                        <span class="badge tag-blue">@Text["Version.Current"]</span>
+                                    }
+                                    @if (isViewing)
+                                    {
+                                        <span class="badge tag-gray">@Text["Version.Viewing"]</span>
+                                    }
+                                </div>
+                                <div class="small">@ChangeLabel(version)</div>
+                                <div class="small text-muted">@Text["Version.Meta", FormatDateTime(version.CreatedAtUtc), version.Author]</div>
+                                @if (version.Note is not null)
+                                {
+                                    <div class="small version-note" dir="auto">@version.Note</div>
+                                }
+                                @if (!isCurrent)
+                                {
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" aria-label="@Text["Version.ViewLabel", version.Number]"
+                                                @onclick="() => View(version)">@Text["Version.View"]</button>
+                                        @if (document.CanEdit)
                                         {
-                                            <span class="badge tag-blue">@Text["Version.Current"]</span>
-                                        }
-                                        @if (isViewing)
-                                        {
-                                            <span class="badge tag-gray">@Text["Version.Viewing"]</span>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="@Text["Version.RestoreLabel", version.Number]"
+                                                    @onclick="() => Restore(version)">@Text["Version.Restore"]</button>
                                         }
                                     </div>
-                                    <div class="small">@ChangeLabel(version)</div>
-                                    <div class="small text-muted">@Text["Version.Meta", FormatDateTime(version.CreatedAtUtc), version.Author]</div>
-                                    @if (version.Note is not null)
-                                    {
-                                        <div class="small version-note" dir="auto">@version.Note</div>
-                                    }
-                                    @if (!isCurrent)
-                                    {
-                                        <div class="d-flex flex-wrap gap-2 mt-2">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" aria-label="@Text["Version.ViewLabel", version.Number]"
-                                                    @onclick="() => View(version)">@Text["Version.View"]</button>
-                                            @if (document.CanEdit)
-                                            {
-                                                <button type="button" class="btn btn-sm btn-outline-primary" aria-label="@Text["Version.RestoreLabel", version.Number]"
-                                                        @onclick="() => Restore(version)">@Text["Version.Restore"]</button>
-                                            }
-                                        </div>
-                                    }
-                                </li>
-                            }
-                        </ol>
-                    }
-                </div>
-            }
-        </section>
-    </div>
+                                }
+                            </li>
+                        }
+                    </ol>
+                }
+            </div>
+        }
+    </section>
 }

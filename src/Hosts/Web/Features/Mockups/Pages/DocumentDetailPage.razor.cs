@@ -4,13 +4,16 @@ using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Quality;
+using OppOcr.Web.Features.Mockups.Word;
 using OppOcr.Web.Features.Ocr;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
 /// One document: an OCR job (images, text, progress, downloads, delete) or a sample, with review
-/// status, metadata, edits saved as versions, and metadata links to search.
+/// status, metadata, edits saved as versions, and metadata links to search. Each page of the scanned
+/// original is shown next to the same page of the Word file.
 /// </summary>
 public sealed partial class DocumentDetailPage : IDisposable
 {
@@ -30,6 +33,11 @@ public sealed partial class DocumentDetailPage : IDisposable
     private IDisposable? _subscription;
     private DocumentRecord? _document;
     private DocumentVersion? _viewing;
+    private IReadOnlyList<WordVersion> _wordVersions = [];
+    private WordPreview? _wordPreview;
+    private PreviewState _previewState;
+    private string? _previewFor;
+    private bool _showText;
     private EditModel _form = new();
     private bool _loaded;
     private bool _notFound;
@@ -49,12 +57,25 @@ public sealed partial class DocumentDetailPage : IDisposable
         Versions,
     }
 
+    private enum PreviewState
+    {
+        /// <summary>No Word file to show (editor not configured, or OCR not finished).</summary>
+        None,
+        Loading,
+        Ready,
+        Unavailable,
+    }
+
     [Parameter]
     public string Id { get; set; } = default!;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
 
     [Inject] private DocumentStore Store { get; set; } = default!;
+
+    [Inject] private WordEditorService Word { get; set; } = default!;
+
+    [Inject] private WordPreviewService Preview { get; set; } = default!;
 
     [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
 
@@ -71,6 +92,16 @@ public sealed partial class DocumentDetailPage : IDisposable
     private string ShownPageText => PageTextOf(_viewing?.PageTexts ?? _document!.PageTexts, _page);
 
     private static string BackArrow => CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft ? "→" : "←";
+
+    /// <summary>Pages of the original or of the Word file, whichever has more (text can reflow).</summary>
+    private int PageCount => Math.Max(_document!.Pages, _wordPreview?.PageCount ?? 0);
+
+    private bool ShowsWord => _previewState == PreviewState.Ready && _viewing is null && !_showText;
+
+    private string ResultPaneTitle => _editing ? Text["Edit.PageText", _page]
+        : _viewing is not null ? Text["Preview.TextVersion", _viewing.Number]
+        : ShowsWord || (_previewState == PreviewState.Loading && !_showText) ? Text["Preview.WordFile"]
+        : Text["Preview.Text"];
 
     public void Dispose()
     {
@@ -93,6 +124,10 @@ public sealed partial class DocumentDetailPage : IDisposable
         _errors.Clear();
         _page = 1;
         _tab = DetailTab.Metadata;
+        _wordPreview = null;
+        _previewState = PreviewState.None;
+        _previewFor = null;
+        _showText = false;
         await LoadAsync();
         _loaded = true;
     }
@@ -101,7 +136,65 @@ public sealed partial class DocumentDetailPage : IDisposable
     {
         if (firstRender)
             _ = RefreshWhileProcessingAsync();
+
+        // Rendering a Word file takes seconds, so it starts once the page is interactive (never while
+        // prerendering) and again when OCR finishes or another document is shown.
+        if (_document is { } document && Preview.Enabled && PreviewKey(document) != _previewFor)
+        {
+            _previewFor = PreviewKey(document);
+            _ = LoadWordPreviewAsync(document);
+        }
     }
+
+    private static string PreviewKey(DocumentRecord document) => $"{document.Id}|{document.Status}";
+
+    private async Task LoadWordPreviewAsync(DocumentRecord document)
+    {
+        try
+        {
+            if (_wordPreview is null)
+            {
+                _previewState = PreviewState.Loading;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            var result = await Preview.GetAsync(document, _disposed.Token);
+            var versions = result.IsSuccess ? await Word.VersionsAsync(document.Id, _disposed.Token) : _wordVersions;
+            await InvokeAsync(() =>
+            {
+                if (_document?.Id != document.Id)
+                    return;
+                _wordPreview = result.IsSuccess ? result.Value : null;
+                _previewState = result.IsSuccess ? PreviewState.Ready
+                    : result.Error!.Code == WordErrors.NoWordFile ? PreviewState.None
+                    : PreviewState.Unavailable;
+                _wordVersions = versions;
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Page closed.
+        }
+        catch (Exception ex)
+        {
+            LogUnexpected(Logger, ex, "render the Word preview");
+            await InvokeAsync(() =>
+            {
+                _previewState = PreviewState.Unavailable;
+                StateHasChanged();
+            });
+        }
+    }
+
+    private void RetryPreview() => _previewFor = null;
+
+    private void ShowPage(int page) => _page = Math.Clamp(page, 1, Math.Max(PageCount, 1));
+
+    private bool IsFlagged(int page) => _document?.Quality?.FlaggedPages.Contains(page) == true;
+
+    private bool IsLowPage(int page) =>
+        _document?.Quality?.Issues.Any(i => i.Kind == QualityIssueKind.LowPageConfidence && i.Page == page) == true;
 
     // The job may have been submitted elsewhere, so the page polls rather than relying on
     // notifications from this instance's worker.
@@ -147,6 +240,7 @@ public sealed partial class DocumentDetailPage : IDisposable
             if (result.IsSuccess)
             {
                 _document = result.Value;
+                _wordVersions = await Word.VersionsAsync(_document.Id, _disposed.Token);
                 _error = null;
                 return;
             }
@@ -250,8 +344,11 @@ public sealed partial class DocumentDetailPage : IDisposable
     {
         DocumentVersionChange.OcrResult => Text["Change.OcrResult"],
         DocumentVersionChange.Restored => Text["Change.Restored", version.RestoredFrom ?? "?"],
+        DocumentVersionChange.EditedInWord => Text["Change.EditedInWord", version.WordVersion ?? 0],
         _ => Text["Change.Edited"],
     };
+
+    private string WordSource(WordVersion version) => Text[$"Word.Source.{version.Source}"];
 
     private static string PageTextOf(IReadOnlyList<string> pageTexts, int pageNumber) =>
         pageNumber >= 1 && pageNumber <= pageTexts.Count ? pageTexts[pageNumber - 1] : string.Empty;

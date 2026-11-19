@@ -1,3 +1,5 @@
+using OppOcr.Web.Features.Mockups.Quality;
+
 namespace OppOcr.Web.Features.Mockups.Data;
 
 /// <summary>Fictional documents shown next to real OCR jobs for demos. Names, numbers and amounts are made up.</summary>
@@ -120,7 +122,27 @@ internal static class SampleDocumentSeed
                 : [ocr];
         }
 
+        // Approved and archived samples were approved by the reviewer just after the last review edit.
+        var approval = status is DocumentStatus.Approved or DocumentStatus.Archived && versions.Length > 0
+            ? new DocumentApproval(Reviewer, versions[^1].CreatedAtUtc.AddMinutes(10))
+            : null;
+        var pageConfidences = confidence is { } value ? SimulatedConfidence.SpreadOverPages(id, pages, value) : null;
         return new DocumentRecord(id, IsSample: true, fileName, pages, size, uploaded, uploadedBy, confidence, status, metadata,
-            PageTexts(text), versions);
+            PageTexts(text), versions, Approval: approval, PageConfidences: pageConfidences,
+            Quality: Check(confidence, pageConfidences, versions));
+    }
+
+    /// <summary>
+    /// The automatic check as it ran when OCR finished, with the default settings and the OCR metadata.
+    /// Samples only store text for page 1, so every page counts as having text.
+    /// </summary>
+    private static QualityCheckResult? Check(double? confidence, IReadOnlyList<double?>? pageConfidences, DocumentVersion[] versions)
+    {
+        if (confidence is null || pageConfidences is null || versions.Length == 0)
+            return null;
+
+        var pages = pageConfidences.Select((value, index) => new PageQuality(index + 1, value, HasText: true, Warnings: 0)).ToList();
+        var ocr = versions[0];
+        return QualityCheck.Run(pages, confidence, ocr.Metadata, QualitySettings.Default, ocr.CreatedAtUtc);
     }
 }

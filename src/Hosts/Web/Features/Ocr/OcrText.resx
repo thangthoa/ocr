@@ -4,8 +4,8 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="UploadTitle" xml:space="preserve"><value>Capture</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>Choose the document type, one file or several images, and a file name, then upload.</value></data>
+  <data name="UploadTitle" xml:space="preserve"><value>Scan</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>Choose the document type, one file or several images, and a document name, then upload. The document page opens as soon as the upload is done.</value></data>
   <data name="FolderPrompt" xml:space="preserve"><value>Or use every image in a folder, in file name order:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>Choose a folder</value></data>
   <data name="FolderSkipped" xml:space="preserve"><value>{0} file(s) in the folder were skipped because they are not supported images.</value></data>
@@ -39,12 +39,8 @@
   <data name="Selected.ReplaceHint" xml:space="preserve"><value>Pages are in file name order; use the arrows to change it. Choosing files again replaces the list.</value></data>
   <data name="Upload" xml:space="preserve"><value>Upload</value></data>
   <data name="ClearSelection" xml:space="preserve"><value>Clear</value></data>
-  <data name="Result.Sent" xml:space="preserve"><value>{0} was sent to the OCR service; you will be notified as it progresses.</value></data>
-  <data name="Result.SentPages" xml:space="preserve"><value>{0} ({1} pages) was sent to the OCR service as one document; you will be notified as it progresses.</value></data>
   <data name="Uploading" xml:space="preserve"><value>Sending to the OCR service…</value></data>
   <data name="GoToJobs" xml:space="preserve"><value>View documents</value></data>
-  <data name="History.Title" xml:space="preserve"><value>Just uploaded</value></data>
-  <data name="History.Hint" xml:space="preserve"><value>Only documents uploaded on this page since you opened it. All documents are in Documents.</value></data>
   <data name="NewUpload" xml:space="preserve"><value>New upload</value></data>
   <data name="View" xml:space="preserve"><value>View</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
@@ -54,11 +50,8 @@
   <data name="LoadFailed" xml:space="preserve"><value>Could not load OCR jobs.</value></data>
   <data name="Retry" xml:space="preserve"><value>Retry</value></data>
   <data name="NoJobs" xml:space="preserve"><value>No OCR jobs yet.</value></data>
-  <data name="Column.File" xml:space="preserve"><value>File</value></data>
   <data name="Column.Type" xml:space="preserve"><value>Type</value></data>
   <data name="Column.Status" xml:space="preserve"><value>Status</value></data>
-  <data name="Column.Progress" xml:space="preserve"><value>Progress</value></data>
-  <data name="Column.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
   <data name="Column.Actions" xml:space="preserve"><value>Actions</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="DeleteJob" xml:space="preserve"><value>Delete job {0}</value></data>

@@ -1,12 +1,8 @@
 .doc-filters {
-    padding: 1rem;
-    background-color: #f4f4f4;
+    padding: 1rem 1.25rem;
+    border-radius: var(--app-radius-card);
+    background-color: var(--ae-whitely-300);
 }
-
-    .doc-filters ::deep .form-control,
-    .doc-filters ::deep .form-select {
-        background-color: #fff;
-    }
 
 .doc-field {
     flex: 0 0 auto;
@@ -20,6 +16,8 @@
 
 .empty-state {
     padding: 2rem 1rem;
-    border: 1px dashed #8d8d8d;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
     text-align: center;
 }

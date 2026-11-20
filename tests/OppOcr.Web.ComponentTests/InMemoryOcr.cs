@@ -36,6 +36,8 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
 
     public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
     {
+        if (Unavailable)
+            return Down;
         await content.CopyToAsync(Stream.Null, cancellationToken);
         var job = NewJob($"job_{++_next:D16}", fileName, OcrJobStatus.Queued) with { DocumentType = documentType };
         _service[job.Id.Value] = job;

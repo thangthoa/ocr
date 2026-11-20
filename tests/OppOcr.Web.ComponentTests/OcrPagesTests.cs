@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,7 +55,7 @@ public sealed class OcrPagesTests : BunitContext
     }
 
     [Fact]
-    public void One_file_is_sent_with_the_typed_name_and_document_type()
+    public void One_file_is_sent_with_the_typed_name_and_document_type_and_its_page_opens()
     {
         var cut = Render<OcrUploadPage>();
         cut.Find("#doc-type").Change(nameof(OcrDocumentType.Handwritten));
@@ -68,8 +69,8 @@ public sealed class OcrPagesTests : BunitContext
         {
             var job = Assert.Single(_ocr.Registry);
             Assert.Equal(("Invoice 17.png", OcrDocumentType.Handwritten), (job.FileName, job.DocumentType));
-            Assert.Contains("Invoice 17.png was sent to the OCR service", cut.Find("#upload-result").TextContent, StringComparison.Ordinal);
-            Assert.NotNull(cut.Find($"#upload-result a[href='{OcrEndpoints.JobUrl(job.Id.Value)}']"));
+            // The document page follows the file step by step (Scan, Recognizing, Reviewing, Archived).
+            Assert.Equal("http://localhost/" + OcrEndpoints.JobUrl(job.Id.Value), Navigation.Uri);
             Assert.Empty(cut.FindAll(".selected-files"));
             Assert.Empty(cut.Find("#file-name").GetAttribute("value") ?? string.Empty);
         });
@@ -154,7 +155,7 @@ public sealed class OcrPagesTests : BunitContext
         {
             var job = Assert.Single(_ocr.Registry);
             Assert.Equal(("Contract.pdf", OcrDocumentType.Printed), (job.FileName, job.DocumentType));
-            Assert.Contains("Contract.pdf (3 pages) was sent", cut.Find("#upload-result").TextContent, StringComparison.Ordinal);
+            Assert.Equal("http://localhost/" + OcrEndpoints.JobUrl(job.Id.Value), Navigation.Uri);
         });
         var pages = Assert.Single(_composer.Calls);
         Assert.Equal([OcrFileFormat.Png, OcrFileFormat.Png, OcrFileFormat.Jpeg], pages.Select(p => p.Format));
@@ -237,38 +238,18 @@ public sealed class OcrPagesTests : BunitContext
     }
 
     [Fact]
-    public void Just_uploaded_lists_only_documents_uploaded_on_this_page_newest_first()
+    public void A_failed_upload_stays_on_the_page_with_the_error()
     {
-        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000077", "earlier.png", OcrJobStatus.Done) with { PagesDone = 1 });
-        var cut = Render<OcrUploadPage>();
-        Assert.Empty(cut.FindAll(".scan-history table"));
-
-        Upload(cut, "first");
-        Upload(cut, "second");
-
-        cut.WaitForAssertion(() => Assert.Equal(["second.png", "first.png"], HistoryNames(cut)));
-        Assert.DoesNotContain("earlier.png", cut.Find(".scan-history").TextContent, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public async Task Just_uploaded_follows_progress_and_drops_deleted_documents()
-    {
-        var cut = Render<OcrUploadPage>();
-        Upload(cut, "scan");
-        cut.WaitForAssertion(() => Assert.Equal(["scan.png"], HistoryNames(cut)));
-        var job = _ocr.Registry[0];
-
-        _ocr.SetOnService(job with { Status = OcrJobStatus.Running, PagesTotal = 3, PagesDone = 1 });
-        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Running, OcrJobChangeKind.Updated), Ct);
-        cut.WaitForAssertion(() => Assert.Equal("Running", cut.Find(".scan-history tbody .badge").TextContent));
-
-        // When the service cannot be asked, the status carried by the notification is still shown.
         _ocr.Unavailable = true;
-        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Done, OcrJobChangeKind.Updated), Ct);
-        cut.WaitForAssertion(() => Assert.Equal("Done", cut.Find(".scan-history tbody .badge").TextContent));
+        var cut = Render<OcrUploadPage>();
+        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "IMG_1.png"));
+        cut.Find("#file-name").Input("scan");
 
-        await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Done, OcrJobChangeKind.Deleted), Ct);
-        cut.WaitForAssertion(() => Assert.Empty(HistoryNames(cut)));
+        cut.Find("#upload-button").Click();
+
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Find("#capture-error")));
+        Assert.Equal("http://localhost/", Navigation.Uri);
+        Assert.NotEmpty(cut.FindAll(".selected-files"));
     }
 
     [Fact]
@@ -330,18 +311,7 @@ public sealed class OcrPagesTests : BunitContext
         Assert.Equal(["open p1.png", "end p1.png", "open p2.jpg", "end p2.jpg", "open p3.png", "end p3.png"], log);
     }
 
-    private static CancellationToken Ct => Xunit.TestContext.Current.CancellationToken;
-
-    private static void Upload(IRenderedComponent<OcrUploadPage> cut, string name)
-    {
-        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "IMG_1.png"));
-        cut.Find("#file-name").Input(name);
-        cut.Find("#upload-button").Click();
-        cut.WaitForAssertion(() => Assert.Contains($"{name}.png was sent", cut.Find("#upload-result").TextContent, StringComparison.Ordinal));
-    }
-
-    private static string[] HistoryNames(IRenderedComponent<OcrUploadPage> cut) =>
-        [.. cut.FindAll(".scan-history tbody a").Select(e => e.TextContent)];
+    private NavigationManager Navigation => Services.GetRequiredService<NavigationManager>();
 
     private static string[] SelectedNames(IRenderedComponent<OcrUploadPage> cut) =>
         [.. cut.FindAll(".selected-files li bdi").Select(e => e.TextContent)];

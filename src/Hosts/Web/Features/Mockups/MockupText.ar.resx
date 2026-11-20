@@ -5,9 +5,8 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="SampleData" xml:space="preserve"><value>بيانات تجريبية</value></data>
-  <data name="Status.Processing" xml:space="preserve"><value>قيد المعالجة</value></data>
-  <data name="Status.NeedsReview" xml:space="preserve"><value>بحاجة إلى مراجعة</value></data>
-  <data name="Status.Approved" xml:space="preserve"><value>معتمد</value></data>
+  <data name="Status.Processing" xml:space="preserve"><value>قيد التعرّف</value></data>
+  <data name="Status.NeedsReview" xml:space="preserve"><value>قيد المراجعة</value></data>
   <data name="Status.Archived" xml:space="preserve"><value>مؤرشف</value></data>
   <data name="Status.Failed" xml:space="preserve"><value>فشل</value></data>
   <data name="Status.Cancelled" xml:space="preserve"><value>ملغى</value></data>
@@ -41,7 +40,7 @@
   <data name="Login.Failed" xml:space="preserve"><value>اسم المستخدم أو كلمة المرور غير صحيحة.</value></data>
   <data name="Dashboard.Title" xml:space="preserve"><value>لوحة المعلومات</value></data>
   <data name="Dashboard.Range" xml:space="preserve"><value>{0} – {1}</value></data>
-  <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>فتح المستندات</value></data>
+  <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>عرض كل المستندات</value></data>
   <data name="Period.Label" xml:space="preserve"><value>فترة التقرير</value></data>
   <data name="Period.Day" xml:space="preserve"><value>يوم</value></data>
   <data name="Period.Week" xml:space="preserve"><value>أسبوع</value></data>
@@ -50,12 +49,11 @@
   <data name="Kpi.Pages" xml:space="preserve"><value>الصفحات الممسوحة</value></data>
   <data name="Kpi.PagesTarget" xml:space="preserve"><value>{0} من الهدف البالغ {1}</value></data>
   <data name="Kpi.VsPrevious" xml:space="preserve"><value>{0} مقارنةً بالفترة السابقة</value></data>
-  <data name="Kpi.Documents" xml:space="preserve"><value>المستندات المنشأة</value></data>
   <data name="Kpi.Confidence" xml:space="preserve"><value>متوسط دقة التعرّف الضوئي</value></data>
   <data name="Kpi.PointsChange" xml:space="preserve"><value>{0} نقطة مقارنةً بالفترة السابقة</value></data>
   <data name="Kpi.Review" xml:space="preserve"><value>بانتظار المراجعة</value></data>
   <data name="Kpi.Failed" xml:space="preserve"><value>فشل {0}</value></data>
-  <data name="Kpi.OpenReview" xml:space="preserve"><value>فتح المستندات للمراجعة</value></data>
+  <data name="Kpi.OpenReview" xml:space="preserve"><value>ابدأ المراجعة</value></data>
   <data name="Chart.PagesByHour" xml:space="preserve"><value>الصفحات الممسوحة في الساعة</value></data>
   <data name="Chart.PagesByDay" xml:space="preserve"><value>الصفحات الممسوحة يوميًا</value></data>
   <data name="Chart.Summary" xml:space="preserve"><value>{0}: بين {1} و{2} صفحة، والهدف {3}.</value></data>
@@ -70,7 +68,7 @@
   <data name="Dept.Documents" xml:space="preserve"><value>المستندات</value></data>
   <data name="Dept.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>متوسط الدقة</value></data>
-  <data name="Documents.Title" xml:space="preserve"><value>المستندات</value></data>
+  <data name="Documents.Title" xml:space="preserve"><value>كل المستندات</value></data>
   <data name="Documents.JobsUnavailable" xml:space="preserve"><value>تعذّر تحميل مهام OCR: {0} لا تزال المستندات التجريبية معروضة.</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>عرض أحدث {0} من أصل {1} مهمة OCR.</value></data>
   <data name="Documents.Upload" xml:space="preserve"><value>رفع ملفات</value></data>
@@ -110,7 +108,7 @@
   <data name="Detail.UploadedAt" xml:space="preserve"><value>رُفع في {0}</value></data>
   <data name="Detail.CurrentVersion" xml:space="preserve"><value>الإصدار {0}</value></data>
   <data name="Detail.Confidence" xml:space="preserve"><value>دقة التعرّف {0}</value></data>
-  <data name="Detail.ArchivedNote" xml:space="preserve"><value>المستندات المؤرشفة للقراءة فقط.</value></data>
+  <data name="Detail.ArchivedNote" xml:space="preserve"><value>المستندات المؤرشفة نهائية. أعِد المستند إلى المراجعة لتعديله.</value></data>
   <data name="Detail.ProcessingNote" xml:space="preserve"><value>لا يزال التعرّف الضوئي جاريًا على هذا الملف. يظهر النص والإصدارات عند الانتهاء.</value></data>
   <data name="Detail.FailedNote" xml:space="preserve"><value>تعذّر على التعرّف الضوئي قراءة هذا الملف. أعد مسح الأصل ضوئيًا أو أعد المحاولة.</value></data>
   <data name="Detail.CancelledNote" xml:space="preserve"><value>أُلغيت مهمة OCR هذه قبل تشغيلها.</value></data>
@@ -121,9 +119,8 @@
   <data name="Detail.Sections" xml:space="preserve"><value>تفاصيل المستند</value></data>
   <data name="Action.Cancel" xml:space="preserve"><value>إلغاء</value></data>
   <data name="Action.Save" xml:space="preserve"><value>حفظ كإصدار جديد</value></data>
-  <data name="Action.Approve" xml:space="preserve"><value>اعتماد</value></data>
+  <data name="Action.Approve" xml:space="preserve"><value>اعتماد وأرشفة</value></data>
   <data name="Action.SendToReview" xml:space="preserve"><value>إعادة إلى المراجعة</value></data>
-  <data name="Action.Archive" xml:space="preserve"><value>أرشفة</value></data>
   <data name="Action.RetryOcr" xml:space="preserve"><value>إعادة التعرّف الضوئي</value></data>
   <data name="Action.Edit" xml:space="preserve"><value>تعديل</value></data>
   <data name="Edit.FixErrors" xml:space="preserve"><value>صحّح الحقول المحددة قبل الحفظ.</value></data>
@@ -295,10 +292,10 @@
   <data name="Word.Source.Edited" xml:space="preserve"><value>مُعدّل في Word</value></data>
   <data name="Change.EditedInWord" xml:space="preserve"><value>تعديل في Word (إصدار الملف {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>حفظ إصدار ملف Word رقم {0}</value></data>
-  <data name="Approved.Title" xml:space="preserve"><value>المستندات المعتمدة</value></data>
+  <data name="Approved.Title" xml:space="preserve"><value>أرشيف المستندات</value></data>
   <data name="Approved.Export" xml:space="preserve"><value>تصدير CSV ({0})</value></data>
-  <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات معتمدة بعد. تظهر المستندات هنا بعد اعتمادها في المراجعة.</value></data>
-  <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى المراجعة</value></data>
+  <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات مؤرشفة بعد. تظهر المستندات هنا بعد اعتمادها في قائمة المراجعة أو اجتيازها الفحص التلقائي.</value></data>
+  <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى قائمة المراجعة</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>تنزيل {0} بصيغة {1}</value></data>
   <data name="Approved.DownloadNote" xml:space="preserve"><value>النسخة النهائية هي النص بعد المراجعة. يحتفظ ملف DOCX بتنسيق Word إذا كان آخر تعديل للمستند في Word.</value></data>
   <data name="Column.Approved" xml:space="preserve"><value>الاعتماد</value></data>
@@ -333,7 +330,7 @@
   <data name="Quality.Passed" xml:space="preserve"><value>اجتاز</value></data>
   <data name="Quality.Flagged" xml:space="preserve"><value>مشكلات: {0}</value></data>
   <data name="Quality.Checked" xml:space="preserve"><value>فُحص في {0} · الحد الأدنى: المستند {1}، الصفحة {2}</value></data>
-  <data name="Quality.PassedApproved" xml:space="preserve"><value>لم تُوجد مشكلات، لذلك اعتُمد المستند دون مراجعة يدوية.</value></data>
+  <data name="Quality.PassedApproved" xml:space="preserve"><value>لم تُوجد مشكلات، لذلك أُرشف المستند دون مراجعة يدوية.</value></data>
   <data name="Quality.PassedNote" xml:space="preserve"><value>لم تُوجد مشكلات.</value></data>
   <data name="Quality.ShowPage" xml:space="preserve"><value>عرض الصفحة {0}: {1}</value></data>
   <data name="Quality.PageFlagged" xml:space="preserve"><value>وجد الفحص الآلي مشكلة في هذه الصفحة</value></data>
@@ -359,10 +356,32 @@
   <data name="QualitySettings.Defaults" xml:space="preserve"><value>تعبئة القيم الافتراضية</value></data>
   <data name="QualitySettings.Saved" xml:space="preserve"><value>حُفظت. تستخدم المستندات التي تُفحص من الآن هذه الإعدادات.</value></data>
   <data name="QualitySettings.Range" xml:space="preserve"><value>أدخل رقمًا من 0 إلى 100.</value></data>
-  <data name="Audit.QualityApproved" xml:space="preserve"><value>اجتاز الفحص الآلي للجودة: اعتُمد</value></data>
+  <data name="Audit.QualityApproved" xml:space="preserve"><value>اجتاز الفحص الآلي للجودة: أُرشف</value></data>
   <data name="Audit.QualityPassed" xml:space="preserve"><value>اجتاز الفحص الآلي للجودة: أُرسل إلى المراجعة</value></data>
   <data name="Audit.QualityFlagged" xml:space="preserve"><value>الفحص الآلي للجودة: وُجدت مشكلات ({0})، أُرسل إلى المراجعة</value></data>
   <data name="Audit.QualitySettingsChanged" xml:space="preserve"><value>غيّر إعدادات فحص الجودة</value></data>
 
 
+  <data name="Kpi.ReviewNow" xml:space="preserve"><value>المستندات في قائمة المراجعة الآن</value></data>
+  <data name="Status.Total" xml:space="preserve"><value>{0} مستند</value></data>
+  <data name="Chart.Current" xml:space="preserve"><value>قيد التقدم (حتى الآن)</value></data>
+  <data name="Chart.TargetLegend" xml:space="preserve"><value>الهدف</value></data>
+  <data name="Steps.Label" xml:space="preserve"><value>مراحل المستند</value></data>
+  <data name="Steps.Scan" xml:space="preserve"><value>المسح</value></data>
+  <data name="Steps.Recognizing" xml:space="preserve"><value>التعرّف الضوئي</value></data>
+  <data name="Steps.Reviewing" xml:space="preserve"><value>المراجعة</value></data>
+  <data name="Steps.Archived" xml:space="preserve"><value>الأرشفة</value></data>
+  <data name="Steps.Waiting" xml:space="preserve"><value>بانتظار البدء</value></data>
+  <data name="Steps.Pages" xml:space="preserve"><value>الصفحة {0} من {1}</value></data>
+  <data name="Steps.InProgress" xml:space="preserve"><value>قيد التنفيذ</value></data>
+  <data name="Steps.Confidence" xml:space="preserve"><value>الدقة {0}</value></data>
+  <data name="Steps.Issues" xml:space="preserve"><value>مشكلات للتحقق: {0}</value></data>
+  <data name="Steps.WaitingReviewer" xml:space="preserve"><value>بانتظار المراجِع</value></data>
+  <data name="Steps.PassedAuto" xml:space="preserve"><value>اجتاز الفحص التلقائي</value></data>
+  <data name="Steps.ApprovedBy" xml:space="preserve"><value>اعتمده {0}</value></data>
+  <data name="Steps.Cancelled" xml:space="preserve"><value>أُلغي</value></data>
+  <data name="Steps.Failed" xml:space="preserve"><value>فشل التعرّف الضوئي</value></data>
+  <data name="Steps.StateDone" xml:space="preserve"><value>مكتملة</value></data>
+  <data name="Steps.StateCurrent" xml:space="preserve"><value>جارية</value></data>
+  <data name="Steps.StateTodo" xml:space="preserve"><value>لم تبدأ</value></data>
 </root>

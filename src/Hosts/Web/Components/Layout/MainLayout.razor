@@ -2,12 +2,18 @@
 @inject IStringLocalizer<SharedText> Text
 
 <div class="page">
+    @* UAE Design System header in one row: the brand over the side menu, then the language switch and the account. *@
     <header class="app-header">
         <a class="app-brand" href="">
+            <span class="app-brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="3" width="14" height="18" rx="2.5" /><path d="M8.5 8h7M8.5 12h7M8.5 16h4" />
+                </svg>
+            </span>
             <span class="app-brand-name">@Text["AppName"]</span>
-            <span class="app-brand-product">@Text["AppProduct"]</span>
         </a>
         <div class="app-header-actions">
+            <LanguageSwitch />
             @* A native disclosure works in this static layout without a circuit; wwwroot/js/account-menu.js
                only adds closing on an outside click or Escape.
                Mockup only: there is no authentication yet, so the user is always the demo account. *@
@@ -24,10 +30,6 @@
                             <div class="account-role">@Text["DemoRole"]</div>
                         </div>
                     </div>
-                    <div class="account-section">
-                        <div class="account-heading" id="account-language">@Text["Language"]</div>
-                        <CultureSelector />
-                    </div>
                     <a class="account-item account-signout" href="login">@Text["SignOut"]</a>
                 </div>
             </details>
@@ -40,7 +42,7 @@
         </div>
 
         <main>
-            <article class="content px-4">
+            <article class="content">
                 @Body
             </article>
         </main>

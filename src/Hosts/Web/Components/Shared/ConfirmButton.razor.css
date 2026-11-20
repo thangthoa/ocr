@@ -1,8 +1,8 @@
-/* Carbon danger modal: dimmed page, a flat panel, a split footer with the danger action at the end. */
+/* Design System modal for a destructive action: dimmed page, a card, actions at the end with the danger action last. */
 .confirm-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(22, 22, 22, .5);
+    background-color: rgba(26, 28, 32, .5);
     z-index: 1050;
 }
 
@@ -11,43 +11,36 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: min(32rem, calc(100vw - 2rem));
+    width: min(37.5rem, calc(100vw - 2rem));
+    padding: 1.5rem;
     background-color: #fff;
-    color: #161616;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    color: var(--app-ink);
+    border-radius: var(--app-radius-card);
+    box-shadow: 0 20px 50px rgba(26, 28, 32, .25);
     z-index: 1051;
     text-align: start;
     white-space: normal;
 }
 
 .confirm-body {
-    padding: 1rem 1rem 2rem;
+    padding-bottom: 1.5rem;
 }
 
 .confirm-title {
     font-size: 1.25rem;
-    font-weight: 400;
+    font-weight: 700;
     margin-bottom: .75rem;
     overflow-wrap: anywhere;
 }
 
 .confirm-message {
-    font-size: .875rem;
     margin: 0;
-    color: #161616;
+    color: var(--app-ink);
 }
 
 .confirm-actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .75rem;
 }
-
-    .confirm-actions .btn {
-        flex: 1 1 50%;
-        min-height: 4rem;
-        display: flex;
-        align-items: flex-start;
-        padding: .875rem 1rem;
-        font-size: .875rem;
-        text-align: start;
-        border-radius: 0;
-    }

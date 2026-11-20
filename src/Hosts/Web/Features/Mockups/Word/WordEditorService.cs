@@ -121,7 +121,7 @@ public sealed partial class WordEditorService(
     public static bool HasWordFile(DocumentRecord document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        return document.Status is DocumentStatus.NeedsReview or DocumentStatus.Approved or DocumentStatus.Archived;
+        return document.Status is DocumentStatus.NeedsReview or DocumentStatus.Archived;
     }
 
     /// <summary>Handles a document server callback. Saves the edited file for statuses 2 and 6.</summary>

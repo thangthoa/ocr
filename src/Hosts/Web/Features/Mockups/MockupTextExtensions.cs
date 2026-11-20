@@ -61,17 +61,20 @@ internal static class MockupTextExtensions
             .ToList();
     }
 
-    /// <summary>Carbon tag colour per status; the label is always shown, so colour is never the only cue.</summary>
-    public static string StatusTagClass(DocumentStatus status) => status switch
+    /// <summary>
+    /// Colour class per status (UAE Design System soft badge colours, defined in app.css); the label
+    /// is always shown, so colour is never the only cue.
+    /// </summary>
+    public static string StatusClass(DocumentStatus status) => status switch
     {
-        DocumentStatus.Processing => "tag-blue",
-        DocumentStatus.NeedsReview => "tag-magenta",
-        DocumentStatus.Approved => "tag-teal",
-        DocumentStatus.Archived => "tag-green",
-        DocumentStatus.Failed => "tag-red",
-        DocumentStatus.Cancelled => "tag-gray",
-        _ => "tag-gray",
+        DocumentStatus.Processing => "status-processing",
+        DocumentStatus.NeedsReview => "status-needs-review",
+        DocumentStatus.Archived => "status-archived",
+        DocumentStatus.Failed => "status-failed",
+        _ => "status-cancelled",
     };
+
+    public static string StatusTagClass(DocumentStatus status) => "status-tag " + StatusClass(status);
 
     public const string Missing = "—";
 

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
-using Modules.Ocr.Application.Features.GetOcrJob;
 using Modules.Ocr.Application.Features.UploadOcrFile;
 using Modules.Ocr.Application.Features.UploadOcrPages;
 using Modules.Ocr.Domain.Jobs;
@@ -14,9 +13,9 @@ using OppOcr.Web.Features.Mockups.Pages;
 namespace OppOcr.Web.Features.Ocr.Pages;
 
 /// <summary>
-/// Capture: the user picks the document type, one image (or PDF) or several images, and a file
-/// name, then uploads. Several images become one PDF with a page per image (one OCR job). Below,
-/// the documents uploaded since the page was opened are followed until the OCR service is done.
+/// Scan: the user picks the document type, one image (or PDF) or several images, and a document
+/// name, then uploads. Several images become one PDF with a page per image (one OCR job). Once the
+/// upload is done the document's page opens, where its progress is shown step by step.
 /// </summary>
 public sealed partial class OcrUploadPage : IDisposable
 {
@@ -32,9 +31,6 @@ public sealed partial class OcrUploadPage : IDisposable
 
     private readonly CancellationTokenSource _disposed = new();
     private readonly List<IBrowserFile> _files = [];
-
-    // Newest first. Only what was uploaded on this page: older documents are in Documents.
-    private readonly List<UploadedDocument> _uploaded = [];
     private OcrDocumentType _documentType = OcrDocumentType.Printed;
     private CaptureMode _mode = CaptureMode.One;
     private string _fileName = string.Empty;
@@ -42,8 +38,6 @@ public sealed partial class OcrUploadPage : IDisposable
     private bool _uploading;
     private string? _error;
     private string? _note;
-    private SentDocument? _sent;
-    private IDisposable? _subscription;
 
     private enum CaptureMode
     {
@@ -55,9 +49,7 @@ public sealed partial class OcrUploadPage : IDisposable
 
     [Inject] private UploadOcrPagesHandler UploadPagesHandler { get; set; } = default!;
 
-    [Inject] private GetOcrJobHandler GetJobHandler { get; set; } = default!;
-
-    [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     [Inject] private CaptureBatchStore Batches { get; set; } = default!;
 
@@ -93,49 +85,9 @@ public sealed partial class OcrUploadPage : IDisposable
 
     public void Dispose()
     {
-        _subscription?.Dispose();
         _disposed.Cancel();
         _disposed.Dispose();
     }
-
-    protected override void OnInitialized() => _subscription = Notifications.Subscribe(OnJobChangedAsync);
-
-    /// <summary>
-    /// The notification only says that a job changed; its progress is read again from the service.
-    /// If that fails, the status from the notification is still shown.
-    /// </summary>
-    private Task OnJobChangedAsync(OcrJobChange change) =>
-        InvokeAsync(async () =>
-        {
-            var index = _uploaded.FindIndex(u => u.Job.Id == change.JobId);
-            if (index < 0)
-                return;
-
-            if (change.Kind == OcrJobChangeKind.Deleted)
-            {
-                _uploaded.RemoveAt(index);
-                StateHasChanged();
-                return;
-            }
-
-            var latest = _uploaded[index].Job with { Status = change.Status, ErrorCode = change.ErrorCode };
-            try
-            {
-                var result = await GetJobHandler.HandleAsync(new GetOcrJobQuery(change.JobId.Value), _disposed.Token);
-                if (result.IsSuccess)
-                    latest = result.Value;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                LogUnexpectedRefresh(Logger, ex);
-            }
-
-            // The list may have changed while the service was asked.
-            index = _uploaded.FindIndex(u => u.Job.Id == change.JobId);
-            if (index >= 0)
-                _uploaded[index] = _uploaded[index] with { Job = latest };
-            StateHasChanged();
-        });
 
     /// <summary>The chosen files belong to one mode: switching mode starts the selection again.</summary>
     private void SetMode(CaptureMode mode)
@@ -161,7 +113,6 @@ public sealed partial class OcrUploadPage : IDisposable
     private void SelectFiles(InputFileChangeEventArgs e)
     {
         ClearSelection();
-        _sent = null;
         if (_mode == CaptureMode.One)
         {
             if (e.FileCount > 1)
@@ -203,7 +154,6 @@ public sealed partial class OcrUploadPage : IDisposable
     private void SelectFolder(InputFileChangeEventArgs e)
     {
         ClearSelection();
-        _sent = null;
         if (e.FileCount > MaxFolderEntries)
         {
             _error = Text["FolderTooLarge", MaxFolderEntries];
@@ -245,7 +195,6 @@ public sealed partial class OcrUploadPage : IDisposable
     private async Task UploadAsync()
     {
         _error = null;
-        _sent = null;
         _nameRequired = true;
         if (string.IsNullOrWhiteSpace(_fileName) || _files.Count == 0)
             return;
@@ -261,12 +210,13 @@ public sealed partial class OcrUploadPage : IDisposable
             if (result.IsSuccess)
             {
                 Record(result.Value);
-                _uploaded.Insert(0, new UploadedDocument(result.Value, Time.GetUtcNow().UtcDateTime));
-                _sent = new SentDocument(result.Value.Id.Value, result.Value.FileName, files.Count);
                 _files.Clear();
                 _note = null;
                 _fileName = string.Empty;
                 _nameRequired = false;
+
+                // The document page follows the file through recognition and review.
+                Navigation.NavigateTo(OcrEndpoints.JobUrl(result.Value.Id.Value));
             }
             else
             {
@@ -324,11 +274,4 @@ public sealed partial class OcrUploadPage : IDisposable
 
     [LoggerMessage(Level = LogLevel.Error, Message = "OCR UI: failed to upload a document")]
     private static partial void LogUnexpected(ILogger logger, Exception exception);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "OCR UI: failed to refresh an uploaded document")]
-    private static partial void LogUnexpectedRefresh(ILogger logger, Exception exception);
-
-    private sealed record SentDocument(string JobId, string FileName, int Pages);
-
-    private sealed record UploadedDocument(OcrJob Job, DateTime UploadedAtUtc);
 }

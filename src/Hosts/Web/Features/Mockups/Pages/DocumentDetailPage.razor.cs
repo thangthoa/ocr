@@ -298,7 +298,7 @@ public sealed partial class DocumentDetailPage : IDisposable
         Refresh();
         _viewing = null;
         _message = Text["Detail.StatusChanged", Text.Status(status)];
-        _offerReviewQueue = wasWaiting && status == DocumentStatus.Approved;
+        _offerReviewQueue = wasWaiting && status == DocumentStatus.Archived;
     }
 
     private void View(DocumentVersion version)

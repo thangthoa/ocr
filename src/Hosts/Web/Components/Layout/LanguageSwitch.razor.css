@@ -1,0 +1,29 @@
+.language-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.5rem;
+    padding: 0 .75rem;
+    border: 1px solid var(--ae-black-200);
+    border-radius: var(--app-radius);
+    background: #fff;
+    color: var(--ae-black-800);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+    .language-switch:hover {
+        border-color: var(--ae-gold-600);
+        color: var(--ae-gold-700);
+    }
+
+    .language-switch svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex: none;
+    }
+
+    .language-switch:lang(ar) {
+        font-family: "Noto Kufi Arabic", var(--app-font-body);
+    }

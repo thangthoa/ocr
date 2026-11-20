@@ -4,104 +4,122 @@
     align-items: center;
     min-height: 3rem;
     padding-inline: 1rem;
-    font-size: .875rem;
     font-weight: 600;
-    color: #161616;
+    color: var(--ae-black-900);
 }
 
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
-    width: 3rem;
+    width: 2.75rem;
     height: 2.5rem;
     position: absolute;
     top: .25rem;
-    inset-inline-end: .5rem;
-    border: 1px solid transparent;
-    border-radius: 0;
-    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23161616' stroke-linecap='square' stroke-width='2' d='M5 8h20M5 15h20M5 22h20'/%3e%3c/svg%3e") no-repeat center/1.5rem transparent;
+    inset-inline-end: .75rem;
+    border: 1px solid var(--ae-black-200);
+    border-radius: var(--app-radius);
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%232a2c32' stroke-linecap='round' stroke-width='2' d='M6 9h18M6 15h18M6 21h18'/%3e%3c/svg%3e") no-repeat center/1.5rem #fff;
 }
 
-    .navbar-toggler:hover {
-        background-color: #e8e8e8;
-    }
-
+    .navbar-toggler:hover,
     .navbar-toggler:checked {
-        background-color: #e0e0e0;
+        border-color: var(--ae-gold-600);
+        background-color: var(--ae-gold-50);
     }
 
     .navbar-toggler:focus-visible {
-        outline: 2px solid #0f62fe;
-        outline-offset: -2px;
+        outline: 2px solid var(--app-focus);
+        outline-offset: 2px;
     }
 
+/* Icons are masks painted with the link colour, so they follow the hover and active states. */
 .bi {
     display: inline-block;
-    position: relative;
-    width: 1.125rem;
-    height: 1.125rem;
-    margin-inline-end: .75rem;
-    background-size: cover;
+    width: 1.5rem;
+    height: 1.5rem;
     flex: none;
+    background-color: currentColor;
+    -webkit-mask: var(--icon) no-repeat center / contain;
+    mask: var(--icon) no-repeat center / contain;
 }
 
 .bi-dashboard-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8'%3E%3Crect x='3' y='3' width='7' height='9'/%3E%3Crect x='14' y='3' width='7' height='5'/%3E%3Crect x='14' y='12' width='7' height='9'/%3E%3Crect x='3' y='16' width='7' height='5'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8'%3E%3Crect x='3' y='3' width='7' height='9' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='5' rx='1.5'/%3E%3Crect x='14' y='12' width='7' height='9' rx='1.5'/%3E%3Crect x='3' y='16' width='7' height='5' rx='1.5'/%3E%3C/svg%3E");
 }
 
-.bi-capture-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8' stroke-linecap='square'%3E%3Cpath d='M12 15V4M7 9l5-5 5 5'/%3E%3Cpath d='M4 15v5h16v-5'/%3E%3C/svg%3E");
-}
-
-.bi-documents-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8'%3E%3Cpath d='M6 3h8l4 4v14H6z'/%3E%3Cpath d='M14 3v4h4M9 12h6M9 16h6'/%3E%3C/svg%3E");
+.bi-scan-nav-menu {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16'/%3E%3C/svg%3E");
 }
 
 .bi-review-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8' stroke-linecap='square'%3E%3Cpath d='M9 11l3 3 8-8'/%3E%3Cpath d='M20 12v8H4V4h11'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11l3 3 8-8'/%3E%3Cpath d='M20 12v6.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13A1.5 1.5 0 0 1 5.5 4H15'/%3E%3C/svg%3E");
 }
 
-.bi-approved-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8' stroke-linecap='square'%3E%3Cpath d='M14 3H5v18h14V8z'/%3E%3Cpath d='M14 3v5h5'/%3E%3Cpath d='M9 14.5l2 2 4-4'/%3E%3C/svg%3E");
+.bi-documents-nav-menu {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z'/%3E%3Cpath d='M14 3v5h5M9 12.5h6M9 16h6'/%3E%3C/svg%3E");
 }
 
-/* Gear (settings). */
+.bi-archive-nav-menu {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='4' rx='1'/%3E%3Cpath d='M5 8v10.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V8M10 12h4'/%3E%3C/svg%3E");
+}
+
 .bi-settings-nav-menu {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M19.2 10.3 L21.5 10.7 L21.5 13.3 L19.2 13.7 L18.3 15.9 L19.7 17.8 L17.8 19.7 L15.9 18.3 L13.7 19.2 L13.3 21.5 L10.7 21.5 L10.3 19.2 L8.1 18.3 L6.2 19.7 L4.3 17.8 L5.7 15.9 L4.8 13.7 L2.5 13.3 L2.5 10.7 L4.8 10.3 L5.7 8.1 L4.3 6.2 L6.2 4.3 L8.1 5.7 L10.3 4.8 L10.7 2.5 L13.3 2.5 L13.7 4.8 L15.9 5.7 L17.8 4.3 L19.7 6.2 L18.3 8.1z'/%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 7h9M17 7h3M4 17h3M11 17h9'/%3E%3Ccircle cx='15' cy='7' r='2'/%3E%3Ccircle cx='9' cy='17' r='2'/%3E%3C/svg%3E");
 }
 
+/* Menu items: 12px menu padding + 12px item padding = the header's 24px, so icons line up with the logo. */
 .nav {
-    padding-block: .5rem;
+    padding: 1rem .75rem;
+    gap: .25rem;
 }
 
-.nav-item {
-    font-size: .875rem;
+.nav-item ::deep .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0 .75rem;
+    border-radius: var(--app-radius);
+    color: var(--ae-black-800);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    text-decoration: none;
 }
 
-    .nav-item ::deep .nav-link {
-        color: #525252;
-        background: none;
-        border: none;
-        border-inline-start: 3px solid transparent;
-        border-radius: 0;
-        min-height: 2.75rem;
-        padding-inline: 1rem;
-        display: flex;
-        align-items: center;
-        width: 100%;
+    .nav-item ::deep .nav-link:hover {
+        background-color: var(--ae-whitely-300);
+        color: var(--ae-gold-700);
     }
 
-        .nav-item ::deep .nav-link:hover {
-            background-color: #e8e8e8;
-            color: #161616;
-        }
+    .nav-item ::deep .nav-link:focus-visible {
+        outline: 2px solid var(--app-focus);
+        outline-offset: -2px;
+    }
 
+    /* Active: Design System navbar colours (primary 700 text, 3px bar) on a primary 50 ground. */
     .nav-item ::deep a.active {
-        background-color: #e0e0e0;
-        border-inline-start-color: #0f62fe;
-        color: #161616;
+        background-color: var(--ae-gold-50);
+        color: var(--ae-gold-700);
         font-weight: 600;
     }
+
+        .nav-item ::deep a.active::before {
+            content: "";
+            position: absolute;
+            inset-inline-start: 0;
+            top: .625rem;
+            bottom: .625rem;
+            width: 3px;
+            border-radius: 999px;
+            background-color: var(--ae-gold-700);
+        }
+
+.nav-separator {
+    border-top: 1px solid var(--app-border-subtle);
+    margin: .625rem .25rem;
+}
 
 .nav-scrollable {
     display: none;

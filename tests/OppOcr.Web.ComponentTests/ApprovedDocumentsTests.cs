@@ -14,8 +14,9 @@ using OppOcr.Web.Features.Mockups.Word;
 namespace OppOcr.Web.ComponentTests;
 
 /// <summary>
-/// Approved documents: who approved them, the Approved page, the final-version downloads and the CSV
-/// export. Samples approved in the seed: 000112 (newest approval), 000109, 000104, 000102.
+/// Archived documents (approving a document archives it, ADR 0007): who approved them, the Document
+/// Archive page, the final-version downloads and the CSV export. Samples archived in the seed, newest
+/// approval first: 000112, 000111, 000109, 000106, 000104, 000102, 000101.
 /// </summary>
 public sealed class ApprovedDocumentsTests : BunitContext
 {
@@ -37,30 +38,33 @@ public sealed class ApprovedDocumentsTests : BunitContext
     private AuditLog Audit => Services.GetRequiredService<AuditLog>();
 
     [Fact]
-    public void Approving_records_who_and_when_archiving_keeps_it_and_sending_back_clears_it()
+    public void Archiving_records_who_approved_and_when_and_sending_back_clears_it()
     {
         var before = DateTime.UtcNow;
-        Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Approved, "reviewer.1");
+        Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Archived, "reviewer.1");
 
         var approval = Store.FindSample("DOC-2026-000105")!.Approval!;
         Assert.Equal("reviewer.1", approval.By);
         Assert.InRange(approval.AtUtc, before, DateTime.UtcNow);
 
+        // Archiving an archived document again keeps the first approval.
         Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Archived, "records.1");
         Assert.Equal(approval, Store.FindSample("DOC-2026-000105")!.Approval);
 
-        Store.ChangeStatus("DOC-2026-000103", DocumentStatus.Approved, "reviewer.1");
+        Store.ChangeStatus("DOC-2026-000103", DocumentStatus.Archived, "reviewer.1");
         Store.ChangeStatus("DOC-2026-000103", DocumentStatus.NeedsReview, "reviewer.1");
         Assert.Null(Store.FindSample("DOC-2026-000103")!.Approval);
     }
 
     [Fact]
-    public void Approved_page_lists_only_approved_documents_newest_approval_first()
+    public void Archive_page_lists_only_archived_documents_newest_approval_first()
     {
         var cut = Render<ApprovedPage>();
 
-        cut.WaitForAssertion(() => Assert.Equal(["ADM-2022-0310.pdf", "PV-2020-0021.pdf", "HR-2016-0187.pdf", "PO-2019-0388.pdf"], Names(cut)));
-        Assert.Contains("4 document(s)", cut.Find("#approved-count").TextContent, StringComparison.Ordinal);
+        cut.WaitForAssertion(() => Assert.Equal(
+            ["ADM-2022-0310.pdf", "HR-2018-0044.pdf", "PV-2020-0021.pdf", "LG-2011-0032.pdf", "HR-2016-0187.pdf", "PO-2019-0388.pdf", "PV-2019-0413.pdf"],
+            Names(cut)));
+        Assert.Contains("7 document(s)", cut.Find("#approved-count").TextContent, StringComparison.Ordinal);
         Assert.All(cut.FindAll(".approved-by span[dir=ltr]"), approver => Assert.Equal("m.khalid", approver.TextContent));
         Assert.Equal("/documents/DOC-2026-000112/final?format=docx", cut.Find("tbody tr .download-docx").GetAttribute("href"));
         Assert.Equal("/documents/DOC-2026-000112/final?format=txt", cut.Find("tbody tr .download-txt").GetAttribute("href"));
@@ -73,7 +77,7 @@ public sealed class ApprovedDocumentsTests : BunitContext
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص", 10, "A v2", [], Cached: false);
         var job = _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000031", "memo.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] });
         Store.FromJob(job);
-        Store.ChangeStatus(job.Id.Value, DocumentStatus.Approved, "admin");
+        Store.ChangeStatus(job.Id.Value, DocumentStatus.Archived, "admin");
 
         var cut = Render<ApprovedPage>();
 
@@ -88,16 +92,16 @@ public sealed class ApprovedDocumentsTests : BunitContext
         cut.WaitForElement("tbody tr");
 
         cut.Find("#approved-department").Change(nameof(DocumentDepartment.Finance));
-        Assert.Equal(["PV-2020-0021.pdf"], Names(cut));
+        Assert.Equal(["PV-2020-0021.pdf", "PV-2019-0413.pdf"], Names(cut));
         Assert.Equal("/approved/export.csv?department=Finance", cut.Find("#export-csv").GetAttribute("href"));
 
         cut.Find("button.btn-outline-secondary").Click(); // Clear filters
         cut.Find("#approved-confidentiality").Change(nameof(DocumentConfidentiality.Confidential));
-        Assert.Equal(["HR-2016-0187.pdf"], Names(cut));
+        Assert.Equal(["HR-2018-0044.pdf", "HR-2016-0187.pdf", "PV-2019-0413.pdf"], Names(cut));
 
         cut.Find("button.btn-outline-secondary").Click();
         cut.Find("#approved-from").Change("2026-11-16");
-        Assert.Equal(["ADM-2022-0310.pdf"], Names(cut));
+        Assert.Equal(["ADM-2022-0310.pdf", "HR-2018-0044.pdf"], Names(cut));
         Assert.Equal("/approved/export.csv?from=2026-11-16", cut.Find("#export-csv").GetAttribute("href"));
 
         cut.Find("#approved-search").Input("no such document");
@@ -105,14 +109,14 @@ public sealed class ApprovedDocumentsTests : BunitContext
     }
 
     [Fact]
-    public void Without_approved_documents_the_page_points_to_review()
+    public void Without_archived_documents_the_page_points_to_review()
     {
-        foreach (var id in new[] { "DOC-2026-000102", "DOC-2026-000104", "DOC-2026-000109", "DOC-2026-000112" })
+        foreach (var id in new[] { "DOC-2026-000101", "DOC-2026-000102", "DOC-2026-000104", "DOC-2026-000106", "DOC-2026-000109", "DOC-2026-000111", "DOC-2026-000112" })
             Store.ChangeStatus(id, DocumentStatus.NeedsReview, "admin");
 
         var cut = Render<ApprovedPage>();
 
-        cut.WaitForAssertion(() => Assert.Contains("No approved documents yet.", cut.Markup, StringComparison.Ordinal));
+        cut.WaitForAssertion(() => Assert.Contains("No archived documents yet.", cut.Markup, StringComparison.Ordinal));
         Assert.NotNull(cut.Find(".empty-state a[href='review']"));
         Assert.Empty(cut.FindAll("#export-csv"));
     }
@@ -153,17 +157,22 @@ public sealed class ApprovedDocumentsTests : BunitContext
         Assert.Equal(("ADM-2022-0310-v1.1.docx", ApprovedDocumentFiles.DocxContentType), (generated.FileName, generated.ContentType));
         Assert.Equal(pages, DocxText.ExtractPages(new MemoryStream(generated.Content)));
 
+        // Archived documents are final: they are changed after being sent back to review, then archived again.
         // Saved from the Word editor: that file, with its formatting, is the final version.
+        Store.ChangeStatus(Id, DocumentStatus.NeedsReview, "admin");
         var wordFiles = Services.GetRequiredService<IWordFileStore>();
         var edited = DocxText.Create(["edited in Word"]);
         var (word, _) = await wordFiles.SaveAsync(Id, new MemoryStream(edited), "admin", WordVersionSource.Edited, Ct);
         Store.RecordWordEdit(Id, ["edited in Word"], "admin", word.Number);
+        Store.ChangeStatus(Id, DocumentStatus.Archived, "admin");
         var fromWord = (await Files.FinalAsync(Id, FinalFileFormat.Docx, "admin", Ct)).Value;
         Assert.Equal($"ADM-2022-0310-word-v{word.Number}.docx", fromWord.FileName);
         Assert.Equal(edited, fromWord.Content);
 
         // Edited again as text afterwards: the Word file is out of date, so the text is used.
+        Store.ChangeStatus(Id, DocumentStatus.NeedsReview, "admin");
         Store.SaveEdit(Id, ["edited as text"], Store.FindSample(Id)!.Metadata, "admin", null);
+        Store.ChangeStatus(Id, DocumentStatus.Archived, "admin");
         var fromText = (await Files.FinalAsync(Id, FinalFileFormat.Docx, "admin", Ct)).Value;
         Assert.Equal(["edited as text"], DocxText.ExtractPages(new MemoryStream(fromText.Content)));
     }
@@ -189,18 +198,20 @@ public sealed class ApprovedDocumentsTests : BunitContext
         Assert.StartsWith("approved-documents-", file.FileName, StringComparison.Ordinal);
         Assert.Equal(Encoding.UTF8.GetPreamble(), file.Content[..3]);
         var lines = Encoding.UTF8.GetString(file.Content[3..]).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-        Assert.Equal(2, lines.Length);
+        Assert.Equal(3, lines.Length);
         Assert.Equal("Document ID,File name,Title,Reference no.,Document date,Department,Document type,Confidentiality,Keywords,Pages,Version,Uploaded by,Uploaded,Approved by,Approved", lines[0]);
         Assert.StartsWith("DOC-2026-000109,PV-2020-0021.pdf,", lines[1], StringComparison.Ordinal);
         Assert.EndsWith(",2020-01-22,Finance,Payment voucher,Internal,تدريب; دفعة,5,1.1,s.karim,2026-11-15T09:00:00Z,m.khalid,2026-11-15T11:10:00Z", lines[1], StringComparison.Ordinal);
-        Assert.Equal("1", Assert.Single(Audit.Latest(), e => e.Action == AuditAction.Exported).Detail);
+        Assert.Equal("2", Assert.Single(Audit.Latest(), e => e.Action == AuditAction.Exported).Detail);
     }
 
     [Fact]
     public async Task Export_makes_formula_like_values_inert()
     {
         const string Id = "DOC-2026-000112";
+        Store.ChangeStatus(Id, DocumentStatus.NeedsReview, "admin");
         Store.SaveEdit(Id, Store.FindSample(Id)!.PageTexts, Store.FindSample(Id)!.Metadata with { Title = "=HYPERLINK(\"http://x\")" }, "admin", null);
+        Store.ChangeStatus(Id, DocumentStatus.Archived, "admin");
 
         var csv = Encoding.UTF8.GetString((await Files.ExportAsync(new DocumentQuery(Text: "ADM-2022-0310"), "admin", Ct)).Value.Content);
 
@@ -267,7 +278,7 @@ public sealed class ApprovedDocumentsTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var rows = cut.FindAll(".audit-table tbody tr").Select(r => r.TextContent).ToList();
-            Assert.Contains("Exported the approved list (4 documents)", rows[0], StringComparison.Ordinal);
+            Assert.Contains("Exported the approved list (7 documents)", rows[0], StringComparison.Ordinal);
             Assert.Contains("Downloaded final version 1.1 as DOCX", rows[1], StringComparison.Ordinal);
         });
     }

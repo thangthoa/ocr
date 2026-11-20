@@ -1,39 +1,41 @@
-/* Carbon tabs: a hairline under the row, a blue bar under the selected tab. */
+/* Design System tabs (simple): a hairline under the row, a primary underline under the selected tab. */
 .admin-tabs {
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 1px solid #e0e0e0;
+    gap: .25rem;
+    border-bottom: 1px solid var(--app-border-subtle);
 }
 
     .admin-tabs button {
         min-height: 3rem;
         padding: 0 1rem;
         border: 0;
-        border-bottom: 2px solid transparent;
+        border-bottom: 3px solid transparent;
         margin-bottom: -1px;
         background-color: transparent;
-        color: #525252;
-        font-size: .875rem;
+        color: var(--ae-black-600);
+        font-weight: 500;
     }
 
         .admin-tabs button:hover {
-            color: #161616;
-            background-color: #e8e8e8;
+            color: var(--ae-gold-700);
         }
 
         .admin-tabs button.active {
-            border-bottom-color: #0f62fe;
-            color: #161616;
+            border-bottom-color: var(--ae-gold-600);
+            color: var(--ae-gold-700);
             font-weight: 600;
         }
 
         .admin-tabs button:focus-visible {
-            outline: 2px solid #0f62fe;
+            outline: 2px solid var(--app-focus);
             outline-offset: -2px;
         }
 
 .empty-state {
     padding: 2rem 1rem;
-    border: 1px dashed #8d8d8d;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
     text-align: center;
 }

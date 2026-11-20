@@ -187,7 +187,7 @@ public sealed partial class AdminPage : IDisposable
         AuditAction.EditedInWord => Text["Audit.EditedInWord", entry.Version ?? "?"],
         AuditAction.Downloaded => Text["Audit.Downloaded", entry.Detail ?? "?", entry.Version ?? "?"],
         AuditAction.Exported => Text["Audit.Exported", entry.Detail ?? "?"],
-        AuditAction.QualityChecked when entry.Status == DocumentStatus.Approved => Text["Audit.QualityApproved"],
+        AuditAction.QualityChecked when entry.Status == DocumentStatus.Archived => Text["Audit.QualityApproved"],
         AuditAction.QualityChecked when entry.Detail == "0" => Text["Audit.QualityPassed"],
         AuditAction.QualityChecked => Text["Audit.QualityFlagged", entry.Detail ?? "?"],
         AuditAction.QualitySettingsChanged => Text["Audit.QualitySettingsChanged"],

@@ -161,14 +161,14 @@ public sealed class DocumentsPagesTests : BunitContext
     }
 
     [Fact]
-    public void Finished_job_can_be_corrected_as_a_new_version_and_approved()
+    public void Finished_job_can_be_corrected_as_a_new_version_and_archived()
     {
         // A warning from the OCR service makes the automatic check send the document to review.
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص خطا", 10, "A v2", ["line detection (Kraken) failed"], Cached: false);
         var job = InMemoryOcr.NewJob("job_0000000000000004", "memo.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] };
         _ocr.SetOnService(job);
         var cut = RenderDocument("job_0000000000000004");
-        Assert.Contains("Needs review", cut.Find(".badge").TextContent, StringComparison.Ordinal);
+        Assert.Contains("Reviewing", cut.Find(".badge").TextContent, StringComparison.Ordinal);
 
         cut.Find("#action-edit").Click();
         cut.Find("#edit-text").Change("نص صحيح");
@@ -177,8 +177,8 @@ public sealed class DocumentsPagesTests : BunitContext
         cut.Find("#action-approve").Click();
 
         var document = Store.FromJob(job);
-        Assert.Contains("Status changed to Approved.", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal(DocumentStatus.Approved, document.Status);
+        Assert.Contains("Status changed to Archived.", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal(DocumentStatus.Archived, document.Status);
         Assert.Equal(["1.0", "1.1"], document.Versions.Select(v => v.Number));
         Assert.Equal(["نص صحيح"], document.PageTexts);
         Assert.Equal("MEMO/2026/1", document.Metadata.Reference);

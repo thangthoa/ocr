@@ -40,7 +40,7 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
     /// <summary>
     /// The document view of an OCR job. A finished job read with its pages gets a record here the
     /// first time (version 1.0 = the OCR text), so it can be reviewed, edited and versioned. That is
-    /// also when the automatic check runs: the document is approved if it passes (and the settings
+    /// also when the automatic check runs: the document is approved, and so archived, if it passes (and the settings
     /// allow it), otherwise it waits in the review queue.
     /// </summary>
     public DocumentRecord FromJob(OcrJob job)
@@ -104,8 +104,8 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
     }
 
     /// <summary>
-    /// Approving records who approved and when; archiving keeps that record; any other status (sent
-    /// back to review, OCR run again) clears it.
+    /// Archiving a document approves it: who did it and when are recorded (an already archived
+    /// document keeps its approval). Any other status (sent back to review, OCR run again) clears it.
     /// </summary>
     public void ChangeStatus(string id, DocumentStatus status, string author)
     {
@@ -114,8 +114,8 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
             var record = Get(id);
             var approval = status switch
             {
-                DocumentStatus.Approved => new DocumentApproval(author, time.GetUtcNow().UtcDateTime),
-                DocumentStatus.Archived => record.Approval,
+                DocumentStatus.Archived when record.Status == DocumentStatus.Archived => record.Approval,
+                DocumentStatus.Archived => new DocumentApproval(author, time.GetUtcNow().UtcDateTime),
                 _ => null,
             };
             _records[record.Id] = record with { Status = status, Approval = approval };
@@ -183,7 +183,7 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
     private static DateOnly? ApprovedOn(DocumentRecord document) =>
         document.Approval is { } approval ? DateOnly.FromDateTime(approval.AtUtc.ToLocalTime()) : null;
 
-    /// <summary>Only documents between OCR and archiving change; the pages never offer it otherwise.</summary>
+    /// <summary>Only documents in review can be edited; the pages never offer it otherwise.</summary>
     private DocumentRecord Get(string id, bool forEdit = false)
     {
         if (!_records.TryGetValue(id, out var record))
@@ -218,7 +218,7 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
         var result = QualityCheck.Run(pages, documentConfidence, record.Metadata, settings, nowUtc);
 
         var approve = result.Passed && settings.AutoApprove;
-        var status = approve ? DocumentStatus.Approved : DocumentStatus.NeedsReview;
+        var status = approve ? DocumentStatus.Archived : DocumentStatus.NeedsReview;
         audit.Record(QualityCheckAuthor, AuditAction.QualityChecked, record.Id, record.FileName, status: status,
             detail: result.Issues.Count.ToString(CultureInfo.InvariantCulture));
         return record with

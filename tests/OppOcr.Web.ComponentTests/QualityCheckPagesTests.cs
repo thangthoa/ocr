@@ -41,11 +41,11 @@ public sealed class QualityCheckPagesTests : BunitContext
         var cut = RenderDocument(job.Id.Value);
 
         Assert.Equal("Passed", cut.Find("#quality-outcome").TextContent.Trim());
-        Assert.Contains("approved without manual review", cut.Find("#quality-check").TextContent, StringComparison.Ordinal);
+        Assert.Contains("archived without manual review", cut.Find("#quality-check").TextContent, StringComparison.Ordinal);
         Assert.Equal(DocumentStore.QualityCheckAuthor, cut.Find("#approved-by").TextContent);
         Assert.Contains("Simulated", cut.Markup, StringComparison.Ordinal);
         var entry = Audit.Latest()[0];
-        Assert.Equal((AuditAction.QualityChecked, DocumentStatus.Approved, "0"), (entry.Action, entry.Status, entry.Detail));
+        Assert.Equal((AuditAction.QualityChecked, DocumentStatus.Archived, "0"), (entry.Action, entry.Status, entry.Detail));
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public sealed class QualityCheckPagesTests : BunitContext
         await _notifications.NotifyAsync(new OcrJobChange(job.Id, job.FileName, OcrJobStatus.Done, OcrJobChangeKind.Updated),
             Xunit.TestContext.Current.CancellationToken);
 
-        Assert.Equal(DocumentStatus.Approved, Store.FromJob(job with { Pages = [] }).Status);
+        Assert.Equal(DocumentStatus.Archived, Store.FromJob(job with { Pages = [] }).Status);
         await trigger.StopAsync(Xunit.TestContext.Current.CancellationToken);
     }
 

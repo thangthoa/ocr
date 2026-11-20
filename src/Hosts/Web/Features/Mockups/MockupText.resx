@@ -5,9 +5,8 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="SampleData" xml:space="preserve"><value>Sample data</value></data>
-  <data name="Status.Processing" xml:space="preserve"><value>Processing</value></data>
-  <data name="Status.NeedsReview" xml:space="preserve"><value>Needs review</value></data>
-  <data name="Status.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Status.Processing" xml:space="preserve"><value>Recognizing</value></data>
+  <data name="Status.NeedsReview" xml:space="preserve"><value>Reviewing</value></data>
   <data name="Status.Archived" xml:space="preserve"><value>Archived</value></data>
   <data name="Status.Failed" xml:space="preserve"><value>Failed</value></data>
   <data name="Status.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
@@ -41,7 +40,7 @@
   <data name="Login.Failed" xml:space="preserve"><value>Incorrect user name or password.</value></data>
   <data name="Dashboard.Title" xml:space="preserve"><value>Dashboard</value></data>
   <data name="Dashboard.Range" xml:space="preserve"><value>{0} – {1}</value></data>
-  <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>Open documents</value></data>
+  <data name="Dashboard.OpenDocuments" xml:space="preserve"><value>View all documents</value></data>
   <data name="Period.Label" xml:space="preserve"><value>Report period</value></data>
   <data name="Period.Day" xml:space="preserve"><value>Day</value></data>
   <data name="Period.Week" xml:space="preserve"><value>Week</value></data>
@@ -50,12 +49,11 @@
   <data name="Kpi.Pages" xml:space="preserve"><value>Pages scanned</value></data>
   <data name="Kpi.PagesTarget" xml:space="preserve"><value>{0} of the {1} target</value></data>
   <data name="Kpi.VsPrevious" xml:space="preserve"><value>{0} vs previous period</value></data>
-  <data name="Kpi.Documents" xml:space="preserve"><value>Documents created</value></data>
   <data name="Kpi.Confidence" xml:space="preserve"><value>Average OCR confidence</value></data>
   <data name="Kpi.PointsChange" xml:space="preserve"><value>{0} pts vs previous period</value></data>
   <data name="Kpi.Review" xml:space="preserve"><value>Waiting for review</value></data>
   <data name="Kpi.Failed" xml:space="preserve"><value>{0} failed</value></data>
-  <data name="Kpi.OpenReview" xml:space="preserve"><value>Open documents to review</value></data>
+  <data name="Kpi.OpenReview" xml:space="preserve"><value>Start reviewing</value></data>
   <data name="Chart.PagesByHour" xml:space="preserve"><value>Pages scanned per hour</value></data>
   <data name="Chart.PagesByDay" xml:space="preserve"><value>Pages scanned per day</value></data>
   <data name="Chart.Summary" xml:space="preserve"><value>{0}: between {1} and {2} pages; target {3}.</value></data>
@@ -70,7 +68,7 @@
   <data name="Dept.Documents" xml:space="preserve"><value>Documents</value></data>
   <data name="Dept.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>Average confidence</value></data>
-  <data name="Documents.Title" xml:space="preserve"><value>Documents</value></data>
+  <data name="Documents.Title" xml:space="preserve"><value>All Documents</value></data>
   <data name="Documents.JobsUnavailable" xml:space="preserve"><value>OCR jobs could not be loaded: {0} Sample documents are still shown.</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>Showing the newest {0} of {1} OCR jobs.</value></data>
   <data name="Documents.Upload" xml:space="preserve"><value>Upload files</value></data>
@@ -110,7 +108,7 @@
   <data name="Detail.UploadedAt" xml:space="preserve"><value>uploaded {0}</value></data>
   <data name="Detail.CurrentVersion" xml:space="preserve"><value>version {0}</value></data>
   <data name="Detail.Confidence" xml:space="preserve"><value>OCR confidence {0}</value></data>
-  <data name="Detail.ArchivedNote" xml:space="preserve"><value>Archived documents are read-only.</value></data>
+  <data name="Detail.ArchivedNote" xml:space="preserve"><value>Archived documents are final. Send the document back to review to change it.</value></data>
   <data name="Detail.ProcessingNote" xml:space="preserve"><value>OCR is still running on this file. Text and versions appear when it finishes.</value></data>
   <data name="Detail.FailedNote" xml:space="preserve"><value>OCR could not read this file. Rescan the original or retry OCR.</value></data>
   <data name="Detail.CancelledNote" xml:space="preserve"><value>This OCR job was cancelled before it ran.</value></data>
@@ -121,9 +119,8 @@
   <data name="Detail.Sections" xml:space="preserve"><value>Document details</value></data>
   <data name="Action.Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Action.Save" xml:space="preserve"><value>Save as new version</value></data>
-  <data name="Action.Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Action.Approve" xml:space="preserve"><value>Approve and archive</value></data>
   <data name="Action.SendToReview" xml:space="preserve"><value>Send back to review</value></data>
-  <data name="Action.Archive" xml:space="preserve"><value>Archive</value></data>
   <data name="Action.RetryOcr" xml:space="preserve"><value>Retry OCR</value></data>
   <data name="Action.Edit" xml:space="preserve"><value>Edit</value></data>
   <data name="Edit.FixErrors" xml:space="preserve"><value>Fix the highlighted fields before saving.</value></data>
@@ -189,7 +186,7 @@
   <data name="Change.OcrResult" xml:space="preserve"><value>OCR result</value></data>
   <data name="Change.Edited" xml:space="preserve"><value>Edited</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>Restored from version {0}</value></data>
-  <data name="Review.Title" xml:space="preserve"><value>Review queue</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Review Queue</value></data>
   <data name="Review.Oldest" xml:space="preserve"><value>Oldest waiting since</value></data>
   <data name="Review.Start" xml:space="preserve"><value>Start reviewing</value></data>
   <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when the automatic quality check flags them.</value></data>
@@ -295,10 +292,10 @@
   <data name="Word.Source.Edited" xml:space="preserve"><value>Edited in Word</value></data>
   <data name="Change.EditedInWord" xml:space="preserve"><value>Edited in Word (file version {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>Saved Word file version {0}</value></data>
-  <data name="Approved.Title" xml:space="preserve"><value>Approved documents</value></data>
+  <data name="Approved.Title" xml:space="preserve"><value>Document Archive</value></data>
   <data name="Approved.Export" xml:space="preserve"><value>Export CSV ({0})</value></data>
-  <data name="Approved.Empty" xml:space="preserve"><value>No approved documents yet. Documents appear here once they are approved in Review.</value></data>
-  <data name="Approved.GoToReview" xml:space="preserve"><value>Go to Review</value></data>
+  <data name="Approved.Empty" xml:space="preserve"><value>No archived documents yet. Documents appear here once they are approved in the review queue or pass the automatic check.</value></data>
+  <data name="Approved.GoToReview" xml:space="preserve"><value>Go to the review queue</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>Download {0} as {1}</value></data>
   <data name="Approved.DownloadNote" xml:space="preserve"><value>Final version = the reviewed text. DOCX keeps the Word formatting when the document was last edited in Word.</value></data>
   <data name="Column.Approved" xml:space="preserve"><value>Approved</value></data>
@@ -333,7 +330,7 @@
   <data name="Quality.Passed" xml:space="preserve"><value>Passed</value></data>
   <data name="Quality.Flagged" xml:space="preserve"><value>Issues: {0}</value></data>
   <data name="Quality.Checked" xml:space="preserve"><value>Checked {0} · thresholds: document {1}, page {2}</value></data>
-  <data name="Quality.PassedApproved" xml:space="preserve"><value>No issues found, so the document was approved without manual review.</value></data>
+  <data name="Quality.PassedApproved" xml:space="preserve"><value>No issues found, so the document was archived without manual review.</value></data>
   <data name="Quality.PassedNote" xml:space="preserve"><value>No issues found.</value></data>
   <data name="Quality.ShowPage" xml:space="preserve"><value>Show page {0}: {1}</value></data>
   <data name="Quality.PageFlagged" xml:space="preserve"><value>The automatic check found an issue on this page</value></data>
@@ -359,10 +356,32 @@
   <data name="QualitySettings.Defaults" xml:space="preserve"><value>Fill in the defaults</value></data>
   <data name="QualitySettings.Saved" xml:space="preserve"><value>Saved. Documents checked from now on use these settings.</value></data>
   <data name="QualitySettings.Range" xml:space="preserve"><value>Enter a number from 0 to 100.</value></data>
-  <data name="Audit.QualityApproved" xml:space="preserve"><value>Automatic quality check passed: approved</value></data>
+  <data name="Audit.QualityApproved" xml:space="preserve"><value>Automatic quality check passed: archived</value></data>
   <data name="Audit.QualityPassed" xml:space="preserve"><value>Automatic quality check passed: sent to review</value></data>
   <data name="Audit.QualityFlagged" xml:space="preserve"><value>Automatic quality check: issues found ({0}), sent to review</value></data>
   <data name="Audit.QualitySettingsChanged" xml:space="preserve"><value>Changed the quality check settings</value></data>
 
 
+  <data name="Kpi.ReviewNow" xml:space="preserve"><value>Documents in the review queue now</value></data>
+  <data name="Status.Total" xml:space="preserve"><value>{0} documents</value></data>
+  <data name="Chart.Current" xml:space="preserve"><value>In progress (so far)</value></data>
+  <data name="Chart.TargetLegend" xml:space="preserve"><value>Target</value></data>
+  <data name="Steps.Label" xml:space="preserve"><value>Document progress</value></data>
+  <data name="Steps.Scan" xml:space="preserve"><value>Scan</value></data>
+  <data name="Steps.Recognizing" xml:space="preserve"><value>Recognizing</value></data>
+  <data name="Steps.Reviewing" xml:space="preserve"><value>Reviewing</value></data>
+  <data name="Steps.Archived" xml:space="preserve"><value>Archived</value></data>
+  <data name="Steps.Waiting" xml:space="preserve"><value>Waiting to start</value></data>
+  <data name="Steps.Pages" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="Steps.InProgress" xml:space="preserve"><value>In progress</value></data>
+  <data name="Steps.Confidence" xml:space="preserve"><value>Confidence {0}</value></data>
+  <data name="Steps.Issues" xml:space="preserve"><value>Issues to check: {0}</value></data>
+  <data name="Steps.WaitingReviewer" xml:space="preserve"><value>Waiting for a reviewer</value></data>
+  <data name="Steps.PassedAuto" xml:space="preserve"><value>Passed the automatic check</value></data>
+  <data name="Steps.ApprovedBy" xml:space="preserve"><value>Approved by {0}</value></data>
+  <data name="Steps.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="Steps.Failed" xml:space="preserve"><value>OCR failed</value></data>
+  <data name="Steps.StateDone" xml:space="preserve"><value>completed</value></data>
+  <data name="Steps.StateCurrent" xml:space="preserve"><value>in progress</value></data>
+  <data name="Steps.StateTodo" xml:space="preserve"><value>not started</value></data>
 </root>

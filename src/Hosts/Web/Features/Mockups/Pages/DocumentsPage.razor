@@ -5,7 +5,7 @@
 
 <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
     <h1 class="h3 mb-0 me-auto">@Text["Documents.Title"]</h1>
-    <a class="btn btn-primary" href="capture">@Text["Documents.Upload"]</a>
+    <a class="btn btn-primary" href="scan">@Text["Documents.Upload"]</a>
 </div>
 
 @if (_list?.JobsError is { } jobsError)
@@ -31,20 +31,10 @@ else if (_loadError is not null)
     <div class="alert alert-secondary py-2 small" role="note">@Text["Documents.NewestOnly", DocumentCatalog.MaxJobs, list.JobsTotal]</div>
 }
 
-<div class="status-filter mb-3" role="group" aria-label="@Text["Filter.Status"]">
-    <button type="button" id="status-all" class="@(_status is null ? "active" : null)" aria-pressed="@(_status is null ? "true" : "false")"
-            @onclick="() => SetStatus(null)">
-        @Text["Filter.AllStatuses"] <span class="count">@_counts.Values.Sum()</span>
-    </button>
-    @foreach (var status in Enum.GetValues<DocumentStatus>())
-    {
-        var selected = _status == status;
-        <button type="button" id="@($"status-{status}")" class="@(selected ? "active" : null)" aria-pressed="@(selected ? "true" : "false")"
-                @onclick="() => SetStatus(status)">
-            @Text.Status(status) <span class="count">@_counts.GetValueOrDefault(status)</span>
-        </button>
-    }
-</div>
+<section class="status-card mb-3" aria-label="@Text["Filter.Status"]">
+    <StatusBreakdown Counts="StatusCounts" Label="@Text["Filter.Status"]" AllLabel="@Text["Filter.AllStatuses"]"
+                     Selected="_status" OnSelect="SetStatus" />
+</section>
 
 <div class="doc-filters mb-3" role="search">
     <div class="row g-3 align-items-end">

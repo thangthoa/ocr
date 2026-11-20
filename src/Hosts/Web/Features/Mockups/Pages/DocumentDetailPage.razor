@@ -6,6 +6,14 @@
 
 <PageTitle>@(_document?.FileName ?? Text["Detail.TitleFallback"])</PageTitle>
 
+@if (_document is { } progressDocument && !_deleted)
+{
+    @* The progress of the file, at the top of the page and kept in view while scrolling. *@
+    <div class="doc-band">
+        <DocumentProgress Document="progressDocument" />
+    </div>
+}
+
 <p class="mb-2"><a href="documents"><span aria-hidden="true">@BackArrow</span> @Text["Detail.Back"]</a></p>
 
 @if (_deleted)
@@ -82,11 +90,11 @@ else
                 @switch (document.Status)
                 {
                     case DocumentStatus.NeedsReview:
-                        <button type="button" id="action-approve" class="btn btn-primary" @onclick="() => ChangeStatus(DocumentStatus.Approved)">@Text["Action.Approve"]</button>
+                        @* Approving archives the document: the last step of the flow. *@
+                        <button type="button" id="action-approve" class="btn btn-primary" @onclick="() => ChangeStatus(DocumentStatus.Archived)">@Text["Action.Approve"]</button>
                         break;
-                    case DocumentStatus.Approved:
+                    case DocumentStatus.Archived:
                         <button type="button" id="action-review" class="btn btn-outline-secondary" @onclick="() => ChangeStatus(DocumentStatus.NeedsReview)">@Text["Action.SendToReview"]</button>
-                        <button type="button" id="action-archive" class="btn btn-primary" @onclick="() => ChangeStatus(DocumentStatus.Archived)">@Text["Action.Archive"]</button>
                         break;
                     case DocumentStatus.Failed when document.IsSample:
                         <button type="button" id="action-retry" class="btn btn-outline-primary" @onclick="() => ChangeStatus(DocumentStatus.Processing)">@Text["Action.RetryOcr"]</button>

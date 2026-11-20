@@ -66,7 +66,7 @@ public static class SampleReports
         var bars = HourlyPages.Select((pages, i) => new ReportBar(start.AddHours(i), pages)).ToList();
         return new ReportSnapshot(ReportPeriod.Day, today, today, bars.Sum(b => b.Pages), DailyTarget, 3.1,
             2140, 2.4, 94.6, 0.3, 312, 4, DailyTarget / HourlyPages.Length, bars,
-            Statuses(180, 196, 1410, 350, 4),
+            Statuses(180, 196, 1760, 4),
             [
                 new(DocumentDepartment.Finance, 820, 9840, 95.1),
                 new(DocumentDepartment.HumanResources, 410, 4920, 93.8),
@@ -81,7 +81,7 @@ public static class SampleReports
         var bars = Days(today, 7);
         return new ReportSnapshot(ReportPeriod.Week, today.AddDays(-6), today, bars.Sum(b => b.Pages), DailyTarget * 7, 4.2,
             15020, 3.6, 94.2, 0.4, 312, 27, DailyTarget, bars,
-            Statuses(180, 1240, 6900, 6673, 27),
+            Statuses(180, 1240, 13573, 27),
             [
                 new(DocumentDepartment.Finance, 5760, 69700, 94.8),
                 new(DocumentDepartment.HumanResources, 2880, 34800, 93.5),
@@ -96,7 +96,7 @@ public static class SampleReports
         var bars = Days(today, DailyPages.Length);
         return new ReportSnapshot(ReportPeriod.Month, today.AddDays(1 - DailyPages.Length), today, bars.Sum(b => b.Pages),
             DailyTarget * DailyPages.Length, 11.8, 63400, 10.9, 93.9, 0.6, 312, 118, DailyTarget, bars,
-            Statuses(180, 2950, 14200, 45952, 118),
+            Statuses(180, 2950, 60152, 118),
             [
                 new(DocumentDepartment.Finance, 24300, 293000, 94.5),
                 new(DocumentDepartment.HumanResources, 12170, 146500, 93.2),
@@ -111,11 +111,10 @@ public static class SampleReports
             .Select((pages, i) => new ReportBar(today.AddDays(i - count + 1).ToDateTime(TimeOnly.MinValue), pages))
             .ToList();
 
-    private static List<ReportStatusCount> Statuses(int processing, int needsReview, int approved, int archived, int failed) =>
+    private static List<ReportStatusCount> Statuses(int processing, int needsReview, int archived, int failed) =>
     [
         new(DocumentStatus.Processing, processing),
         new(DocumentStatus.NeedsReview, needsReview),
-        new(DocumentStatus.Approved, approved),
         new(DocumentStatus.Archived, archived),
         new(DocumentStatus.Failed, failed),
     ];

@@ -22,8 +22,20 @@
     </div>
 </div>
 
+<section class="dash-card status-card mb-4" aria-labelledby="status-title">
+    <div class="dash-card-head">
+        <h2 id="status-title" class="h5 mb-0">@Text["Status.Heading"]</h2>
+        <span class="text-muted small">
+            @Text["Status.Total", FormatNumber(Report.Documents)] ·
+            @Text["Kpi.VsPrevious", FormatSigned(Report.DocumentsChangePercent, "0.0") + "%"]
+        </span>
+        <a class="dash-card-link" href="documents">@Text["Dashboard.OpenDocuments"]</a>
+    </div>
+    <StatusBreakdown Counts="StatusCounts" Label="@Text["Status.Heading"]" Href="StatusUrl" />
+</section>
+
 <section class="kpi-grid mb-4" aria-label="@Text["Kpi.Heading"]">
-    <div class="kpi">
+    <div class="kpi kpi-primary">
         <span class="kpi-label">@Text["Kpi.Pages"]</span>
         <span class="kpi-value" id="kpi-pages">@FormatNumber(Report.Pages)</span>
         <span class="kpi-meter" aria-hidden="true"><span style="width: @CssPercent(PagesPercent)"></span></span>
@@ -31,20 +43,18 @@
         <span class="kpi-note">@Text["Kpi.VsPrevious", FormatSigned(Report.PagesChangePercent, "0.0") + "%"]</span>
     </div>
     <div class="kpi">
-        <span class="kpi-label">@Text["Kpi.Documents"]</span>
-        <span class="kpi-value">@FormatNumber(Report.Documents)</span>
-        <span class="kpi-note">@Text["Kpi.VsPrevious", FormatSigned(Report.DocumentsChangePercent, "0.0") + "%"]</span>
-    </div>
-    <div class="kpi">
         <span class="kpi-label">@Text["Kpi.Confidence"]</span>
         <span class="kpi-value">@FormatPercent(Report.Confidence)</span>
         <span class="kpi-note">@Text["Kpi.PointsChange", FormatSigned(Report.ConfidenceChangePoints, "0.0")]</span>
     </div>
-    <div class="kpi">
+    <div class="kpi kpi-attention">
         <span class="kpi-label">@Text["Kpi.Review"]</span>
         <span class="kpi-value">@FormatNumber(Report.WaitingReview)</span>
-        <span class="kpi-note">@Text["Kpi.Failed", FormatNumber(Report.Failed)]</span>
-        <a class="kpi-note" href="review">@Text["Kpi.OpenReview"]</a>
+        <span class="kpi-note">@Text["Kpi.ReviewNow"]</span>
+        <div class="kpi-actions">
+            <a class="btn btn-sm btn-primary" href="review">@Text["Kpi.OpenReview"]</a>
+            <a class="kpi-failed" href="documents?status=Failed">@Text["Kpi.Failed", FormatNumber(Report.Failed)]</a>
+        </div>
     </div>
 </section>
 
@@ -62,10 +72,12 @@
                     <span class="bar-gridline" style="bottom: 50%" aria-hidden="true"></span>
                     <span class="bar-gridline" style="bottom: 100%" aria-hidden="true"></span>
                     <div class="bars">
-                        @foreach (var bar in Report.Bars)
+                        @for (var i = 0; i < Report.Bars.Count; i++)
                         {
+                            var bar = Report.Bars[i];
+                            @* The last bar is the hour or day still in progress, so it is drawn apart. *@
                             <div class="bar-slot" title="@Text["Chart.BarTip", BarLabel(bar, full: true), FormatNumber(bar.Pages)]">
-                                <span class="bar" style="height: @CssPercent(bar.Pages * 100d / ScaleMax)"></span>
+                                <span class="bar @(i == Report.Bars.Count - 1 ? "bar-current" : null)" style="height: @CssPercent(bar.Pages * 100d / ScaleMax)"></span>
                             </div>
                         }
                     </div>
@@ -80,6 +92,11 @@
                     }
                 </div>
             </div>
+        </div>
+        <div class="chart-legend" aria-hidden="true">
+            <span><i class="legend-bar"></i>@Text["Chart.Pages"]</span>
+            <span><i class="legend-bar legend-current"></i>@Text["Chart.Current"]</span>
+            <span><i class="legend-target"></i>@Text["Chart.TargetLegend"]</span>
         </div>
         <details class="mt-3">
             <summary class="small">@Text["Chart.ShowTable"]</summary>
@@ -106,50 +123,31 @@
         </details>
     </section>
 
-    <section class="dash-card dash-status" aria-labelledby="status-title">
-        <h2 id="status-title" class="h5">@Text["Status.Heading"]</h2>
-        <ul class="status-bars">
-            @foreach (var row in Report.Statuses)
-            {
-                var percent = row.Documents * 100d / Report.Documents;
-                <li>
-                    <div class="d-flex align-items-center gap-2">
-                        <DocumentStatusTag Status="row.Status" />
-                        <span class="ms-auto fw-semibold">@FormatNumber(row.Documents)</span>
-                        <span class="text-muted small status-percent">@FormatPercent(percent)</span>
-                    </div>
-                    <span class="status-meter" aria-hidden="true"><span style="width: @CssPercent(percent)"></span></span>
-                </li>
-            }
-        </ul>
-        <a class="small" href="documents">@Text["Dashboard.OpenDocuments"]</a>
+    <section class="dash-card dash-dept" aria-labelledby="dept-title">
+        <h2 id="dept-title" class="h5">@Text["Dept.Heading"]</h2>
+        <div class="table-responsive position-relative">
+            <table class="table align-middle mb-0">
+                <caption class="visually-hidden">@Text["Dept.Heading"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Text["Dept.Department"]</th>
+                        <th scope="col" class="text-end">@Text["Dept.Documents"]</th>
+                        <th scope="col" class="text-end">@Text["Dept.Pages"]</th>
+                        <th scope="col" class="text-end">@Text["Dept.Confidence"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Report.Departments)
+                    {
+                        <tr>
+                            <td><a href="@($"documents?department={row.Department}")">@Text.Department(row.Department)</a></td>
+                            <td class="text-end">@FormatNumber(row.Documents)</td>
+                            <td class="text-end">@FormatNumber(row.Pages)</td>
+                            <td class="text-end">@FormatPercent(row.Confidence)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>
-
-<section class="dash-card" aria-labelledby="dept-title">
-    <h2 id="dept-title" class="h5">@Text["Dept.Heading"]</h2>
-    <div class="table-responsive position-relative">
-        <table class="table align-middle mb-0">
-            <caption class="visually-hidden">@Text["Dept.Heading"]</caption>
-            <thead>
-                <tr>
-                    <th scope="col">@Text["Dept.Department"]</th>
-                    <th scope="col" class="text-end">@Text["Dept.Documents"]</th>
-                    <th scope="col" class="text-end">@Text["Dept.Pages"]</th>
-                    <th scope="col" class="text-end">@Text["Dept.Confidence"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in Report.Departments)
-                {
-                    <tr>
-                        <td><a href="@($"documents?department={row.Department}")">@Text.Department(row.Department)</a></td>
-                        <td class="text-end">@FormatNumber(row.Documents)</td>
-                        <td class="text-end">@FormatNumber(row.Pages)</td>
-                        <td class="text-end">@FormatPercent(row.Confidence)</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>

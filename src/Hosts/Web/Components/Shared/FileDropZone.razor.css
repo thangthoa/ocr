@@ -1,8 +1,10 @@
+/* Design System file upload, dropzone appearance. */
 .upload-zone {
     position: relative;
     padding: 2.5rem 1rem;
-    border: 1px dashed #8d8d8d;
-    border-radius: 0;
+    border: 2px dashed var(--ae-gold-300);
+    border-radius: var(--app-radius);
+    background-color: var(--ae-gold-50);
     text-align: center;
     transition: background-color .15s, border-color .15s;
 }
@@ -10,8 +12,13 @@
 .upload-zone:hover,
 .upload-zone:focus-within,
 .upload-zone.drag-over {
-    border-color: #0f62fe;
-    background-color: #edf5ff;
+    border-color: var(--ae-gold-600);
+    background-color: var(--ae-gold-100);
+}
+
+.upload-zone:focus-within {
+    outline: 2px solid var(--app-focus);
+    outline-offset: 2px;
 }
 
 .upload-zone.disabled {
@@ -30,4 +37,10 @@
 
 .upload-zone ::deep input[type=file]:focus-visible {
     opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .upload-zone {
+        transition: none;
+    }
 }

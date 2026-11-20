@@ -7,7 +7,6 @@ internal static class SampleDocumentSeed
 {
     private const string OcrService = "ocr-service";
     private const string Reviewer = "m.khalid";
-    private const string RecordsManager = "y.rahman";
 
     public static IReadOnlyList<DocumentRecord> Create()
     {
@@ -26,7 +25,7 @@ internal static class SampleDocumentSeed
                 Ocr(Uploaded(12, 9, 14), pv413Ocr, pv413 with { Reference = "2019/412" }),
                 Edit("1.1", Uploaded(12, 11, 5), Reviewer, "Corrected the voucher number and two words.", pv413Text, pv413)),
 
-            Doc("DOC-2026-000102", "PO-2019-0388.pdf", 6, 3_100_000, Uploaded(12, 9, 40), "a.hassan", 95.8, DocumentStatus.Approved,
+            Doc("DOC-2026-000102", "PO-2019-0388.pdf", 6, 3_100_000, Uploaded(12, 9, 40), "a.hassan", 95.8, DocumentStatus.Archived,
                 Meta("أمر شراء رقم ٣٨٨ — أجهزة حاسوب ومستلزمات", "PO-2019-0388", new(2019, 2, 3),
                     DocumentDepartment.Procurement, DocumentKind.PurchaseOrder, DocumentConfidentiality.Internal, "أجهزة حاسوب", "أمر شراء"),
                 "أمر شراء\nرقم الأمر: ٣٨٨ — التاريخ: ٠٣/٠٢/٢٠١٩\nإلى: شركة المورد للتقنية\nيرجى توريد أجهزة حاسوب محمولة عدد ٢٠ جهازًا مع الضمان لمدة ثلاث سنوات\nمكان التسليم: مبنى الإدارة المالية"),
@@ -36,7 +35,7 @@ internal static class SampleDocumentSeed
                     DocumentDepartment.Legal, DocumentKind.Contract, DocumentConfidentiality.Confidential, "صيانة", "عقد سنوي"),
                 "عقد صيانة\nإنه في يوم الأحد الموافق ٠٥/٠١/٢٠٢٠ تم الاتفاق بين كل من:\nالطرف الأول: الإدارة العامة\nالطرف الثاني: شركة الخدمات التقنية\nيلتزم الطرف الثاني بصيانة أجهزة الحاسوب وتوريد قطع الغيار عند الحاجة"),
 
-            Doc("DOC-2026-000104", "HR-2016-0187.pdf", 3, 1_700_000, Uploaded(13, 8, 30), "s.karim", 93.1, DocumentStatus.Approved, hr187, hr187Text,
+            Doc("DOC-2026-000104", "HR-2016-0187.pdf", 3, 1_700_000, Uploaded(13, 8, 30), "s.karim", 93.1, DocumentStatus.Archived, hr187, hr187Text,
                 Ocr(Uploaded(13, 8, 33), hr187Text.Replace("خالد", "خاند", StringComparison.Ordinal), hr187),
                 Edit("1.1", Uploaded(13, 10, 12), Reviewer, "Fixed the employee name.", hr187Text, hr187)),
 
@@ -60,7 +59,7 @@ internal static class SampleDocumentSeed
                     DocumentDepartment.Administration, DocumentKind.Correspondence, DocumentConfidentiality.Internal),
                 string.Empty),
 
-            Doc("DOC-2026-000109", "PV-2020-0021.pdf", 5, 2_900_000, Uploaded(15, 9, 0), "s.karim", 98.1, DocumentStatus.Approved,
+            Doc("DOC-2026-000109", "PV-2020-0021.pdf", 5, 2_900_000, Uploaded(15, 9, 0), "s.karim", 98.1, DocumentStatus.Archived,
                 Meta("سند صرف رقم ٢٠٢٠/٠٢١ — رسوم تدريب", "2020/021", new(2020, 1, 22),
                     DocumentDepartment.Finance, DocumentKind.PaymentVoucher, DocumentConfidentiality.Internal, "تدريب", "دفعة"),
                 "سند صرف\nرقم السند: ٢٠٢٠/٠٢١ — التاريخ: ٢٢/٠١/٢٠٢٠\nيصرف لمعهد التدريب المهني\nمبلغ وقدره: ١٢٬٥٠٠ درهم\nوذلك مقابل: رسوم دورة تدريبية لموظفي قسم المالية"),
@@ -75,7 +74,7 @@ internal static class SampleDocumentSeed
                     DocumentDepartment.HumanResources, DocumentKind.Decision, DocumentConfidentiality.Confidential, "ترقية", "موظف"),
                 "قرار إداري رقم ٤٤ لسنة ٢٠١٨\nبشأن ترقية عدد من الموظفين\nتقرر ترقية الموظفين الواردة أسماؤهم في الكشف المرفق إلى الدرجة التالية."),
 
-            Doc("DOC-2026-000112", "ADM-2022-0310.pdf", 1, 600_000, Uploaded(17, 12, 10), "s.karim", 99.0, DocumentStatus.Approved,
+            Doc("DOC-2026-000112", "ADM-2022-0310.pdf", 1, 600_000, Uploaded(17, 12, 10), "s.karim", 99.0, DocumentStatus.Archived,
                 Meta("تعميم بشأن ساعات العمل", "ADM/2022/310", new(2022, 11, 8),
                     DocumentDepartment.Administration, DocumentKind.Correspondence, DocumentConfidentiality.Internal, "ساعات العمل", "تعميم"),
                 "تعميم\nيُعمم على جميع الموظفين بأن ساعات العمل الرسمية تبدأ من الساعة ٧:٣٠ صباحًا وحتى ٣:٣٠ مساءً اعتبارًا من الأسبوع القادم."),
@@ -109,7 +108,7 @@ internal static class SampleDocumentSeed
 
     /// <summary>
     /// Builds a document. Without explicit versions, a document that has text gets a single
-    /// OCR version a few minutes after upload; approved and archived ones also get a review edit.
+    /// OCR version a few minutes after upload; archived ones also get a review edit.
     /// </summary>
     private static DocumentRecord Doc(string id, string fileName, int pages, long size, DateTime uploaded, string uploadedBy,
         double? confidence, DocumentStatus status, DocumentMetadata metadata, string text, params DocumentVersion[] versions)
@@ -117,13 +116,13 @@ internal static class SampleDocumentSeed
         if (versions.Length == 0 && text.Length > 0)
         {
             var ocr = Ocr(uploaded.AddMinutes(4), text, metadata);
-            versions = status is DocumentStatus.Approved or DocumentStatus.Archived
-                ? [ocr, Edit("1.1", uploaded.AddHours(2), status == DocumentStatus.Archived ? RecordsManager : Reviewer, "Checked metadata.", text, metadata)]
+            versions = status == DocumentStatus.Archived
+                ? [ocr, Edit("1.1", uploaded.AddHours(2), Reviewer, "Checked metadata.", text, metadata)]
                 : [ocr];
         }
 
-        // Approved and archived samples were approved by the reviewer just after the last review edit.
-        var approval = status is DocumentStatus.Approved or DocumentStatus.Archived && versions.Length > 0
+        // Archived samples were approved by the reviewer just after the last review edit.
+        var approval = status == DocumentStatus.Archived && versions.Length > 0
             ? new DocumentApproval(Reviewer, versions[^1].CreatedAtUtc.AddMinutes(10))
             : null;
         var pageConfidences = confidence is { } value ? SimulatedConfidence.SpreadOverPages(id, pages, value) : null;

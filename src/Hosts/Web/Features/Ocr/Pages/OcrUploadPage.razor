@@ -1,14 +1,21 @@
+@page "/scan"
 @page "/capture"
 @page "/ocr"
 @rendermode InteractiveServer
-@using System.Globalization
 @using Modules.Ocr.Domain.Jobs
 @using OppOcr.Web.Features.Ocr.Components
 
 <PageTitle>@Text["UploadTitle"]</PageTitle>
 
-<h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
-<p class="text-muted mb-4">@Text["UploadIntro"]</p>
+<div class="page-head mb-4">
+    <div class="min-w-0">
+        <h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
+        <p class="text-muted mb-0">@Text["UploadIntro"]</p>
+    </div>
+    <a class="btn btn-outline-primary" href="documents">@Text["GoToJobs"]</a>
+</div>
+
+<section class="scan-card">
 
 <fieldset class="capture-options mb-3" disabled="@_uploading">
     <legend class="visually-hidden">@Text["Options.Legend"]</legend>
@@ -135,60 +142,4 @@
         <button type="button" class="btn btn-outline-secondary" @onclick="ClearSelection">@Text["ClearSelection"]</button>
     }
 </div>
-
-@if (_sent is { } sent)
-{
-    <div id="upload-result" class="alert alert-success mt-3 py-2" role="status">
-        @(sent.Pages > 1 ? Text["Result.SentPages", sent.FileName, sent.Pages] : Text["Result.Sent", sent.FileName])
-        <a href="@OcrEndpoints.JobUrl(sent.JobId)">@Text["View"]</a>
-    </div>
-}
-
-<section class="scan-history mt-5" aria-labelledby="history-title">
-    <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
-        <h2 id="history-title" class="h5 mb-0 me-auto">@Text["History.Title"]</h2>
-        <a class="small" href="documents">@Text["GoToJobs"]</a>
-    </div>
-
-    @if (_uploaded.Count > 0)
-    {
-        <p class="small text-muted mb-2">@Text["History.Hint"]</p>
-        @* position-relative keeps the visually-hidden caption inside the scroll box; otherwise it widens the page. *@
-        <div class="table-responsive position-relative">
-            <table class="table align-middle">
-                <caption class="visually-hidden">@Text["History.Title"]</caption>
-                <thead>
-                    <tr>
-                        <th scope="col" style="min-width: 12rem">@Text["Column.File"]</th>
-                        <th scope="col">@Text["Column.Type"]</th>
-                        <th scope="col">@Text["Column.Status"]</th>
-                        <th scope="col">@Text["Column.Progress"]</th>
-                        <th scope="col">@Text["Column.Uploaded"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var (job, uploadedAtUtc) in _uploaded)
-                    {
-                        <tr @key="job.Id">
-                            <td class="text-break"><a href="@OcrEndpoints.JobUrl(job.Id.Value)" dir="auto">@job.FileName</a></td>
-                            <td class="text-nowrap">@Text.DocumentType(job.DocumentType)</td>
-                            <td><OcrStatusBadge Status="job.Status" /></td>
-                            <td style="min-width: 12rem">
-                                @if (job.Status == OcrJobStatus.Failed)
-                                {
-                                    <span class="text-danger small">@Text.JobError(job.ErrorCode)</span>
-                                }
-                                else
-                                {
-                                    <OcrProgress Status="job.Status" PagesTotal="job.PagesTotal" PagesDone="job.PagesDone"
-                                                 CurrentStep="@job.CurrentStep" QueuePosition="job.QueuePosition" />
-                                }
-                            </td>
-                            <td class="small text-nowrap">@uploadedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 </section>

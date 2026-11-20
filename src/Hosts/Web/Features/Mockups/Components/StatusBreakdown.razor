@@ -1,0 +1,67 @@
+@inject IStringLocalizer<MockupText> Text
+
+@* Documents by status as one horizontal bar (a segment per status, sized by its share) and a legend
+   of equal tiles. The legend is the control: links on the dashboard, filter buttons in All Documents. *@
+<div class="status-breakdown @(Selected is null ? null : "has-selection")">
+    <div class="status-bar" aria-hidden="true">
+        @foreach (var (status, count) in Counts.Where(c => c.Value > 0).Select(c => (c.Key, c.Value)))
+        {
+            <span class="status-segment @StatusClass(status) @(Selected is { } selected && selected != status ? "is-dim" : null)"
+                  style="flex-grow: @count.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                  title="@($"{Text.Status(status)}: {FormatNumber(count)} ({FormatPercent(Share(count))})")"></span>
+        }
+    </div>
+    <div class="status-legend" role="group" aria-label="@Label">
+        @if (OnSelect.HasDelegate)
+        {
+            <button type="button" id="status-all" class="status-key" aria-pressed="@(Selected is null ? "true" : "false")"
+                    @onclick="() => OnSelect.InvokeAsync(null)">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span class="status-name">@AllLabel</span>
+                <span class="status-figures"><span class="count">@FormatNumber(Total)</span></span>
+            </button>
+        }
+        @foreach (var (status, count) in Counts.Select(c => (c.Key, c.Value)))
+        {
+            if (OnSelect.HasDelegate)
+            {
+                <button type="button" id="@($"status-{status}")" class="status-key @StatusClass(status)"
+                        aria-pressed="@(Selected == status ? "true" : "false")" @onclick="() => OnSelect.InvokeAsync(status)">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="status-name">@Text.Status(status)</span>
+                    <span class="status-figures"><span class="count">@FormatNumber(count)</span> <span class="share">@FormatPercent(Share(count))</span></span>
+                </button>
+            }
+            else
+            {
+                <a class="status-key @StatusClass(status)" href="@Href!(status)">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="status-name">@Text.Status(status)</span>
+                    <span class="status-figures"><span class="count">@FormatNumber(count)</span> <span class="share">@FormatPercent(Share(count))</span></span>
+                </a>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Documents per status, in the order to show them.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<KeyValuePair<DocumentStatus, int>> Counts { get; set; } = [];
+
+    /// <summary>Accessible name of the legend.</summary>
+    [Parameter, EditorRequired] public string Label { get; set; } = default!;
+
+    /// <summary>Link per status (dashboard). Used when <see cref="OnSelect"/> is not set.</summary>
+    [Parameter] public Func<DocumentStatus, string>? Href { get; set; }
+
+    /// <summary>Filter mode: the legend becomes toggle buttons, with an "all" button first.</summary>
+    [Parameter] public EventCallback<DocumentStatus?> OnSelect { get; set; }
+
+    [Parameter] public DocumentStatus? Selected { get; set; }
+
+    [Parameter] public string? AllLabel { get; set; }
+
+    private int Total => Counts.Sum(c => c.Value);
+
+    private double Share(int count) => Total == 0 ? 0 : count * 100d / Total;
+}

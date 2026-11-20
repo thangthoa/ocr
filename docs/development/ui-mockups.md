@@ -1,4 +1,4 @@
-# Màn hình mockup và giao diện Carbon
+# Màn hình mockup và giao diện (UAE Design System)
 
 Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `SharedText*.resx`). Tên trong code
 (`OppOcr.Web`, `OppOcr.slnx`…) giữ nguyên.
@@ -8,32 +8,37 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 | Route | Màn hình | Dữ liệu |
 |---|---|---|
 | `/login` | Đăng nhập (layout riêng, không có menu) | Giả: `admin` / `admin` |
-| `/`, `/dashboard` | Báo cáo theo Ngày / Tuần / Tháng | Số liệu mẫu cố định, ngày theo hôm nay |
-| `/capture` (và `/ocr` cũ) | Chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh) và tên file (bắt buộc), xem / sắp xếp trang rồi Upload; bên dưới là danh sách *Just uploaded*: chỉ các file vừa upload từ trang này (kể từ khi mở trang), cập nhật trạng thái / tiến độ trực tiếp | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
-| `/review` | Hàng đợi duyệt tay (vòng 2): document *Needs review* kèm lý do kiểm tra tự động đưa vào; document thật trước, rồi cũ nhất trước | Job thật + mẫu |
-| `/approved` | Tài liệu đã duyệt: người duyệt, thời điểm duyệt, lọc / tìm, tải bản cuối (DOCX, TXT), xuất CSV | Job thật + mẫu |
-| `/documents` | Danh sách document: job OCR thật + 14 tài liệu mẫu (nhãn *Sample*) | Job thật + phần lưu trong bộ nhớ |
-| `/documents/{id}` | Preview: ảnh gốc cạnh trang Word (từng trang); bên dưới là metadata và lịch sử phiên bản; duyệt, sửa (lưu thành phiên bản mới) | Job thật + phần lưu trong bộ nhớ |
-| `/admin` (`?tab=Roles\|Retention\|Quality\|Integrations\|Audit`) | Vai trò, phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, hệ thống kết nối, nhật ký hoạt động | Vai trò và lưu giữ: mẫu. Cài đặt kiểm tra: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật. Nhật ký: ghi thật, trong bộ nhớ |
+| `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng; trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó) | Số liệu mẫu cố định, ngày theo hôm nay |
+| `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh) và tên (bắt buộc), xem / sắp xếp trang rồi Upload. Upload xong thì **mở trang của document**, nơi tiến trình hiện theo từng bước | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
+| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào; document thật trước, rồi cũ nhất trước | Job thật + mẫu |
+| `/documents` | **All Documents**: job OCR thật + 14 tài liệu mẫu (nhãn *Sample*); thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái | Job thật + phần lưu trong bộ nhớ |
+| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, tải bản cuối (DOCX, TXT), xuất CSV | Job thật + mẫu |
+| `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn); preview ảnh gốc cạnh trang Word (từng trang); bên dưới là metadata và lịch sử phiên bản; duyệt (= lưu trữ), sửa (lưu thành phiên bản mới) | Job thật + phần lưu trong bộ nhớ |
+| `/admin` (`?tab=Roles\|Retention\|Quality\|Integrations\|Audit`) | **Settings** (mục cuối của menu): vai trò, phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, hệ thống kết nối, nhật ký hoạt động | Vai trò và lưu giữ: mẫu. Cài đặt kiểm tra: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật. Nhật ký: ghi thật, trong bộ nhớ |
 | `/ocr/jobs`, `/ocr/jobs/{id}` | Không còn trang riêng: chuyển hướng sang `/documents`, `/documents/{id}` | — |
 
 ## Document = job OCR
 
-Mỗi file upload là một job OCR và được hiển thị như một document. Trạng thái document:
+Mỗi file upload là một job OCR và được hiển thị như một document. Luồng của một document là
+**Scan › Recognizing › Reviewing › Archived** (ADR 0007). Trạng thái document:
 
-| Job OCR | Document |
-|---|---|
-| Queued, Running | Processing (kèm tiến độ, trang chi tiết tự làm mới mỗi 3 giây) |
-| Failed | Failed (kèm lỗi đã dịch) |
-| Cancelled | Cancelled |
-| Done | Kiểm tra tự động: đạt → Approved (tự duyệt); có vấn đề → Needs review → Approved (người duyệt). Sau đó → Archived (người dùng chuyển) |
+| Job OCR | Document (nhãn trên giao diện) | Bước trên thanh tiến trình |
+|---|---|---|
+| — | — | Scan (luôn xong khi đã upload) |
+| Queued, Running | `Processing` (*Recognizing*), kèm tiến độ; trang chi tiết tự làm mới mỗi 3 giây | Recognizing |
+| Failed | `Failed`, kèm lỗi đã dịch | Dừng ở Recognizing, có lý do |
+| Cancelled | `Cancelled` | Dừng ở Recognizing |
+| Done | Kiểm tra tự động: đạt → `Archived` (tự duyệt); có vấn đề → `NeedsReview` (*Reviewing*) → `Archived` (người duyệt bấm **Approve and archive**) | Reviewing → Archived |
+
+Duyệt là lưu trữ: không còn trạng thái *Approved* riêng. Document đã lưu trữ là bản cuối, không sửa được; nút
+**Send back to review** đưa nó về Review Queue (xoá thông tin duyệt) để sửa rồi duyệt lại.
 
 Từ dịch vụ OCR: tên file, loại (in / viết tay), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo,
 file tải về (DOCX/TXT/MD/JSON, là kết quả OCR gốc, không gồm các lần sửa), xoá/huỷ job.
 
 App lưu thêm **trong bộ nhớ** (`Features/Mockups/Data/DocumentStore.cs`): trạng thái duyệt, metadata, text
 đã sửa theo từng trang và các phiên bản. Phiên bản 1.0 là text OCR, được tạo khi mở document đã OCR xong lần đầu.
-Document upload từ Capture được gắn người upload và mã lần upload (hiện ở metadata và nhật ký); phòng ban không còn
+Document upload từ Scan được gắn người upload và mã lần upload (hiện ở metadata và nhật ký); phòng ban không còn
 được chọn lúc upload, nhập ở metadata của document.
 
 **Nhật ký hoạt động** (`AuditLog`) ghi: đăng nhập (thành công/thất bại, không ghi mật khẩu), upload, sửa, khôi
@@ -43,7 +48,7 @@ và đổi cài đặt kiểm tra. Chỉ giữ 500 dòng gần nhất trong bộ
 ## Kiểm tra chất lượng tự động (duyệt vòng 1) và confidence
 
 Code ở `Features/Mockups/Quality/`. Khi job OCR xong, app so kết quả với các quy tắc dưới đây. Document không có vấn
-đề gì thì được **tự duyệt** (*Approved*, người duyệt `quality-check`). Document có vấn đề thì vào hàng đợi `/review`
+đề gì thì được **tự duyệt và lưu trữ** (*Archived*, người duyệt `quality-check`). Document có vấn đề thì vào hàng đợi `/review`
 kèm danh sách lý do.
 
 | Quy tắc | Mặc định | Ghi chú |
@@ -75,13 +80,13 @@ kèm danh sách lý do.
 - Quy tắc kiểm tra là quy tắc nghiệp vụ. Hiện chúng nằm trong Web host như phần mockup còn lại. Khi có module
   Documents, `QualityCheck` và `QualitySettings` chuyển vào Domain/Application của module đó, cài đặt lưu PostgreSQL.
 
-## Tài liệu đã duyệt
+## Tài liệu đã duyệt (Document Archive)
 
-- Bấm **Approve** thì app lưu *người duyệt* và *thời điểm duyệt* (hiện ở metadata trang document và trang
-  `/approved`). **Archive** giữ nguyên thông tin này; **Send back to review** thì xoá.
-- Trang `/approved` chỉ liệt kê document *Approved*, document thật trước, rồi mới duyệt nhất. Lọc theo phòng
+- Bấm **Approve and archive** thì app lưu *người duyệt* và *thời điểm duyệt* (hiện ở metadata trang document,
+  trên thanh tiến trình và trang `/archive`) và chuyển document sang *Archived*. **Send back to review** thì xoá.
+- Trang `/archive` chỉ liệt kê document *Archived*, document thật trước, rồi mới duyệt nhất. Lọc theo phòng
   ban, loại, mức mật, khoảng ngày duyệt (ngày theo giờ server) và tìm như trang Documents.
-- **Bản cuối** (`/documents/{id}/final?format=docx|txt`, chỉ cho document *Approved* / *Archived*):
+- **Bản cuối** (`/documents/{id}/final?format=docx|txt`, chỉ cho document *Archived*):
   - DOCX là file Word mới nhất nếu nó chứa đúng text hiện tại (lưu từ editor Word, hoặc DOCX OCR chưa sửa);
     nếu text đã được sửa sau đó (nút Edit, khôi phục phiên bản) thì app tạo DOCX từ text hiện tại.
   - TXT là text hiện tại (UTF-8 có BOM), các trang ngăn bằng ký tự form feed.
@@ -92,7 +97,7 @@ kèm danh sách lý do.
 
 ## Sửa Word trực tiếp (OnlyOffice Docs)
 
-Xem ADR 0004. Trên trang document (đang *Needs review* hoặc *Approved*), nút **Edit in Word** mở `/documents/{id}/word`
+Xem ADR 0004. Trên trang document đang *Reviewing*, nút **Edit in Word** mở `/documents/{id}/word`
 với editor OnlyOffice nhúng trong trang. Phiên bản Word đầu tiên là DOCX của dịch vụ OCR (hoặc tạo từ text với tài
 liệu mẫu / khi dịch vụ OCR tắt). Bấm **Save** (Ctrl+S) hoặc đóng editor thì app lưu phiên bản Word mới, cập nhật text
 và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục *Word file*) và dòng *Word file, version n*.
@@ -129,8 +134,8 @@ và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục
   khi chạy một instance (app không có database, ADR 0003). Muốn giữ lâu dài cần module Documents có PostgreSQL.
 - Danh sách Documents lấy **100 job mới nhất** rồi lọc trong bộ nhớ; tìm theo nội dung text chỉ áp dụng cho
   document đã mở (đã có text trong app) và tài liệu mẫu, vì danh sách job của dịch vụ không kèm text.
-- Khi dịch vụ OCR không kết nối được, Documents báo lỗi nhưng vẫn hiện tài liệu mẫu; Capture báo lỗi ngay khi bấm Upload.
-- Trang Approved và file CSV cũng chỉ gồm các job trong danh sách job mới nhất mà trang Documents lấy về. Link tải
+- Khi dịch vụ OCR không kết nối được, All Documents báo lỗi nhưng vẫn hiện tài liệu mẫu; Scan báo lỗi ngay khi bấm Upload (và ở lại trang).
+- Trang Document Archive và file CSV cũng chỉ gồm các job trong danh sách job mới nhất mà trang Documents lấy về. Link tải
   bản cuối và xuất CSV, như mọi trang khác, **chưa có phân quyền** (đăng nhập còn là giả).
 - **Vai trò và lịch lưu giữ ở trang Quản trị là dữ liệu mẫu**: không có phân quyền thật, không có tự động
   huỷ hay legal hold. Các hệ thống AD, SharePoint, CMS, hệ thống nội bộ, SIEM chỉ ghi *Planned*.
@@ -150,18 +155,31 @@ chuỗi `MockupText*.resx`) cùng một dòng `builder.Services.AddMockups()` tr
 Documents thật (Domain, Application, Infrastructure riêng), thay `DocumentStore`/`DocumentCatalog` bằng các use
 case của module đó; các trang Razor giữ bố cục, chỉ đổi nguồn dữ liệu.
 
-## Giao diện Carbon
+## Giao diện: UAE Design System 4.0
 
-Toàn bộ app dùng phong cách lấy cảm hứng từ IBM Carbon, áp lên Bootstrap 5.3 bằng cách ghi đè biến CSS trong
-`wwwroot/app.css`. Không thêm thư viện component nào.
+Xem ADR 0007. App giữ Bootstrap 5.3 và áp token của UAE Design System (gói `@aegov/designsystem` 4.0.4) bằng CSS
+riêng: biến `--ae-*` và `--app-*` trong `wwwroot/app.css`, phần còn lại trong các file `*.razor.css`. Không thêm
+Tailwind hay thư viện component nào.
 
-- Màu chủ đạo `#0f62fe`, chữ `#161616`, nền phụ `#f4f4f4`, góc vuông (0px). Màu trạng thái dùng bảng màu tag
-  của Carbon (độ tương phản đạt AA) và luôn đi kèm chữ, không dùng màu đơn lẻ để phân biệt.
-- Font IBM Plex Sans và IBM Plex Sans Arabic (SIL Open Font License, xem `wwwroot/fonts/ibm-plex/OFL-*.txt`)
-  được **lưu trong repo**, vì app chạy on-prem có thể không có internet. Chữ Latin có `letter-spacing: .16px`
-  theo Carbon; chữ Ả Rập để mặc định để không làm hỏng nét nối.
-- Đây là dự án cho khách hàng: màu chủ đạo là tạm thời, cần thay bằng màu thương hiệu của khách
-  (biến `--app-primary` và các biến `--bs-primary*` trong `app.css`).
+- **Khung app**:
+  - Header một hàng, cao 72px, dính trên cùng: logo và tên app (thẳng cột với menu), nút đổi ngôn ngữ
+    (`LanguageSwitch`), menu tài khoản.
+  - Menu dọc rộng 288px, theo thứ tự: Dashboard · Scan · Review Queue · All Documents · Document Archive, rồi
+    Settings tách riêng. Mục đang chọn: chữ AE Gold 700, gạch 3px, nền gold 50.
+  - Nội dung rộng tối đa 1600px, canh giữa vùng bên phải menu.
+- **Màu**:
+  - Màu chính là AE Gold 600 `#90702a` (hover 700), màu phụ là Camel. Viền focus 2px màu Camel 500.
+  - Màu trạng thái dùng badge "soft" của DS: Recognizing xanh biển, Reviewing camel, Archived xanh lá, Failed
+    đỏ, Cancelled xám. Luôn đi kèm chữ, không dùng màu đơn lẻ để phân biệt.
+- **Font**: Roboto (chữ thường) và Inter (tiêu đề) cho chữ Latin; Noto Kufi Arabic và Alexandria cho chữ Ả Rập.
+  - Font được **lưu trong repo** (`wwwroot/fonts/*/`, kèm file giấy phép SIL OFL), vì app chạy on-prem có thể
+    không có internet.
+  - Không giãn chữ (letter-spacing), để không làm hỏng nét nối của chữ Ả Rập.
+- **Component dùng chung**: `StatusBreakdown` (thanh trạng thái ngang và ô chú thích) và `DocumentProgress`
+  (thanh tiến trình theo kiểu Timeline của DS; không có trạng thái lỗi nên bước lỗi giữ dạng "đang chạy", kèm lý do).
+- **Giấy phép**: theo `LICENSE.md` của gói, Design System chỉ được dùng cho dự án của Chính phủ Liên bang UAE;
+  trường hợp khác phải xin phép TDRA. Cần xác nhận trước khi đưa vào production (xem ADR 0007). App không dùng
+  logo hay quốc huy của Chính phủ UAE.
 
 ## Docker
 

@@ -4,12 +4,14 @@
     transform: translateX(-50%);
 }
 
+/* Design System toast: a white card with a 4px top border in the colour of the outcome. */
 .ocr-toast {
     width: min(26rem, calc(100vw - 2rem));
     border: 0;
-    border-inline-start: 4px solid var(--ocr-toast-color);
-    box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .15);
-    --ocr-toast-color: var(--bs-secondary);
+    border-top: 4px solid var(--ocr-toast-color);
+    border-radius: var(--app-radius);
+    box-shadow: 0 10px 30px rgba(26, 28, 32, .18);
+    --ocr-toast-color: var(--ae-black-400);
 }
 
 .ocr-toast-icon {
@@ -23,13 +25,13 @@
 }
 
 .ocr-toast-running {
-    --ocr-toast-color: var(--bs-primary);
+    --ocr-toast-color: var(--ae-gold-600);
 }
 
 .ocr-toast-done {
-    --ocr-toast-color: var(--bs-success);
+    --ocr-toast-color: var(--app-success);
 }
 
 .ocr-toast-failed {
-    --ocr-toast-color: var(--bs-danger);
+    --ocr-toast-color: var(--app-error);
 }

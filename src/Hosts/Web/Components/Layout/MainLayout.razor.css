@@ -1,65 +1,72 @@
+/* App shell (UAE Design System, see docs/development/ui-mockups.md): a one-row header over a side
+   menu and a centred content column. The brand column is as wide as the menu, and the logo and the
+   menu icons share the same 24px start offset. */
 .page {
+    --header-height: 4.5rem;
+    --sidebar-width: 18rem;
+    --content-pad-x: 1rem;
+    --content-pad-top: 1.5rem;
     position: relative;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: #fff;
 }
 
-/* Carbon UI shell: a dark 48px header across the full width. */
 .app-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    min-height: 3rem;
+    min-height: var(--header-height);
     padding-inline: 1rem;
-    background-color: #161616;
-    color: #f4f4f4;
+    background-color: #fff;
+    border-bottom: 1px solid var(--app-border-subtle);
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 20;
 }
 
 .app-brand {
     display: inline-flex;
-    align-items: baseline;
-    gap: .375rem;
-    color: #f4f4f4;
+    align-items: center;
+    gap: .75rem;
+    min-width: 0;
+    color: var(--ae-black-900);
     text-decoration: none;
-    font-size: .875rem;
+    font-family: var(--app-font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
     white-space: nowrap;
 }
 
     .app-brand:hover {
-        color: #fff;
+        color: var(--ae-gold-700);
     }
 
-.app-brand-name {
-    font-weight: 600;
+.app-brand-mark {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--app-radius);
+    background-color: var(--ae-gold-600);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    flex: none;
 }
+
+    .app-brand-mark svg {
+        width: 1.375rem;
+        height: 1.375rem;
+    }
 
 .app-header-actions {
     margin-inline-start: auto;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    font-size: .875rem;
+    gap: .75rem;
 }
 
-    .app-header-actions ::deep a {
-        color: #c6c6c6;
-        text-decoration: none;
-    }
-
-        .app-header-actions ::deep a:hover,
-        .app-header-actions ::deep a[aria-current] {
-            color: #fff;
-        }
-
-        .app-header-actions ::deep a:focus-visible {
-            outline-color: #fff;
-        }
-
-/* Account menu: an avatar button in the header opening a light panel. */
+/* Account menu: an avatar button opening a small panel. */
 .account-menu {
     position: relative;
 }
@@ -69,8 +76,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
     cursor: pointer;
 }
 
@@ -78,54 +86,56 @@
         display: none;
     }
 
-    .account-toggle:hover,
-    .account-menu[open] > .account-toggle {
-        background-color: #393939;
+    .account-menu[open] > .account-toggle .avatar {
+        outline: 2px solid var(--app-focus);
+        outline-offset: 2px;
     }
 
     .account-toggle:focus-visible {
-        outline: 2px solid #fff;
-        outline-offset: -2px;
+        outline: 2px solid var(--app-focus);
+        outline-offset: 2px;
     }
 
 .avatar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
-    background-color: #0f62fe;
-    color: #fff;
-    font-size: .875rem;
-    font-weight: 600;
-    letter-spacing: 0;
+    background-color: var(--ae-gold-100);
+    color: var(--ae-gold-800);
+    font-weight: 700;
     flex: none;
 }
 
 .avatar-lg {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
 }
 
 .account-panel {
     position: absolute;
-    top: 100%;
+    top: calc(100% + .5rem);
     inset-inline-end: 0;
     width: 17rem;
+    padding: .375rem;
     background-color: #fff;
-    color: #161616;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-    z-index: 10;
+    color: var(--app-ink);
+    border: 1px solid var(--app-border-subtle);
+    border-radius: var(--app-radius);
+    box-shadow: 0 10px 30px rgba(26, 28, 32, .14);
+    z-index: 30;
 }
 
 .account-who {
     display: flex;
     align-items: center;
     gap: .75rem;
-    padding: 1rem 1rem .5rem;
+    padding: .5rem .625rem .75rem;
+    border-bottom: 1px solid var(--app-border-subtle);
+    margin-bottom: .375rem;
 }
 
 .min-w-0 {
@@ -138,65 +148,24 @@
 }
 
 .account-role {
-    font-size: .75rem;
-    color: #525252;
+    font-size: .875rem;
+    color: var(--app-ink-muted);
 }
 
-.account-section {
-    border-top: 1px solid #e0e0e0;
-    padding: .5rem 0;
+.account-item {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 .625rem;
+    border-radius: .375rem;
+    color: var(--app-ink);
+    text-decoration: none;
 }
 
-.account-heading {
-    padding: .25rem 1rem;
-    font-size: .75rem;
-    color: #525252;
-}
-
-/* The language links become menu rows; the current language carries a check mark. */
-.app-header-actions .account-panel ::deep .culture-selector {
-    flex-direction: column;
-    gap: 0;
-}
-
-    .app-header-actions .account-panel ::deep .culture-selector a,
-    .app-header-actions .account-panel .account-item {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-        min-height: 2.5rem;
-        padding: 0 1rem;
-        color: #161616;
-        font-weight: 400 !important;
-        text-decoration: none;
+    .account-item:hover {
+        background-color: var(--ae-whitely-300);
+        color: var(--app-ink);
     }
-
-        .app-header-actions .account-panel ::deep .culture-selector a::before {
-            content: "";
-            width: 1rem;
-            height: 1rem;
-            flex: none;
-        }
-
-        .app-header-actions .account-panel ::deep .culture-selector a[aria-current]::before {
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230f62fe' stroke-width='2'%3E%3Cpath d='M3 8l3.5 3.5L13 5'/%3E%3C/svg%3E") no-repeat center/1rem;
-        }
-
-        .app-header-actions .account-panel ::deep .culture-selector a:hover,
-        .app-header-actions .account-panel .account-item:hover {
-            background-color: #e8e8e8;
-            color: #161616;
-        }
-
-        .app-header-actions .account-panel ::deep .culture-selector a:focus-visible,
-        .app-header-actions .account-panel .account-item:focus-visible {
-            outline: 2px solid #0f62fe;
-            outline-offset: -2px;
-        }
-
-.account-signout {
-    border-top: 1px solid #e0e0e0;
-}
 
 .app-body {
     display: flex;
@@ -212,37 +181,54 @@ main {
     background-color: #fff;
 }
 
+/* Content column: centred, at most 1600px of content. Pages can bleed to its edges with the
+   --content-pad-* values (the document progress band does). */
+.content {
+    max-width: calc(100rem + 2 * var(--content-pad-x));
+    margin-inline: auto;
+    padding: var(--content-pad-top) var(--content-pad-x) 4rem;
+}
+
 .sidebar {
     position: relative;
     background-color: #fff;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--app-border-subtle);
 }
 
 @media (max-width: 640.98px) {
-    .app-brand-product {
-        display: none;
+    .app-brand-name {
+        font-size: 1.125rem;
     }
-
 }
 
 @media (min-width: 641px) {
+    .page {
+        --content-pad-x: 2rem;
+        --content-pad-top: 2rem;
+    }
+
+    .app-header {
+        padding-inline: 1.5rem;
+    }
+
+    /* The brand column ends where the side menu does. */
+    .app-brand {
+        width: calc(var(--sidebar-width) - 2.5rem);
+        flex: none;
+    }
+
     .app-body {
         flex-direction: row;
     }
 
     .sidebar {
-        width: 256px;
+        width: var(--sidebar-width);
         flex: none;
-        height: calc(100vh - 3rem);
+        height: calc(100vh - var(--header-height));
         position: sticky;
-        top: 3rem;
+        top: var(--header-height);
         border-bottom: 0;
-        border-inline-end: 1px solid #e0e0e0;
-    }
-
-    article {
-        padding-inline-start: 2rem !important;
-        padding-inline-end: 2rem !important;
+        border-inline-end: 1px solid var(--app-border-subtle);
     }
 }
 

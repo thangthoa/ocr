@@ -1,8 +1,10 @@
 /* The editor fills the rest of the window under the header and the page's own title. */
 .word-frame {
-    height: calc(100vh - 13rem);
+    height: calc(100vh - 14rem);
     min-height: 32rem;
-    border: 1px solid #e0e0e0;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    overflow: hidden;
 }
 
     .word-frame ::deep iframe {

@@ -1,116 +1,162 @@
-/* Carbon content switcher */
+/* Report period: Design System segmented tabs. */
 .content-switcher {
     display: inline-flex;
-    border: 1px solid #161616;
+    gap: 2px;
+    padding: 4px;
+    border-radius: var(--app-radius);
+    background-color: var(--ae-whitely-400);
 }
 
     .content-switcher button {
         min-height: 2.5rem;
-        min-width: 5.5rem;
+        min-width: 5rem;
         padding: 0 1rem;
         border: 0;
-        border-inline-start: 1px solid #8d8d8d;
-        background-color: #fff;
-        color: #525252;
-        font-size: .875rem;
+        border-radius: .375rem;
+        background-color: transparent;
+        color: var(--ae-black-600);
+        font-weight: 500;
     }
 
-        .content-switcher button:first-child {
-            border-inline-start: 0;
-        }
-
         .content-switcher button:hover {
-            background-color: #e8e8e8;
-            color: #161616;
+            color: var(--ae-black-900);
         }
 
         .content-switcher button.active {
-            background-color: #161616;
-            color: #fff;
+            background-color: #fff;
+            color: var(--ae-black-900);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1), 0 1px 2px -1px rgba(0, 0, 0, .1);
         }
 
         .content-switcher button:focus-visible {
-            outline: 2px solid #0f62fe;
-            outline-offset: -2px;
+            outline: 2px solid var(--app-focus);
+            outline-offset: 2px;
         }
 
-/* KPI tiles: tiles separated by 1px gaps on a grey ground, no shadows. */
+/* Cards: neutral Design System cards (2px border, 12px radius, 24px padding). */
+.dash-card {
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    padding: 1.5rem;
+    background-color: #fff;
+    min-width: 0;
+}
+
+.dash-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .375rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.dash-card-link {
+    margin-inline-start: auto;
+    font-weight: 500;
+}
+
+/* Key figures: the headline figure on the primary colour, the review queue on camel (it needs action). */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: 1px;
-    background-color: #e0e0e0;
-    border: 1px solid #e0e0e0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
 }
 
 .kpi {
     display: flex;
     flex-direction: column;
     gap: .375rem;
-    padding: 1rem;
+    min-width: 0;
+    padding: 1.5rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
     background-color: #fff;
+}
+
+.kpi-primary {
+    background-color: var(--ae-gold-600);
+    border-color: var(--ae-gold-600);
+    color: var(--ae-gold-50);
+}
+
+.kpi-attention {
+    background-color: var(--ae-camel-50);
+    border-color: var(--ae-camel-200);
 }
 
 .kpi-label {
     font-size: .875rem;
-    color: #525252;
+    font-weight: 500;
 }
 
 .kpi-value {
-    font-size: 2rem;
+    font-family: var(--app-font-heading);
+    font-size: 2.125rem;
+    font-weight: 800;
     line-height: 1.25;
     font-variant-numeric: tabular-nums;
 }
 
 .kpi-note {
-    font-size: .75rem;
-    letter-spacing: .32px;
-    color: #525252;
+    font-size: .875rem;
 }
 
-a.kpi-note {
-    color: #0f62fe;
-}
-
-.kpi-meter,
-.status-meter {
-    display: block;
-    height: .25rem;
-    background-color: #e0e0e0;
-}
-
-    .kpi-meter > span,
-    .status-meter > span {
-        display: block;
-        height: 100%;
-        background-color: #0f62fe;
-    }
-
-.dash-row {
+.kpi-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    align-items: center;
+    gap: .625rem 1rem;
+    margin-top: auto;
+    padding-top: .5rem;
 }
 
-.dash-card {
-    border: 1px solid #e0e0e0;
-    padding: 1rem 1.25rem;
-    background-color: #fff;
-    min-width: 0;
+.kpi-failed {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    color: var(--ae-red-700);
+    font-weight: 500;
 }
 
-.dash-chart {
-    flex: 3 1 32rem;
+    .kpi-failed::before {
+        content: "";
+        width: .625rem;
+        height: .625rem;
+        border-radius: 50%;
+        background-color: var(--ae-red-600);
+    }
+
+.kpi-meter {
+    display: block;
+    height: .5rem;
+    border-radius: 999px;
+    background-color: var(--ae-black-200);
+    overflow: hidden;
 }
 
-.dash-status {
-    flex: 2 1 18rem;
-    display: flex;
-    flex-direction: column;
-    gap: .75rem;
+    .kpi-meter > span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background-color: var(--ae-gold-600);
+    }
+
+.kpi-primary .kpi-meter {
+    background-color: rgba(255, 255, 255, .3);
 }
 
-/* Bar chart: one series, so one colour and no legend; the target is a dashed reference line. */
+    .kpi-primary .kpi-meter > span {
+        background-color: var(--ae-gold-50);
+    }
+
+/* Chart next to the department table. */
+.dash-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 1.5rem;
+}
+
+/* Bar chart: one series, so one colour and no legend for it; the target is a dashed reference line. */
 .bar-chart {
     display: flex;
     gap: .5rem;
@@ -121,9 +167,9 @@ a.kpi-note {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 12rem;
+    height: 13rem;
     font-size: .75rem;
-    color: #525252;
+    color: var(--app-ink-muted);
     text-align: end;
     font-variant-numeric: tabular-nums;
 }
@@ -143,14 +189,14 @@ a.kpi-note {
 
 .bar-plot {
     position: relative;
-    height: 12rem;
-    border-bottom: 1px solid #8d8d8d;
+    height: 13rem;
+    border-bottom: 1px solid var(--ae-black-300);
 }
 
 .bar-gridline {
     position: absolute;
     inset-inline: 0;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--app-border-subtle);
 }
 
 .bars {
@@ -170,21 +216,29 @@ a.kpi-note {
     justify-content: center;
 }
 
-    .bar-slot:hover .bar {
-        background-color: #0043ce;
+    .bar-slot:hover .bar:not(.bar-current) {
+        background-color: var(--ae-gold-700);
     }
 
 .bar {
     display: block;
     width: 72%;
-    max-width: 2rem;
-    background-color: #0f62fe;
+    max-width: 2.5rem;
+    border-radius: .25rem .25rem 0 0;
+    background-color: var(--ae-gold-600);
+}
+
+/* The hour or day still in progress: hatched, so it is not read as a finished period below target. */
+.bar-current,
+.legend-current {
+    background: repeating-linear-gradient(135deg, var(--ae-gold-600) 0 2px, var(--ae-gold-100) 2px 6px);
+    box-shadow: inset 0 0 0 1px var(--ae-gold-600);
 }
 
 .bar-target {
     position: absolute;
     inset-inline: 0;
-    border-top: 2px dashed #161616;
+    border-top: 2px dashed var(--ae-black-800);
     pointer-events: none;
 }
 
@@ -192,11 +246,13 @@ a.kpi-note {
     .bar-target > span {
         position: absolute;
         inset-inline-start: .25rem;
-        bottom: .125rem;
-        padding: 0 .25rem;
+        bottom: .25rem;
+        padding: 0 .375rem;
         font-size: .75rem;
         font-weight: 600;
         background-color: #fff;
+        border: 1px solid var(--ae-black-300);
+        border-radius: .375rem;
     }
 
 .bar-labels {
@@ -204,7 +260,7 @@ a.kpi-note {
     gap: 2px;
     margin-top: .25rem;
     font-size: .75rem;
-    color: #525252;
+    color: var(--app-ink-muted);
 }
 
     .bar-labels span {
@@ -222,22 +278,46 @@ a.kpi-note {
             justify-content: flex-end;
         }
 
-.status-bars {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.chart-legend {
     display: flex;
-    flex-direction: column;
-    gap: .875rem;
+    flex-wrap: wrap;
+    gap: .375rem 1.125rem;
+    margin-top: .875rem;
+    font-size: .875rem;
+    color: var(--app-ink-muted);
 }
 
-    .status-bars li {
-        display: flex;
-        flex-direction: column;
+    .chart-legend span {
+        display: inline-flex;
+        align-items: center;
         gap: .375rem;
     }
 
-.status-percent {
-    min-width: 3.5rem;
-    text-align: end;
+.legend-bar {
+    width: .75rem;
+    height: .75rem;
+    border-radius: 3px;
+    background-color: var(--ae-gold-600);
+}
+
+.legend-target {
+    width: 1rem;
+    border-top: 2px dashed var(--ae-black-800);
+}
+
+@media (max-width: 1100px) {
+    .dash-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 840px) {
+    .kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* The department table shares its row with the chart: headers wrap rather than push the last column out. */
+.dash-dept th {
+    white-space: normal;
 }

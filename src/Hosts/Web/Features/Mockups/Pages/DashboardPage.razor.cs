@@ -60,6 +60,12 @@ public sealed partial class DashboardPage
         _ => (Report.Bars.Count - 1 - index) % 5 == 0,
     };
 
+    private List<KeyValuePair<DocumentStatus, int>> StatusCounts =>
+        Report.Statuses.Select(row => KeyValuePair.Create(row.Status, row.Documents)).ToList();
+
+    /// <summary>A status in the legend opens All Documents filtered to it.</summary>
+    private static string StatusUrl(DocumentStatus status) => $"documents?status={status}";
+
     /// <summary>CSS lengths must use the invariant culture whatever the UI language is.</summary>
     private static string CssPercent(double value) =>
         Math.Clamp(value, 0, 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";

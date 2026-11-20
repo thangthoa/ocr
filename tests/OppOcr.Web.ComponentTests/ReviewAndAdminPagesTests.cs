@@ -61,7 +61,7 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
         login.Find("#login-user").Change("admin");
         login.Find("#login-password").Change("admin");
         login.Find("form").Submit();
-        Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Approved, "admin");
+        Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Archived, "admin");
 
         Navigation.NavigateTo("admin?tab=Audit");
         var cut = Render<AdminPage>();
@@ -70,7 +70,7 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
         {
             var rows = cut.FindAll(".audit-table tbody tr").Select(r => r.TextContent).ToList();
             Assert.Equal(2, rows.Count);
-            Assert.Contains("Changed the status to Approved", rows[0], StringComparison.Ordinal);
+            Assert.Contains("Changed the status to Archived", rows[0], StringComparison.Ordinal);
             Assert.Contains("Signed in", rows[1], StringComparison.Ordinal);
         });
         Assert.NotEmpty(cut.FindAll(".audit-table a[href='documents/DOC-2026-000105']"));

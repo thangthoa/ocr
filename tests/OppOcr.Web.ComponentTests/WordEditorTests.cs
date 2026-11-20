@@ -10,6 +10,7 @@ using Modules.Ocr.Domain.Jobs;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Mockups.Pages;
+using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Mockups.Word;
 
 namespace OppOcr.Web.ComponentTests;
@@ -129,6 +130,8 @@ public sealed class WordEditorTests : BunitContext
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص", 5, "A v2", [], Cached: false);
         _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000005", "scan.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] });
         _ocr.Docx = DocxText.Create(["من خدمة OCR"]);
+        // Keep the job in review: one that passes the automatic check is archived, and archived documents are final.
+        Services.GetRequiredService<QualitySettingsStore>().Save(QualitySettings.Default with { AutoApprove = false }, "admin");
 
         var result = await Editor.OpenAsync("job_0000000000000005", "admin", CultureInfo.GetCultureInfo("en"), Ct);
 

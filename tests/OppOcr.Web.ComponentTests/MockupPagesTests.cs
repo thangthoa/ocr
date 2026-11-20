@@ -95,7 +95,9 @@ public sealed class MockupPagesTests : BunitContext
         cut.Find("#status-Archived").Click();
 
         var files = cut.FindAll("tbody tr td:first-child a").Select(a => a.TextContent).ToList();
-        Assert.Equal(["HR-2018-0044.pdf", "LG-2011-0032.pdf", "PV-2019-0413.pdf"], files.Order(StringComparer.Ordinal));
+        Assert.Equal(
+            ["ADM-2022-0310.pdf", "HR-2016-0187.pdf", "HR-2018-0044.pdf", "LG-2011-0032.pdf", "PO-2019-0388.pdf", "PV-2019-0413.pdf", "PV-2020-0021.pdf"],
+            files.Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -156,6 +158,8 @@ public sealed class MockupPagesTests : BunitContext
     [Fact]
     public void Restoring_an_old_version_adds_a_new_one()
     {
+        // An archived document is final; sent back to review, its history can be used again.
+        Store.ChangeStatus("DOC-2026-000104", DocumentStatus.NeedsReview, "admin");
         var cut = RenderDocument("DOC-2026-000104");
 
         cut.Find("#tab-versions").Click();
@@ -173,7 +177,8 @@ public sealed class MockupPagesTests : BunitContext
         var cut = RenderDocument("DOC-2026-000101");
 
         Assert.Empty(cut.FindAll("#action-edit"));
-        Assert.Contains("Archived documents are read-only.", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Archived documents are final.", cut.Markup, StringComparison.Ordinal);
+        Assert.NotEmpty(cut.FindAll("#action-review"));
 
         cut.Find("#tab-versions").Click();
         Assert.Empty(cut.FindAll("button[aria-label^='Restore version']"));
@@ -181,15 +186,16 @@ public sealed class MockupPagesTests : BunitContext
     }
 
     [Fact]
-    public void Approving_a_reviewed_document_changes_its_status()
+    public void Approving_a_reviewed_document_archives_it()
     {
         var cut = RenderDocument("DOC-2026-000105");
 
         cut.Find("#action-approve").Click();
 
-        Assert.Contains("Status changed to Approved.", cut.Markup, StringComparison.Ordinal);
-        Assert.Equal(DocumentStatus.Approved, Store.FindSample("DOC-2026-000105")!.Status);
-        Assert.NotEmpty(cut.FindAll("#action-archive"));
+        Assert.Contains("Status changed to Archived.", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal(DocumentStatus.Archived, Store.FindSample("DOC-2026-000105")!.Status);
+        Assert.NotEmpty(cut.FindAll("#action-review"));
+        Assert.Empty(cut.FindAll("#action-approve, #action-edit"));
     }
 
     [Fact]

@@ -41,11 +41,11 @@ internal sealed class ApprovedDocumentFiles(
 
     private static readonly SearchValues<char> NeedsQuotes = SearchValues.Create(",\"\r\n");
 
-    /// <summary>Approved documents matching the query: real ones before samples, then the newest approval first.</summary>
+    /// <summary>Archived (approved) documents matching the query: real ones before samples, then the newest approval first.</summary>
     public static IReadOnlyList<DocumentRecord> Approved(IEnumerable<DocumentRecord> documents, DocumentQuery query)
     {
         ArgumentNullException.ThrowIfNull(query);
-        return DocumentStore.Filter(documents, query with { Status = DocumentStatus.Approved })
+        return DocumentStore.Filter(documents, query with { Status = DocumentStatus.Archived })
             .OrderBy(d => d.IsSample)
             .ThenByDescending(d => d.Approval?.AtUtc ?? DateTime.MinValue)
             .ToList();

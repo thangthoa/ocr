@@ -4,8 +4,8 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="UploadTitle" xml:space="preserve"><value>الرفع والمسح</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>اختر نوع المستند، وملفًا واحدًا أو عدة صور، واسم الملف، ثم ارفع.</value></data>
+  <data name="UploadTitle" xml:space="preserve"><value>المسح</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>اختر نوع المستند، وملفًا واحدًا أو عدة صور، واسم المستند، ثم ارفع. تُفتح صفحة المستند فور انتهاء الرفع.</value></data>
   <data name="FolderPrompt" xml:space="preserve"><value>أو استخدم كل الصور داخل مجلد، مرتبة حسب اسم الملف:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>اختيار مجلد</value></data>
   <data name="FolderSkipped" xml:space="preserve"><value>تم تخطي {0} ملف في المجلد لأنه ليس صورة مدعومة.</value></data>
@@ -39,12 +39,8 @@
   <data name="Selected.ReplaceHint" xml:space="preserve"><value>الصفحات مرتبة حسب اسم الملف؛ استخدم الأسهم لتغيير الترتيب. اختيار الملفات مجددًا يستبدل القائمة.</value></data>
   <data name="Upload" xml:space="preserve"><value>رفع</value></data>
   <data name="ClearSelection" xml:space="preserve"><value>مسح</value></data>
-  <data name="Result.Sent" xml:space="preserve"><value>تم إرسال {0} إلى خدمة OCR؛ سيصلك إشعار عند تغيّر حالته.</value></data>
-  <data name="Result.SentPages" xml:space="preserve"><value>تم إرسال {0} ({1} صفحات) إلى خدمة OCR كمستند واحد؛ سيصلك إشعار عند تغيّر حالته.</value></data>
   <data name="Uploading" xml:space="preserve"><value>جارٍ الإرسال إلى خدمة OCR…</value></data>
   <data name="GoToJobs" xml:space="preserve"><value>عرض المستندات</value></data>
-  <data name="History.Title" xml:space="preserve"><value>تم رفعها للتو</value></data>
-  <data name="History.Hint" xml:space="preserve"><value>المستندات المرفوعة من هذه الصفحة منذ فتحها فقط. كل المستندات موجودة في صفحة المستندات.</value></data>
   <data name="NewUpload" xml:space="preserve"><value>رفع جديد</value></data>
   <data name="View" xml:space="preserve"><value>عرض</value></data>
   <data name="Close" xml:space="preserve"><value>إغلاق</value></data>
@@ -54,11 +50,8 @@
   <data name="LoadFailed" xml:space="preserve"><value>تعذّر تحميل مهام OCR.</value></data>
   <data name="Retry" xml:space="preserve"><value>إعادة المحاولة</value></data>
   <data name="NoJobs" xml:space="preserve"><value>لا توجد مهام OCR بعد.</value></data>
-  <data name="Column.File" xml:space="preserve"><value>الملف</value></data>
   <data name="Column.Type" xml:space="preserve"><value>النوع</value></data>
   <data name="Column.Status" xml:space="preserve"><value>الحالة</value></data>
-  <data name="Column.Progress" xml:space="preserve"><value>التقدّم</value></data>
-  <data name="Column.Uploaded" xml:space="preserve"><value>وقت الرفع</value></data>
   <data name="Column.Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="Delete" xml:space="preserve"><value>حذف</value></data>
   <data name="DeleteJob" xml:space="preserve"><value>حذف المهمة {0}</value></data>

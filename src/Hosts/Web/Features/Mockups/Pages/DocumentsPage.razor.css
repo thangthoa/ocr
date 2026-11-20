@@ -1,52 +1,16 @@
-/* Status filter as Carbon-style selectable tags with counts. */
-.status-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
+/* Status bar card: the legend under the bar filters the list. */
+.status-card {
+    padding: 1.25rem 1.5rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    background-color: #fff;
 }
-
-    .status-filter button {
-        display: inline-flex;
-        align-items: center;
-        gap: .5rem;
-        min-height: 2.5rem;
-        padding: 0 1rem;
-        border: 1px solid #8d8d8d;
-        background-color: #fff;
-        color: #161616;
-        font-size: .875rem;
-    }
-
-        .status-filter button:hover {
-            background-color: #e8e8e8;
-        }
-
-        .status-filter button.active {
-            background-color: #161616;
-            border-color: #161616;
-            color: #fff;
-        }
-
-        .status-filter button:focus-visible {
-            outline: 2px solid #0f62fe;
-            outline-offset: -2px;
-        }
-
-    .status-filter .count {
-        font-variant-numeric: tabular-nums;
-        color: inherit;
-        opacity: .8;
-    }
 
 .doc-filters {
-    padding: 1rem;
-    background-color: #f4f4f4;
+    padding: 1rem 1.25rem;
+    border-radius: var(--app-radius-card);
+    background-color: var(--ae-whitely-300);
 }
-
-    .doc-filters ::deep .form-control,
-    .doc-filters ::deep .form-select {
-        background-color: #fff;
-    }
 
 .doc-field {
     flex: 0 0 auto;
@@ -64,6 +28,8 @@
 
 .empty-state {
     padding: 2rem 1rem;
-    border: 1px dashed #8d8d8d;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
     text-align: center;
 }

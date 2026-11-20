@@ -119,6 +119,10 @@ public sealed partial class DocumentsPage : IDisposable
         _page = keepPage ? Math.Min(_page, TotalPages) : 1;
     }
 
+    /// <summary>Every status, so the legend keeps its place when a status has no documents.</summary>
+    private List<KeyValuePair<DocumentStatus, int>> StatusCounts =>
+        Enum.GetValues<DocumentStatus>().Select(s => KeyValuePair.Create(s, _counts.GetValueOrDefault(s))).ToList();
+
     private void SetStatus(DocumentStatus? status)
     {
         _status = status;

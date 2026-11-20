@@ -1,0 +1,105 @@
+@using Modules.Ocr.Domain.Jobs
+@inject IStringLocalizer<MockupText> Text
+@inject IStringLocalizer<OcrText> OcrText
+
+@* The flow Scan → Recognizing → Reviewing → Archived, drawn like the UAE Design System timeline:
+   completed, current and pending steps. The timeline has no error state, so a failed or cancelled
+   document stays on its current step and says why in the step text (the page also shows a callout). *@
+<ol class="doc-steps" aria-label="@Text["Steps.Label"]">
+    @foreach (var step in Steps())
+    {
+        <li class="doc-step is-@step.State.ToString().ToLowerInvariant() @(step.Halted ? "is-halted" : null) @(step.Live ? "is-live" : null)"
+            aria-current="@(step.State == StepState.Current ? "step" : null)">
+            <span class="doc-step-dot" aria-hidden="true">
+                @if (step.State == StepState.Done)
+                {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                }
+                else
+                {
+                    @step.Number
+                }
+            </span>
+            <span class="doc-step-text">
+                <span class="doc-step-name">@step.Name</span>
+                <span class="visually-hidden">(@StateLabel(step.State))</span>
+                @if (step.Detail is not null)
+                {
+                    <span class="doc-step-detail">@step.Detail</span>
+                }
+                @if (step.Progress is { } progress)
+                {
+                    <span class="doc-step-progress" aria-hidden="true"><span style="width: @progress"></span></span>
+                }
+            </span>
+        </li>
+    }
+</ol>
+
+@code {
+    [Parameter, EditorRequired] public DocumentRecord Document { get; set; } = default!;
+
+    private enum StepState
+    {
+        Done,
+        Current,
+        Todo,
+    }
+
+    private sealed record Step(int Number, string Name, StepState State, string? Detail, string? Progress = null, bool Halted = false, bool Live = false);
+
+    private string StateLabel(StepState state) => state switch
+    {
+        StepState.Done => Text["Steps.StateDone"],
+        StepState.Current => Text["Steps.StateCurrent"],
+        _ => Text["Steps.StateTodo"],
+    };
+
+    private IEnumerable<Step> Steps()
+    {
+        var document = Document;
+        var job = document.Job;
+        var status = document.Status;
+
+        yield return new Step(1, Text["Steps.Scan"], StepState.Done,
+            document.UploadedAtUtc is { } uploaded ? FormatDateTime(uploaded) : null);
+
+        yield return status switch
+        {
+            DocumentStatus.Processing when job is { Status: OcrJobStatus.Queued } =>
+                new Step(2, Text["Steps.Recognizing"], StepState.Current, Text["Steps.Waiting"], Live: true),
+            DocumentStatus.Processing when job is { PagesTotal: > 0 } =>
+                new Step(2, Text["Steps.Recognizing"], StepState.Current, Text["Steps.Pages", job.PagesDone, job.PagesTotal],
+                    Percent(job.PagesDone, job.PagesTotal), Live: true),
+            DocumentStatus.Processing =>
+                new Step(2, Text["Steps.Recognizing"], StepState.Current, Text["Steps.InProgress"], Live: true),
+            DocumentStatus.Failed =>
+                new Step(2, Text["Steps.Recognizing"], StepState.Current,
+                    job is null ? Text["Steps.Failed"] : OcrText.JobError(job.ErrorCode), Halted: true),
+            DocumentStatus.Cancelled =>
+                new Step(2, Text["Steps.Recognizing"], StepState.Current, Text["Steps.Cancelled"], Halted: true),
+            _ => new Step(2, Text["Steps.Recognizing"], StepState.Done,
+                document.Confidence is { } confidence ? Text["Steps.Confidence", FormatPercent(confidence)].Value : null),
+        };
+
+        yield return status switch
+        {
+            DocumentStatus.NeedsReview => new Step(3, Text["Steps.Reviewing"], StepState.Current,
+                document.Quality is { Passed: false } check ? Text["Steps.Issues", check.Issues.Count] : Text["Steps.WaitingReviewer"]),
+            DocumentStatus.Archived => new Step(3, Text["Steps.Reviewing"], StepState.Done,
+                document.Approval is { } approval
+                    ? approval.By == DocumentStore.QualityCheckAuthor ? Text["Steps.PassedAuto"].Value : Text["Steps.ApprovedBy", approval.By].Value
+                    : null),
+            _ => new Step(3, Text["Steps.Reviewing"], StepState.Todo, null),
+        };
+
+        yield return status == DocumentStatus.Archived
+            ? new Step(4, Text["Steps.Archived"], StepState.Done,
+                document.Approval is { } archived ? FormatDateTime(archived.AtUtc) : null)
+            : new Step(4, Text["Steps.Archived"], StepState.Todo, null);
+    }
+
+    /// <summary>pages_done only moves at the last step, so show a sliver while work is underway.</summary>
+    private static string Percent(int done, int total) =>
+        string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{Math.Max(5, done * 100 / Math.Max(1, total))}%");
+}

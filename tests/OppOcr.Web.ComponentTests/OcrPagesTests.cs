@@ -1,6 +1,7 @@
 using System.Globalization;
 using Bunit;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Modules.Ocr.Application;
@@ -305,6 +306,30 @@ public sealed class OcrPagesTests : BunitContext
         cut.WaitForAssertion(() => Assert.Contains("اكتمل التعرف الضوئي", cut.Markup, StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task Multi_reads_the_chosen_files_one_at_a_time()
+    {
+        // With Interactive Server the browser starts sending a file as soon as it is opened; files opened
+        // together but read one after another stalled each other until the upload timed out.
+        var log = new List<string>();
+        IBrowserFile[] files =
+        [
+            new RecordingBrowserFile("p1.png", PngBytes, log),
+            new RecordingBrowserFile("p2.jpg", JpegBytes, log),
+            new RecordingBrowserFile("p3.png", PngBytes, log),
+        ];
+        var cut = Render<OcrUploadPage>();
+        cut.Find("#mode-Multi").Change(true);
+        var input = cut.FindComponent<InputFile>();
+        await cut.InvokeAsync(() => input.Instance.OnChange.InvokeAsync(new InputFileChangeEventArgs(files)));
+        cut.Find("#file-name").Input("Contract");
+
+        await cut.Find("#upload-button").ClickAsync(new MouseEventArgs());
+
+        cut.WaitForAssertion(() => Assert.Single(_ocr.Registry));
+        Assert.Equal(["open p1.png", "end p1.png", "open p2.jpg", "end p2.jpg", "open p3.png", "end p3.png"], log);
+    }
+
     private static CancellationToken Ct => Xunit.TestContext.Current.CancellationToken;
 
     private static void Upload(IRenderedComponent<OcrUploadPage> cut, string name)
@@ -323,4 +348,43 @@ public sealed class OcrPagesTests : BunitContext
 
     private static void SetCulture(string name) =>
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = LocalizationSetup.CreateCulture(name);
+
+    /// <summary>A browser file that writes down when it is opened and when it has been read to the end.</summary>
+    private sealed class RecordingBrowserFile(string name, byte[] content, List<string> log) : IBrowserFile
+    {
+        public string Name => name;
+
+        public DateTimeOffset LastModified => DateTimeOffset.UnixEpoch;
+
+        public long Size => content.Length;
+
+        public string ContentType => "application/octet-stream";
+
+        public Stream OpenReadStream(long maxAllowedSize = 512000, CancellationToken cancellationToken = default)
+        {
+            log.Add($"open {name}");
+            return new RecordingStream(name, content, log);
+        }
+    }
+
+    private sealed class RecordingStream(string name, byte[] content, List<string> log) : MemoryStream(content, writable: false)
+    {
+        private bool _ended;
+
+        public override int Read(byte[] buffer, int offset, int count) => Record(base.Read(buffer, offset, count));
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
+            Record(await base.ReadAsync(buffer, cancellationToken));
+
+        private int Record(int read)
+        {
+            if (read == 0 && !_ended)
+            {
+                _ended = true;
+                log.Add($"end {name}");
+            }
+
+            return read;
+        }
+    }
 }

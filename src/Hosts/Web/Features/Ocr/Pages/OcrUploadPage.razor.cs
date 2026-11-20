@@ -297,7 +297,8 @@ public sealed partial class OcrUploadPage : IDisposable
 
     private async Task<Result<OcrJob>> UploadPagesAsync(List<IBrowserFile> files, string name)
     {
-        var streams = files.Select(f => f.OpenReadStream(maxAllowedSize: Math.Max(f.Size, 1), _disposed.Token)).ToList();
+        // Opened one at a time as the pages are read: opening them all at once stalls the upload.
+        var streams = files.Select(f => new DeferredBrowserFileStream(f, _disposed.Token)).ToList();
         try
         {
             var pages = files.Zip(streams, (file, stream) => new OcrPageFile(file.Name, file.Size, stream)).ToList();

@@ -39,7 +39,11 @@ public sealed class LocalizationTests
     {
         var manager = new ResourceManager(typeof(OcrText).FullName!, typeof(OcrText).Assembly);
         var keys = Keys(manager, CultureInfo.InvariantCulture);
-        string[] serviceCodes = ["unauthorized", "not_found", "file_too_large", "too_many_pages", "unsupported_file", "bad_image", "invalid_request", "internal_error", "processing_error"];
+        string[] serviceCodes =
+        [
+            "unauthorized", "not_found", "file_too_large", "too_many_pages", "unsupported_file", "bad_image", "invalid_request", "internal_error",
+            "processing_error", OcrServiceErrorCodes.FileDownloadFailed,
+        ];
         string[] moduleCodes = [OcrServiceErrorCodes.ServiceUnavailable, OcrServiceErrorCodes.RemoteJobLost];
 
         Assert.All(serviceCodes.Concat(moduleCodes), code => Assert.Contains($"JobError.{code}", keys));

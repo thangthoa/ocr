@@ -4,7 +4,9 @@ using Modules.Ocr.Application.Features.DeleteOcrJob;
 using Modules.Ocr.Application.Features.DownloadOcrResult;
 using Modules.Ocr.Application.Features.GetOcrJob;
 using Modules.Ocr.Application.Features.GetOcrPageImage;
+using Modules.Ocr.Application.Features.GetOcrSourceFile;
 using Modules.Ocr.Application.Features.ListOcrJobs;
+using Modules.Ocr.Application.Features.ReceiveOcrJobCallback;
 using Modules.Ocr.Application.Features.SyncTrackedOcrJobs;
 using Modules.Ocr.Application.Features.UploadOcrFile;
 using Modules.Ocr.Application.Features.UploadOcrPages;
@@ -26,6 +28,8 @@ public static class DependencyInjection
         services.AddScoped<GetOcrPageImageHandler>();
         services.AddScoped<DownloadOcrResultHandler>();
         services.AddScoped<SyncTrackedOcrJobsHandler>();
+        services.AddScoped<GetOcrSourceFileHandler>();
+        services.AddScoped<ReceiveOcrJobCallbackHandler>();
         return services;
     }
 }

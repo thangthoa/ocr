@@ -6,6 +6,9 @@ public enum ErrorType
     NotFound,
     Conflict,
     Failure,
+
+    /// <summary>The caller could not prove who it is (for example a webhook with a bad signature).</summary>
+    Unauthorized,
 }
 
 public sealed record Error(string Code, string Message, ErrorType Type)
@@ -17,4 +20,6 @@ public sealed record Error(string Code, string Message, ErrorType Type)
     public static Error Conflict(string code, string message) => new(code, message, ErrorType.Conflict);
 
     public static Error Failure(string code, string message) => new(code, message, ErrorType.Failure);
+
+    public static Error Unauthorized(string code, string message) => new(code, message, ErrorType.Unauthorized);
 }

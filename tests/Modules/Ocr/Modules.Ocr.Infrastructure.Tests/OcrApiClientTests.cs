@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Domain.Jobs;
 using Modules.Ocr.Infrastructure.Api;
@@ -168,11 +170,108 @@ public sealed class OcrApiClientTests
         Assert.Equal("النص", await reader.ReadToEndAsync(Ct));
     }
 
-    private static OcrApiClient Create(StubHandler handler)
+    [Fact]
+    public async Task Submit_with_an_app_url_sends_a_link_the_service_downloads_during_the_request()
+    {
+        var store = new OcrSourceFileStore(TimeProvider.System);
+        var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
+        byte[]? downloaded = null;
+        string? contentType = null;
+        handler.OnRequest = () =>
+        {
+            // What the service does before it answers: fetch the file from the link.
+            var file = store.Open(Token(FormValue(handler.Body, "file_url")!))!;
+            using var copy = new MemoryStream();
+            file.Content.CopyTo(copy);
+            (downloaded, contentType) = (copy.ToArray(), file.ContentType);
+        };
+
+        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "hợp đồng.png", OcrDocumentType.Printed, Ct);
+
+        Assert.True(result.IsSuccess);
+        var fileUrl = FormValue(handler.Body, "file_url")!;
+        Assert.StartsWith("https://ocr.example/api/ocr-files/", fileUrl, StringComparison.Ordinal);
+        Assert.EndsWith("/h%E1%BB%A3p%20%C4%91%E1%BB%93ng.png", fileUrl, StringComparison.Ordinal);
+        Assert.Equal(64, Token(fileUrl).Length);
+        Assert.DoesNotContain("filename=", handler.Body, StringComparison.Ordinal);
+        Assert.Equal("printed", FormValue(handler.Body, "doc_type"));
+        Assert.Equal([1, 2, 3], downloaded);
+        Assert.Equal("image/png", contentType);
+    }
+
+    [Fact]
+    public async Task Submit_link_stops_working_once_the_service_has_answered()
+    {
+        var store = new OcrSourceFileStore(TimeProvider.System);
+        var handler = new StubHandler(HttpStatusCode.UnprocessableEntity, """{"error":{"code":"file_download_failed","message":"HTTP 404"}}""");
+
+        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", OcrDocumentType.Printed, Ct);
+
+        Assert.Equal(OcrServiceErrorCodes.FileDownloadFailed, result.Error!.Code);
+        Assert.Equal(ErrorType.Validation, result.Error.Type);
+        Assert.Null(store.Open(Token(FormValue(handler.Body, "file_url")!)));
+        Assert.Equal(0, store.Count);
+    }
+
+    [Fact]
+    public async Task Submit_link_is_removed_when_the_service_cannot_be_reached()
+    {
+        var store = new OcrSourceFileStore(TimeProvider.System);
+
+        var result = await Create(new StubHandler(new HttpRequestException("connection refused")), LinkOptions(), store)
+            .SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", OcrDocumentType.Printed, Ct);
+
+        Assert.Equal(ErrorType.Failure, result.Error!.Type);
+        Assert.Equal(0, store.Count);
+    }
+
+    [Fact]
+    public async Task Submit_asks_for_a_callback_only_when_a_secret_is_configured()
+    {
+        var withSecret = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
+        var withoutSecret = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_b","status":"queued"}""");
+
+        await Create(withSecret, LinkOptions(callbackSecret: "s3cret")).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
+        await Create(withoutSecret, LinkOptions()).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
+
+        Assert.Equal("https://ocr.example/api/ocr-callback", FormValue(withSecret.Body, "callback_url"));
+        Assert.Null(FormValue(withoutSecret.Body, "callback_url"));
+        Assert.DoesNotContain("s3cret", withSecret.Body, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Submit_without_an_app_url_uploads_the_file_and_asks_for_no_callback()
+    {
+        var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
+
+        await Create(handler, new OcrApiOptions { CallbackSecret = "s3cret" }).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
+
+        Assert.Contains("filename=a.png", handler.Body, StringComparison.Ordinal);
+        Assert.Null(FormValue(handler.Body, "file_url"));
+        Assert.Null(FormValue(handler.Body, "callback_url"));
+    }
+
+    private static OcrApiOptions LinkOptions(string? callbackSecret = null) =>
+        new() { AppUrl = new Uri("https://ocr.example/"), CallbackSecret = callbackSecret };
+
+    /// <summary>The value of a text field in a multipart body, or null when there is no such field.</summary>
+    private static string? FormValue(string body, string name)
+    {
+        var match = Regex.Match(body, $"Content-Disposition: form-data; name=\"?{name}\"?\r\n(?:[^\r\n]+\r\n)*\r\n(?<value>[^\r\n]*)");
+        return match.Success ? match.Groups["value"].Value : null;
+    }
+
+    private static string Token(string fileUrl) => new Uri(fileUrl).Segments[^2].TrimEnd('/');
+
+    private static OcrApiClient Create(StubHandler handler, OcrApiOptions? options = null, OcrSourceFileStore? store = null)
     {
         var http = new HttpClient(handler) { BaseAddress = new Uri("http://ocr.test/") };
         http.DefaultRequestHeaders.Add(OcrApiClient.ApiKeyHeader, "secret");
-        return new OcrApiClient(http, NullLogger<OcrApiClient>.Instance);
+        return new OcrApiClient(
+            http,
+            store ?? new OcrSourceFileStore(TimeProvider.System),
+            Options.Create(options ?? new OcrApiOptions()),
+            NullLogger<OcrApiClient>.Instance);
     }
 
     private sealed class StubHandler : HttpMessageHandler
@@ -195,11 +294,15 @@ public sealed class OcrApiClientTests
 
         public string Body { get; private set; } = string.Empty;
 
+        /// <summary>Runs while the request is "on the service", once its body has been read.</summary>
+        public Action? OnRequest { get; set; }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Request = request;
             if (request.Content is not null)
                 Body = await request.Content.ReadAsStringAsync(cancellationToken);
+            OnRequest?.Invoke();
             if (_exception is not null)
                 throw _exception;
 

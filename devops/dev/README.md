@@ -29,6 +29,25 @@ Server cần thêm khoảng 4 GB RAM; editor khởi động 1–2 phút sau mỗ
 
 Server đã cài từ trước: chạy lại `./devops/dev/setup.sh` một lần để thêm các biến trên vào `.env`, rồi deploy.
 
+## Gửi file bằng link + nhận kết quả qua callback (ADR 0006)
+
+Chỉ bật trên server mà `https://ocr.dc1.merket.io` trỏ tới (máy chủ OCR chỉ cho phép host này, và chỉ https).
+
+- `OCR_APP_URL=https://ocr.dc1.merket.io`: máy chủ OCR tự tải file từ link
+  `https://ocr.dc1.merket.io/api/ocr-files/<token>/<tên file>`, thay vì app gửi file lên (nhanh hơn ~15 lần từ
+  mạng văn phòng). Link chỉ sống trong vài giây của request `POST /v1/jobs`.
+- `OCR_CALLBACK_SECRET`: khoá bên AI gửi riêng (không qua chat/email chung). Có khoá thì máy chủ OCR báo
+  kết quả về `https://ocr.dc1.merket.io/api/ocr-callback` ngay khi job xong, kèm chữ ký mà app kiểm tra.
+- Reverse proxy của `ocr.dc1.merket.io` phải chuyển `/api/ocr-files/*` và `/api/ocr-callback` vào app
+  (cổng `APP_PORT`). Đây là hai đường duy nhất máy chủ OCR gọi vào.
+- Để trống `OCR_APP_URL` thì app gửi file thẳng như trước. Server đã cài từ trước: chạy lại `setup.sh` để
+  thêm hai biến vào `.env`, điền giá trị, rồi deploy.
+- Kiểm tra sau deploy: upload một file, rồi xem `./devops/dev/logs.sh`. Phải có các dòng
+  `GET /api/ocr-files/*** responded 200`, `Ocr: submitted job …` và sau đó
+  `Ocr: callback for job … (Done, …)`. Nếu màn upload báo không tải được file
+  (`file_download_failed`), máy chủ OCR không vào được link: kiểm tra `OCR_APP_URL` và reverse proxy. Nếu
+  log có `rejected a callback (callback_rejected)`, `OCR_CALLBACK_SECRET` sai hoặc đồng hồ server lệch quá 5 phút.
+
 ## Lần đầu trên server
 
 ```bash
@@ -63,7 +82,7 @@ Giữ 3 image gần nhất để rollback, image cũ hơn bị xoá. Trạng th�
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `APP_PORT` | trong `.env`, không có thì `5286` | Cổng app trên server |
-| `ENV_FILE` | `devops/dev/.env` | File chứa `OCR_API_KEY`, `OCR_API_BASE_URL` |
+| `ENV_FILE` | `devops/dev/.env` | File chứa `OCR_API_KEY`, `OCR_API_BASE_URL`, `OCR_APP_URL`, `OCR_CALLBACK_SECRET` |
 | `CONTAINER_NAME` | `oppocr-dev` | Tên container |
 | `IMAGE_NAME` | `oppocr-web` | Tên image |
 | `KEEP_IMAGES` | `3` | Số image giữ lại để rollback |

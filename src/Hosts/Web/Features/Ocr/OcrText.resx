@@ -117,6 +117,7 @@
   <data name="JobError.processing_error" xml:space="preserve"><value>Processing failed on the OCR service. Upload the file again to retry.</value></data>
   <data name="JobError.service_unavailable" xml:space="preserve"><value>The OCR service could not be reached.</value></data>
   <data name="JobError.remote_job_lost" xml:space="preserve"><value>The OCR service no longer has this job (it may have been restarted).</value></data>
+  <data name="JobError.file_download_failed" xml:space="preserve"><value>The OCR service could not download the file from this application. Try again; if it keeps failing, check the configuration.</value></data>
   <data name="JobError.unknown" xml:space="preserve"><value>OCR failed ({0}).</value></data>
   <data name="Warning.Repeated" xml:space="preserve"><value>The full-page read repeated itself; the page was read block by block (slower).</value></data>
   <data name="Warning.AllRepeated" xml:space="preserve"><value>Every full-page read repeated itself; the text may be incomplete.</value></data>

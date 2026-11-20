@@ -34,6 +34,15 @@ public static class OcrServiceErrorCodes
 
     /// <summary>The service does not offer <c>GET /v1/jobs</c> yet.</summary>
     public const string ListNotSupported = "list_not_supported";
+
+    /// <summary>Sent by the service: it could not download the file from the link it was given (ADR 0006).</summary>
+    public const string FileDownloadFailed = "file_download_failed";
+
+    /// <summary>A callback without a valid signature, too old, or received while callbacks are not configured.</summary>
+    public const string CallbackRejected = "callback_rejected";
+
+    /// <summary>A correctly signed callback whose body is not a job.</summary>
+    public const string CallbackInvalid = "callback_invalid";
 }
 
 public static class OcrErrors

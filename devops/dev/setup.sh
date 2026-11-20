@@ -20,6 +20,9 @@ add_setting_if_missing() {
 }
 add_setting_if_missing DOCS_EDITOR_PUBLIC_URL "http://localhost:8085"
 add_setting_if_missing DOCS_PORT "8085"
+# OCR file links + callbacks (ADR 0006); empty keeps uploading files directly.
+add_setting_if_missing OCR_APP_URL ""
+add_setting_if_missing OCR_CALLBACK_SECRET ""
 
 if ! grep -Eq '^DOCS_EDITOR_JWT_SECRET=.{32,}' "$ENV_FILE"; then
     secret="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
@@ -32,4 +35,5 @@ if ! grep -Eq '^DOCS_EDITOR_JWT_SECRET=.{32,}' "$ENV_FILE"; then
 fi
 
 grep -Eq '^OCR_API_KEY=.+' "$ENV_FILE" || log "Set OCR_API_KEY in $ENV_FILE"
+grep -Eq '^OCR_APP_URL=.+' "$ENV_FILE" || log "On the server behind https://ocr.dc1.merket.io, set OCR_APP_URL and OCR_CALLBACK_SECRET in $ENV_FILE (ADR 0006)"
 log "Check DOCS_EDITOR_PUBLIC_URL in $ENV_FILE (the address browsers use for the Word editor), then run ./devops/dev/deploy.sh"

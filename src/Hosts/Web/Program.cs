@@ -10,6 +10,7 @@ using OppOcr.Web.Features.Mockups.Word;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddDotEnvInDevelopment();
@@ -41,7 +42,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseSerilogRequestLogging();
+// Serilog's default request properties, except that OCR file link tokens are hidden (ADR 0006).
+app.UseSerilogRequestLogging(options => options.GetMessageTemplateProperties = (http, path, elapsedMs, statusCode) =>
+[
+    new LogEventProperty("RequestMethod", new ScalarValue(http.Request.Method)),
+    new LogEventProperty("RequestPath", new ScalarValue(OcrServiceEndpoints.PathForLogs(path))),
+    new LogEventProperty("StatusCode", new ScalarValue(statusCode)),
+    new LogEventProperty("Elapsed", new ScalarValue(elapsedMs)),
+]);
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
@@ -53,6 +61,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapOcrEndpoints();
+app.MapOcrServiceEndpoints();
 app.MapWordEditorEndpoints();
 app.MapApprovedDocumentEndpoints();
 app.MapCultureEndpoint();

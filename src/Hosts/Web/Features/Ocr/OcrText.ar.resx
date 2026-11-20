@@ -117,6 +117,7 @@
   <data name="JobError.processing_error" xml:space="preserve"><value>فشلت المعالجة على خدمة OCR. ارفع الملف مجددًا لإعادة المحاولة.</value></data>
   <data name="JobError.service_unavailable" xml:space="preserve"><value>تعذّر الاتصال بخدمة OCR.</value></data>
   <data name="JobError.remote_job_lost" xml:space="preserve"><value>لم تعد خدمة OCR تحتفظ بهذه المهمة (ربما أُعيد تشغيلها).</value></data>
+  <data name="JobError.file_download_failed" xml:space="preserve"><value>تعذّر على خدمة OCR تنزيل الملف من هذا التطبيق. حاول مجددًا؛ وإذا تكرّر الخطأ فتحقّق من الإعدادات.</value></data>
   <data name="JobError.unknown" xml:space="preserve"><value>فشل التعرف الضوئي ({0}).</value></data>
   <data name="Warning.Repeated" xml:space="preserve"><value>تكرّر النص عند قراءة الصفحة كاملة؛ فقُرئت الصفحة كتلةً كتلة (أبطأ).</value></data>
   <data name="Warning.AllRepeated" xml:space="preserve"><value>تكرّر النص في كل قراءات الصفحة الكاملة؛ قد يكون النص ناقصًا.</value></data>

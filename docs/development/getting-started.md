@@ -17,6 +17,11 @@ cp .env.example .env      # điền OCR_API_KEY (và OCR_API_BASE_URL nếu khá
 | -------------------- | ------------------- | ---------------------------------------------------------------- |
 | `OCR_API_BASE_URL` | `Ocr:Api:BaseUrl` | Địa chỉ dịch vụ OCR, mặc định `http://n2.ckey.vn:1436` |
 | `OCR_API_KEY`      | `Ocr:Api:ApiKey`  | Khoá API, bắt buộc; chỉ ở server, không commit             |
+| `OCR_APP_URL`         | `Ocr:Api:AppUrl`         | Tuỳ chọn. Địa chỉ https máy chủ OCR dùng để gọi app (`https://ocr.dc1.merket.io`). Có thì máy chủ OCR tự tải file qua link thay vì app gửi file lên (ADR 0006) |
+| `OCR_CALLBACK_SECRET` | `Ocr:Api:CallbackSecret` | Tuỳ chọn. Khoá ký callback, bên AI gửi riêng. Có cùng `OCR_APP_URL` thì máy chủ OCR báo kết quả về `/api/ocr-callback` |
+
+Trên máy dev để trống `OCR_APP_URL`: máy chủ OCR không gọi được `localhost`, nên app gửi file thẳng như trước,
+và trạng thái job vẫn cập nhật bằng cách hỏi định kỳ.
 
 Ở môi trường Development, app tự đọc `.env` ở thư mục gốc repo (biến môi trường thật vẫn được ưu tiên).
 Môi trường khác phải đặt biến môi trường như bình thường. Thiếu khoá thì app dừng ngay khi khởi động.

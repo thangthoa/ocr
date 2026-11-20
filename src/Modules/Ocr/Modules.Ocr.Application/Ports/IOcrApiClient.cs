@@ -10,6 +10,10 @@ namespace Modules.Ocr.Application.Ports;
 /// </summary>
 public interface IOcrApiClient
 {
+    /// <summary>
+    /// Creates a job for one file. How the file reaches the service (uploaded, or downloaded by the
+    /// service from a link, ADR 0006) is the adapter's choice; the call returns once the service has it.
+    /// </summary>
     /// <param name="content">Read to the end; the caller keeps ownership and disposes it.</param>
     Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken);
 

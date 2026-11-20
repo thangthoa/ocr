@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Application.Ports;
 using Modules.Ocr.Domain.Jobs;
@@ -11,7 +12,11 @@ using OppOcr.BuildingBlocks.Application.Results;
 namespace Modules.Ocr.Infrastructure.Api;
 
 /// <summary>HTTP adapter for the OCR service. Base address, key and timeout are set at registration.</summary>
-internal sealed partial class OcrApiClient(HttpClient http, ILogger<OcrApiClient> logger) : IOcrApiClient
+internal sealed partial class OcrApiClient(
+    HttpClient http,
+    OcrSourceFileStore sourceFiles,
+    IOptions<OcrApiOptions> options,
+    ILogger<OcrApiClient> logger) : IOcrApiClient
 {
     public const string ApiKeyHeader = "X-API-Key";
 
@@ -22,12 +27,28 @@ internal sealed partial class OcrApiClient(HttpClient http, ILogger<OcrApiClient
 
     public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
     {
+        var settings = options.Value;
         using var form = new MultipartFormDataContent();
-        // StreamContent disposes its stream; the caller owns `content`, so hand over a wrapper.
-        var file = new StreamContent(new NonClosingStream(content));
-        file.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        form.Add(file, "file", fileName);
         form.Add(new StringContent(documentType.ToWire()), "doc_type");
+
+        // Uploading from the office network to the service is very slow; the service downloads the same
+        // file from this application's public address many times faster (ADR 0006). It does so before
+        // answering, so the link is only needed while this request runs.
+        using var link = settings.AppUrl is null ? null : await PublishAsync(content, fileName, settings, cancellationToken);
+        if (link is null)
+        {
+            // StreamContent disposes its stream; the caller owns `content`, so hand over a wrapper.
+            var file = new StreamContent(new NonClosingStream(content));
+            file.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            form.Add(file, "file", fileName);
+        }
+        else
+        {
+            form.Add(new StringContent(AppLink(settings, $"{OcrServicePaths.SourceFiles}/{link.Token}/{Uri.EscapeDataString(fileName)}")), "file_url");
+        }
+
+        if (settings.CallbacksEnabled)
+            form.Add(new StringContent(AppLink(settings, OcrServicePaths.Callback)), "callback_url");
 
         return await SendForJobAsync(() => new HttpRequestMessage(HttpMethod.Post, "v1/jobs") { Content = form }, cancellationToken);
     }
@@ -101,6 +122,26 @@ internal sealed partial class OcrApiClient(HttpClient http, ILogger<OcrApiClient
     }
 
     private static string JobPath(OcrJobId jobId) => $"v1/jobs/{Uri.EscapeDataString(jobId.Value)}";
+
+    private static string AppLink(OcrApiOptions settings, string path) => settings.AppUrl!.AbsoluteUri.TrimEnd('/') + "/" + path;
+
+    private async Task<OcrSourceFileStore.Lease> PublishAsync(Stream content, string fileName, OcrApiOptions settings, CancellationToken cancellationToken)
+    {
+        byte[] bytes;
+        if (content.CanSeek)
+        {
+            bytes = new byte[content.Length - content.Position];
+            await content.ReadExactlyAsync(bytes, cancellationToken);
+        }
+        else
+        {
+            using var buffer = new MemoryStream();
+            await content.CopyToAsync(buffer, cancellationToken);
+            bytes = buffer.ToArray();
+        }
+
+        return sourceFiles.Add(bytes, fileName, TimeSpan.FromMinutes(settings.FileLinkLifetimeMinutes));
+    }
 
     private async Task<Result<OcrJob>> SendForJobAsync(Func<HttpRequestMessage> createRequest, CancellationToken cancellationToken)
     {

@@ -39,6 +39,41 @@ public sealed class OcrConfigurationTests
         Assert.Throws<OptionsValidationException>(() => Resolve(configuration));
     }
 
+    [Fact]
+    public void File_links_and_callbacks_are_off_unless_configured()
+    {
+        var options = Resolve(Build(new() { ["OCR_API_BASE_URL"] = "http://x:1", ["OCR_API_KEY"] = "k" }));
+
+        Assert.Null(options.AppUrl);
+        Assert.False(options.CallbacksEnabled);
+        Assert.Equal(15, options.FileLinkLifetimeMinutes);
+    }
+
+    [Fact]
+    public void App_url_and_callback_secret_come_from_flat_env_variables()
+    {
+        var options = Resolve(Build(new()
+        {
+            ["OCR_API_BASE_URL"] = "http://x:1",
+            ["OCR_API_KEY"] = "k",
+            ["OCR_APP_URL"] = "https://ocr.dc1.merket.io",
+            ["OCR_CALLBACK_SECRET"] = "s",
+        }));
+
+        Assert.Equal(new Uri("https://ocr.dc1.merket.io"), options.AppUrl);
+        Assert.Equal("s", options.CallbackSecret);
+        Assert.True(options.CallbacksEnabled);
+    }
+
+    [Fact]
+    public void Plain_http_app_url_fails_validation()
+    {
+        // The OCR service only downloads from, and calls back to, https addresses.
+        var configuration = Build(new() { ["OCR_API_BASE_URL"] = "http://x:1", ["OCR_API_KEY"] = "k", ["OCR_APP_URL"] = "http://ocr.dc1.merket.io" });
+
+        Assert.Throws<OptionsValidationException>(() => Resolve(configuration));
+    }
+
     private static IConfiguration Build(Dictionary<string, string?> values)
     {
         values["Ocr:Worker:Enabled"] = "false";

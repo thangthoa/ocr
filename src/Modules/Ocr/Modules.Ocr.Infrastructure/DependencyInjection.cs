@@ -30,6 +30,9 @@ public static class DependencyInjection
             http.DefaultRequestHeaders.Add(OcrApiClient.ApiKeyHeader, options.ApiKey);
         });
         services.AddTransient<IOcrApiClient>(sp => sp.GetRequiredService<OcrApiClient>());
+        services.AddSingleton<OcrSourceFileStore>();
+        services.AddSingleton<IOcrSourceFiles>(sp => sp.GetRequiredService<OcrSourceFileStore>());
+        services.AddSingleton<IOcrCallbackReader, OcrCallbackReader>();
         services.AddSingleton<IPdfComposer, ImagePdfComposer>();
 
         services.AddOptions<OcrWorkerOptions>().Bind(configuration.GetSection(OcrWorkerOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
@@ -50,5 +53,9 @@ public static class DependencyInjection
             options.BaseUrl = new Uri(baseUrl, UriKind.Absolute);
         if (configuration[OcrApiOptions.ApiKeyVariable] is { Length: > 0 } apiKey)
             options.ApiKey = apiKey;
+        if (configuration[OcrApiOptions.AppUrlVariable] is { Length: > 0 } appUrl)
+            options.AppUrl = new Uri(appUrl, UriKind.Absolute);
+        if (configuration[OcrApiOptions.CallbackSecretVariable] is { Length: > 0 } callbackSecret)
+            options.CallbackSecret = callbackSecret;
     }
 }

@@ -107,7 +107,8 @@ và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục
 - Chạy local có editor: thêm `DOCS_EDITOR_JWT_SECRET` vào `.env` rồi
   `docker-compose -f devops/local/docker-compose.yml --profile word up -d --build`.
 - Extension chặn quảng cáo/tracker (uBlock, AdBlock, AdGuard, Brave Shields…) chặn file `Analytics.js` của
-  OnlyOffice. Khi file này bị chặn, editor dừng ở khung xám mà không báo lỗi. Sau 45 giây editor chưa báo sẵn sàng
+  OnlyOffice, khiến editor dừng ở khung xám. Vì vậy document server chạy image đã vá (`devops/docker/documentserver.Dockerfile`,
+  ADR 0004): file đó được nạp dưới tên khác. Nếu extension vẫn chặn một file khác, sau 45 giây editor chưa báo sẵn sàng
   (`onAppReady`), trang hiện cảnh báo hướng dẫn tắt chặn cho trang (extension cho phép theo trang đang mở, không theo
 địa chỉ editor) và nút *Try again*. Editor khởi động muộn thì cảnh báo tự biến mất.
 

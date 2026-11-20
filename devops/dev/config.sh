@@ -5,6 +5,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 IMAGE_NAME="${IMAGE_NAME:-oppocr-web}"
+# OnlyOffice Docs, built locally from devops/docker/documentserver.Dockerfile.
+DOCS_IMAGE="${DOCS_IMAGE:-oppocr-documentserver:9.4.0.1}"
 CONTAINER_NAME="${CONTAINER_NAME:-oppocr-dev}"
 ENV_FILE="${ENV_FILE:-$SCRIPT_DIR/.env}"
 STATE_DIR="$SCRIPT_DIR/.state"
@@ -27,7 +29,7 @@ compose() {
     shift
     local cmd=(docker compose)
     docker compose version >/dev/null 2>&1 || cmd=(docker-compose)
-    IMAGE_TAG="$tag" IMAGE_NAME="$IMAGE_NAME" ENV_FILE="$ENV_FILE" CONTAINER_NAME="$CONTAINER_NAME" APP_PORT="$(app_port)" DOCS_PORT="$(docs_port)" \
+    IMAGE_TAG="$tag" IMAGE_NAME="$IMAGE_NAME" DOCS_IMAGE="$DOCS_IMAGE" ENV_FILE="$ENV_FILE" CONTAINER_NAME="$CONTAINER_NAME" APP_PORT="$(app_port)" DOCS_PORT="$(docs_port)" \
         "${cmd[@]}" -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR" -p "$CONTAINER_NAME" "$@"
 }
 

@@ -22,7 +22,12 @@ services:
         max-file: "3"
 
   documentserver:
-    image: onlyoffice/documentserver:9.4.0.1
+    # OnlyOffice Docs 9.4.0.1, patched so ad blockers do not stop the editor (devops/docker/documentserver.Dockerfile).
+    image: ${DOCS_IMAGE:-oppocr-documentserver:9.4.0.1}
+    pull_policy: never
+    build:
+      context: ../docker
+      dockerfile: documentserver.Dockerfile
     container_name: ${CONTAINER_NAME:-oppocr-dev}-docs
     restart: unless-stopped
     environment:

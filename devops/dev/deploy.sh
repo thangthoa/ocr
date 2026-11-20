@@ -25,6 +25,10 @@ fi
 log "Building $IMAGE_NAME:$TAG"
 docker build -f devops/docker/Dockerfile -t "$IMAGE_NAME:$TAG" .
 
+# Rebuilt on every deploy (from cache when nothing changed) so a change to the patch is never skipped.
+log "Building $DOCS_IMAGE"
+docker build -f devops/docker/documentserver.Dockerfile -t "$DOCS_IMAGE" devops/docker
+
 mkdir -p "$STATE_DIR"
 PREVIOUS="$(current_tag)"
 log "Starting $IMAGE_NAME:$TAG"

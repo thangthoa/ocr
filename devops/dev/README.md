@@ -18,9 +18,14 @@ Server cần thêm khoảng 4 GB RAM; editor khởi động 1–2 phút sau mỗ
 - `DOCS_EDITOR_JWT_SECRET`: secret dùng chung giữa app và OnlyOffice (≥ 32 ký tự). `setup.sh` tự sinh.
 - File Word đã sửa nằm trên volume `<CONTAINER_NAME>_documents`; deploy và `stop.sh` không xoá volume.
 - Bản Community giới hạn 20 người sửa cùng lúc; production cần license Enterprise.
-- Editor đứng mãi ở khung xám, Console báo `Analytics.js net::ERR_FAILED` / `ERR_BLOCKED_BY_CLIENT`: extension chặn
-  quảng cáo trên trình duyệt đang chặn editor. Tắt extension cho trang app (đang mở trang nào thì cho phép trang đó;
-  với `localhost` là cả hai cổng), hoặc mở bằng cửa sổ ẩn danh.
+- OnlyOffice chạy từ image `oppocr-documentserver:9.4.0.1`, do `deploy.sh` build từ
+  `devops/docker/documentserver.Dockerfile` (image gốc 9.4.0.1, đổi tên file `Analytics.js` mà extension chặn quảng
+  cáo hay chặn; xem ADR 0004). Lần deploy đầu sau thay đổi này container document server được tạo lại, khởi động
+  mất 1–2 phút.
+- Editor vẫn đứng ở khung xám: mở Console (F12). Nếu có file bị `ERR_BLOCKED_BY_CLIENT`, extension đang chặn một
+  file khác của editor: tắt extension cho trang app (đang mở trang nào thì cho phép trang đó), hoặc mở bằng cửa sổ
+  ẩn danh. Nếu Console báo `Analytics.js`, document server vẫn chạy image cũ: kiểm tra
+  `docker ps --format '{{.Names}} {{.Image}}'`.
 
 Server đã cài từ trước: chạy lại `./devops/dev/setup.sh` một lần để thêm các biến trên vào `.env`, rồi deploy.
 

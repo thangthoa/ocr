@@ -27,7 +27,11 @@ services:
 
   documentserver:
     profiles: ["word"]
-    image: onlyoffice/documentserver:9.4.0.1
+    # OnlyOffice Docs 9.4.0.1, patched so ad blockers do not stop the editor (devops/docker/documentserver.Dockerfile).
+    image: oppocr-documentserver:9.4.0.1
+    build:
+      context: ../docker
+      dockerfile: documentserver.Dockerfile
     container_name: oppocr-local-docs
     environment:
       JWT_ENABLED: "true"

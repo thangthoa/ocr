@@ -34,6 +34,16 @@ tiêu đề, chữ Ả Rập phải sang trái), và mỗi lần lưu là một 
   render một lần. Ảnh render bằng chính engine của editor nên giống hệt khi mở Word. Trình duyệt chỉ tải ảnh,
   không nạp editor. Document server tắt hoặc lỗi thì trang hiện text OCR kèm nút thử lại.
 - Không cấu hình document server thì tính năng tự ẩn; phần còn lại của app chạy bình thường.
+- **Chạy được khi trình duyệt chặn quảng cáo** (bổ sung 2026-11-20): editor nạp `web-apps/apps/common/Analytics.js`
+  như một module bắt buộc (`require.config` trong `apps/*/main/app.js`). Extension chặn quảng cáo/tracker
+  (uBlock Origin, AdGuard, Brave Shields) và web filter dùng chung danh sách chặn mọi URL có `analytics.js`, nên editor
+  dừng ở khung xám. Image `oppocr-documentserver:9.4.0.1` (`devops/docker/documentserver.Dockerfile`) dựng từ image
+  gốc và chỉ thay một điểm: module được nạp dưới tên `common/AppHooks.js`, nội dung file giữ nguyên. Build fail nếu
+  phiên bản OnlyOffice mới nạp module theo cách khác, để không âm thầm phát hành editor vẫn bị chặn.
+  - Đã thử: chặn `*nalytics.js*` (`ERR_BLOCKED_BY_CLIENT`). Với image gốc, editor không khởi động. Với image đã vá,
+    editor khởi động bình thường.
+  - Cache trình duyệt: mã trong URL (`/9.4.0-<hash>/`) sinh lại mỗi lần container khởi động, nên sau deploy
+    trình duyệt tải bản mới.
 
 ## Phương án đã cân nhắc
 
@@ -43,12 +53,23 @@ tiêu đề, chữ Ả Rập phải sang trái), và mỗi lần lưu là một 
 - **Tải về, sửa, upload lại**: đơn giản nhưng không phải sửa trực tiếp.
 - **Collabora Online**: giấy phép MPL, nhưng phải cài đặt giao thức WOPI (nhiều endpoint hơn) và định dạng DOCX
   thường lệch hơn OnlyOffice.
+- Với việc editor bị chặn:
+  - **Chỉ hướng dẫn người dùng tắt chặn cho trang**: không phải sửa image, nhưng mỗi người dùng (kể cả khách hàng)
+    phải tự làm, và web filter của công ty thì người dùng không tắt được. Cảnh báo sau 45 giây vẫn giữ, phòng khi
+    có file khác bị chặn.
+  - **Đổi URL ở reverse proxy** (`sub_filter` của nginx): nginx trước document server không nằm trong repo, phải
+    tắt nén ở upstream, và vẫn là sửa phần mềm khi phục vụ.
 
 ## Hệ quả
 
 - Thêm một service nặng: image khoảng 1,4 GB, nên có từ 4 GB RAM, khởi động 1–2 phút sau mỗi lần deploy.
 - **Giấy phép**: bản Community dùng AGPL v3 và giới hạn **20 người sửa cùng lúc**. Proposal cần ≥ 100 người
   dùng đồng thời, nên production cần **license OnlyOffice Docs Enterprise** (hoặc đánh giá lại phương án).
+- Image đã vá là **bản sửa đổi của phần mềm AGPL v3**. Theo điều 13, người dùng tương tác với nó qua mạng phải lấy
+  được mã nguồn tương ứng. Mã nguồn đó là mã nguồn OnlyOffice cùng `devops/docker/documentserver.Dockerfile`;
+  file này cần được bàn giao cùng mã nguồn (proposal §22). Thông báo bản quyền và logo của OnlyOffice giữ nguyên.
+- Khi nâng phiên bản OnlyOffice, sửa dòng `FROM` trong `documentserver.Dockerfile` và tag `DOCS_IMAGE`. Nếu build
+  fail ở bước vá, cần xem lại cách bản mới nạp module analytics.
 - Document server phải tải file từ app qua mạng Docker nội bộ, nên bật `ALLOW_PRIVATE_IP_ADDRESS`. Chỉ mở cổng
   document server cho mạng nội bộ.
 - `DOCS_EDITOR_PUBLIC_URL` phải là địa chỉ trình duyệt mở được (với người dùng khác máy: `http://<server>:8085`).

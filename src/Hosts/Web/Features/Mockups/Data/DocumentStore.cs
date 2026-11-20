@@ -1,16 +1,23 @@
 using System.Globalization;
+using Microsoft.Extensions.Options;
 using Modules.Ocr.Domain.Jobs;
 using OppOcr.Web.Features.Mockups.Quality;
 
 namespace OppOcr.Web.Features.Mockups.Data;
 
 /// <summary>
-/// In-memory store for the documents mockup: the sample documents, and for real OCR jobs whatever
-/// the OCR service cannot keep (review status, metadata, edited text, versions). Everything is
+/// In-memory store for the documents mockup: for real OCR jobs whatever the OCR service cannot keep
+/// (review status, metadata, edited text, versions), and the sample documents when they are turned on
+/// (<see cref="DocumentSampleOptions"/>). Everything is
 /// lost when the app restarts and is shared by everyone using this instance (no database, ADR 0003).
 /// Every change is written to the <see cref="AuditLog"/>.
 /// </summary>
-public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, AuditLog audit, QualitySettingsStore quality)
+public sealed class DocumentStore(
+    TimeProvider time,
+    CaptureBatchStore batches,
+    AuditLog audit,
+    QualitySettingsStore quality,
+    IOptions<DocumentSampleOptions> samples)
 {
     public const string OcrAuthor = "ocr-service";
 
@@ -19,7 +26,7 @@ public sealed class DocumentStore(TimeProvider time, CaptureBatchStore batches, 
 
     private readonly Lock _lock = new();
     private readonly Dictionary<string, DocumentRecord> _records =
-        SampleDocumentSeed.Create().ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
+        (samples.Value.Enabled ? SampleDocumentSeed.Create() : []).ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlyList<DocumentRecord> Samples()
     {

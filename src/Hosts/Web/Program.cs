@@ -5,7 +5,9 @@ using Modules.Ocr.Infrastructure;
 using OppOcr.Web.Components;
 using OppOcr.Web.Extensions;
 using OppOcr.Web.Features.Mockups;
+using OppOcr.Web.Features.Mockups.Activity;
 using OppOcr.Web.Features.Mockups.Approved;
+using OppOcr.Web.Features.Mockups.Reports;
 using OppOcr.Web.Features.Mockups.Word;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
@@ -64,6 +66,8 @@ app.MapOcrEndpoints();
 app.MapOcrServiceEndpoints();
 app.MapWordEditorEndpoints();
 app.MapApprovedDocumentEndpoints();
+app.MapReportEndpoints();
+app.MapActivityEndpoints();
 app.MapCultureEndpoint();
 
 // Liveness only proves the process responds; readiness also checks dependencies.

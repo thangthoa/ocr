@@ -1,8 +1,10 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Mockups.Pages;
+using OppOcr.Web.Features.Mockups.Word;
 
 namespace OppOcr.Web.Features.Mockups.Approved;
 
@@ -13,6 +15,10 @@ internal static class ApprovedDocumentEndpoints
 
     public static string FinalFileUrl(string documentId, FinalFileFormat format) =>
         $"/documents/{Uri.EscapeDataString(documentId)}/final?format={format.ToString().ToLowerInvariant()}";
+
+    /// <summary>The current version, for a document in review or archived (the document page).</summary>
+    public static string CurrentFileUrl(string documentId, FinalFileFormat format) =>
+        $"/documents/{Uri.EscapeDataString(documentId)}/file?format={format.ToString().ToLowerInvariant()}";
 
     /// <summary>The export link for the filters shown on the Approved page.</summary>
     public static string ExportUrl(DocumentQuery query)
@@ -53,6 +59,26 @@ internal static class ApprovedDocumentEndpoints
                 return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "Unknown format.");
 
             return ToResult(await files.FinalAsync(id, fileFormat, LoginPage.DemoUserName, ct), http);
+        });
+
+        endpoints.MapGet("/documents/{id}/file", async (string id, string? format, ApprovedDocumentFiles files, HttpContext http, CancellationToken ct) =>
+        {
+            if (Parse<FinalFileFormat>(format) is not { } fileFormat)
+                return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "Unknown format.");
+
+            return ToResult(await files.CurrentAsync(id, fileFormat, LoginPage.DemoUserName, ct), http);
+        });
+
+        // Read by the document server only (it has no session), to make a PDF: the link is signed and expires.
+        endpoints.MapGet("/documents/{id}/text.docx", async (string id, [FromQuery(Name = "exp")] long expires,
+            [FromQuery(Name = "sig")] string? signature, WordLinks links, DocumentCatalog catalog, CancellationToken ct) =>
+        {
+            if (!links.IsValidTextDocxLink(id, expires, signature))
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
+            var found = await catalog.GetAsync(id, ct);
+            return found.IsSuccess && ApprovedDocumentFiles.HasText(found.Value)
+                ? Results.File(ApprovedDocumentFiles.TextDocx(found.Value), ApprovedDocumentFiles.DocxContentType)
+                : Results.NotFound();
         });
 
         endpoints.MapGet("/approved/export.csv", async (HttpRequest request, ApprovedDocumentFiles files, HttpContext http, CancellationToken ct) =>

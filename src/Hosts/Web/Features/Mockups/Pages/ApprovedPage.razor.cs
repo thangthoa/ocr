@@ -2,20 +2,22 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Approved;
+using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Ocr;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
-/// Approved documents: the final, reviewed documents, newest approval first, with who approved them.
-/// Each can be downloaded (DOCX or text) and the filtered list exported as CSV.
+/// Document Archive: the final, reviewed documents, newest approval first, with who approved them.
+/// Each can be downloaded as DOCX, PDF (when the document server is configured) or text. The CSV export
+/// of the list stays available at its address (<see cref="ApprovedDocumentEndpoints.ExportUrl"/>) but has
+/// no button.
 /// </summary>
 public sealed partial class ApprovedPage : IDisposable
 {
-    public const int PageSize = 10;
-
     private readonly CancellationTokenSource _disposed = new();
+    private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
     private DocumentList? _list;
     private IReadOnlyList<DocumentRecord> _results = [];
@@ -26,10 +28,11 @@ public sealed partial class ApprovedPage : IDisposable
     private DocumentConfidentiality? _confidentiality;
     private DateOnly? _approvedFrom;
     private DateOnly? _approvedTo;
-    private int _page = 1;
     private string? _loadError;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
+
+    [Inject] private ApprovedDocumentFiles Files { get; set; } = default!;
 
     [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
 
@@ -41,10 +44,6 @@ public sealed partial class ApprovedPage : IDisposable
 
     private DocumentQuery Query => new(_search, _field, Department: _department, Kind: _kind,
         Confidentiality: _confidentiality, ApprovedFrom: _approvedFrom, ApprovedTo: _approvedTo);
-
-    private int TotalPages => Math.Max(1, (int)Math.Ceiling(_results.Count / (double)PageSize));
-
-    private IEnumerable<DocumentRecord> PageItems => _results.Skip((_page - 1) * PageSize).Take(PageSize);
 
     private bool HasFilters => !string.IsNullOrWhiteSpace(_search) || _field != DocumentSearchField.All || _department is not null
         || _kind is not null || _confidentiality is not null || _approvedFrom is not null || _approvedTo is not null;
@@ -88,7 +87,10 @@ public sealed partial class ApprovedPage : IDisposable
     private void Apply(bool keepPage = false)
     {
         _results = ApprovedDocumentFiles.Approved(_list?.Documents ?? [], Query);
-        _page = keepPage ? Math.Min(_page, TotalPages) : 1;
+        if (keepPage)
+            _paging.Clamp(_results.Count);
+        else
+            _paging.Reset();
     }
 
     private void ClearFilters()

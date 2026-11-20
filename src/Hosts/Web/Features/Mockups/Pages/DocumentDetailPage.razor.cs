@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.BuildingBlocks.Application.Results;
+using OppOcr.Web.Features.Mockups.Approved;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Mockups.Word;
@@ -44,6 +45,7 @@ public sealed partial class DocumentDetailPage : IDisposable
     private bool _deleted;
     private bool _deleting;
     private bool _editing;
+    private FinalFileFormat _downloadFormat = FinalFileFormat.Docx;
     private string? _error;
     private string? _deleteError;
     private string? _message;
@@ -75,6 +77,8 @@ public sealed partial class DocumentDetailPage : IDisposable
 
     [Inject] private WordEditorService Word { get; set; } = default!;
 
+    [Inject] private ApprovedDocumentFiles FinalFiles { get; set; } = default!;
+
     [Inject] private WordPreviewService Preview { get; set; } = default!;
 
     [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
@@ -98,8 +102,10 @@ public sealed partial class DocumentDetailPage : IDisposable
 
     private bool ShowsWord => _previewState == PreviewState.Ready && _viewing is null && !_showText;
 
-    private string ResultPaneTitle => _editing ? Text["Edit.PageText", _page]
-        : _viewing is not null ? Text["Preview.TextVersion", _viewing.Number]
+    /// <summary>The picked download format, or DOCX when it is not offered (PDF without a document server).</summary>
+    private FinalFileFormat DownloadFormat => FinalFiles.Formats.Contains(_downloadFormat) ? _downloadFormat : FinalFileFormat.Docx;
+
+    private string ResultPaneTitle => _viewing is not null ? Text["Preview.TextVersion", _viewing.Number]
         : ShowsWord || (_previewState == PreviewState.Loading && !_showText) ? Text["Preview.WordFile"]
         : Text["Preview.Text"];
 
@@ -285,7 +291,9 @@ public sealed partial class DocumentDetailPage : IDisposable
             return;
         }
 
-        Store.SaveEdit(Id, _form.PageTexts, _form.ToMetadata(), CurrentUser, _form.Note);
+        // Only the details change here (the text is edited in Word): keep the latest text, which a Word save may have changed meanwhile.
+        Refresh();
+        Store.SaveEdit(Id, _document!.PageTexts, _form.ToMetadata(), CurrentUser, _form.Note);
         Refresh();
         _editing = false;
         _message = Text["Detail.Saved", _document!.CurrentVersion!.Number];
@@ -367,12 +375,9 @@ public sealed partial class DocumentDetailPage : IDisposable
     [LoggerMessage(Level = LogLevel.Error, Message = "Documents UI: failed to {Operation}")]
     private static partial void LogUnexpected(ILogger logger, Exception exception, string operation);
 
+    /// <summary>The details being edited (the text itself is edited in Word).</summary>
     private sealed class EditModel
     {
-        private readonly List<string> _pageTexts = [];
-
-        public IReadOnlyList<string> PageTexts => _pageTexts;
-
         public string Title { get; set; } = string.Empty;
 
         public string Reference { get; set; } = string.Empty;
@@ -389,31 +394,16 @@ public sealed partial class DocumentDetailPage : IDisposable
 
         public string? Note { get; set; }
 
-        public string PageText(int pageNumber) => PageTextOf(_pageTexts, pageNumber);
-
-        /// <summary>Pages without text yet are padded so any page can be edited.</summary>
-        public void SetPageText(int pageNumber, string? text)
+        public static EditModel From(DocumentRecord document) => new()
         {
-            while (_pageTexts.Count < pageNumber)
-                _pageTexts.Add(string.Empty);
-            _pageTexts[pageNumber - 1] = text ?? string.Empty;
-        }
-
-        public static EditModel From(DocumentRecord document)
-        {
-            var model = new EditModel
-            {
-                Title = document.Metadata.Title,
-                Reference = document.Metadata.Reference,
-                DocumentDate = document.Metadata.DocumentDate,
-                Department = document.Metadata.Department,
-                Kind = document.Metadata.Kind,
-                Confidentiality = document.Metadata.Confidentiality,
-                Keywords = string.Join(", ", document.Metadata.Keywords),
-            };
-            model._pageTexts.AddRange(document.PageTexts);
-            return model;
-        }
+            Title = document.Metadata.Title,
+            Reference = document.Metadata.Reference,
+            DocumentDate = document.Metadata.DocumentDate,
+            Department = document.Metadata.Department,
+            Kind = document.Metadata.Kind,
+            Confidentiality = document.Metadata.Confidentiality,
+            Keywords = string.Join(", ", document.Metadata.Keywords),
+        };
 
         public DocumentMetadata ToMetadata() => new(
             Title.Trim(),

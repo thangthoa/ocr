@@ -1,0 +1,45 @@
+@inject IStringLocalizer<MockupText> Text
+
+@* One KPI on the dashboard: the figure for the period, its status in words (colour is never the only cue),
+   a meter with the target marked, and the target and alert level it was measured against. *@
+<div id="@($"kpi-{Target.Kind}")" class="kpi-card @KpiStatusClass(Status)">
+    <div class="kpi-card-head">
+        <span class="kpi-card-label">@Text.KpiName(Target.Kind)</span>
+        <span class="badge kpi-status">@Text.KpiStatusName(Status)</span>
+    </div>
+    <span class="kpi-card-value">@Text.KpiValue(Target.Kind, Actual)</span>
+    <span class="kpi-card-meter" aria-hidden="true">
+        <span class="kpi-card-fill" style="width: @Position(Actual)"></span>
+        <span class="kpi-card-target" style="inset-inline-start: @Position(Target.Target)"></span>
+    </span>
+    <span class="kpi-card-goal">@Goal</span>
+    @if (Note is not null)
+    {
+        <span class="kpi-card-note">@Note</span>
+    }
+    <div class="kpi-card-actions">@ChildContent</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public KpiTarget Target { get; set; } = default!;
+
+    [Parameter, EditorRequired] public double Actual { get; set; }
+
+    [Parameter] public string? Note { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private KpiStatus Status => KpiRules.Evaluate(Actual, Target);
+
+    private string Goal => KpiRules.Direction(Target.Kind) == KpiDirection.AtLeast
+        ? Text["KpiCard.AtLeast", Text.KpiValue(Target.Kind, Target.Target), Text.KpiValue(Target.Kind, Target.Alert)]
+        : Text["KpiCard.AtMost", Text.KpiValue(Target.Kind, Target.Target), Text.KpiValue(Target.Kind, Target.Alert)];
+
+    /// <summary>The meter runs a little past the largest of the figure, the target and the alert level.</summary>
+    private string Position(double value)
+    {
+        var top = Math.Max(Actual, Math.Max(Target.Target, Target.Alert)) * 1.1;
+        var percent = top > 0 ? Math.Clamp(value / top * 100, 0, 100) : 0;
+        return percent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "%";
+    }
+}

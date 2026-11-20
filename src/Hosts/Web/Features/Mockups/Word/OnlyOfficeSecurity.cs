@@ -67,6 +67,7 @@ public sealed class WordLinks(IOptions<WordEditorOptions> options, TimeProvider 
 {
     private const string FilePurpose = "file";
     private const string CallbackPurpose = "callback";
+    private const string TextDocxPurpose = "text-docx";
 
     public string FileUrl(string documentId, int version)
     {
@@ -75,6 +76,21 @@ public sealed class WordLinks(IOptions<WordEditorOptions> options, TimeProvider 
         return Absolute(string.Create(CultureInfo.InvariantCulture,
             $"documents/{Uri.EscapeDataString(documentId)}/word/file?v={version}&exp={expires}&sig={signature}"));
     }
+
+    /// <summary>
+    /// The current text of a document as DOCX, for converting it to PDF when no Word file holds that text
+    /// (for example after restoring an older version). Expires like a file link.
+    /// </summary>
+    public string TextDocxUrl(string documentId)
+    {
+        var expires = time.GetUtcNow().AddMinutes(options.Value.LinkLifetimeMinutes).ToUnixTimeSeconds();
+        var signature = Sign(documentId, TextDocxPurpose, 0, expires);
+        return Absolute(string.Create(CultureInfo.InvariantCulture,
+            $"documents/{Uri.EscapeDataString(documentId)}/text.docx?exp={expires}&sig={signature}"));
+    }
+
+    public bool IsValidTextDocxLink(string documentId, long expires, string? signature) =>
+        expires >= time.GetUtcNow().ToUnixTimeSeconds() && Matches(Sign(documentId, TextDocxPurpose, 0, expires), signature);
 
     /// <summary>No expiry: the server calls back when the last editor closes, which can be hours later. Its body is JWT-signed too.</summary>
     public string CallbackUrl(string documentId) =>

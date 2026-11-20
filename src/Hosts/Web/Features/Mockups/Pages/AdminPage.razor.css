@@ -22,7 +22,7 @@
         }
 
         .admin-tabs button.active {
-            border-bottom-color: var(--ae-gold-600);
+            border-bottom-color: var(--app-primary);
             color: var(--ae-gold-700);
             font-weight: 600;
         }
@@ -38,4 +38,14 @@
     border-radius: var(--app-radius-card);
     color: var(--app-ink-muted);
     text-align: center;
+}
+
+/* KPI targets: number boxes wide enough for 1,000,000 and the unit. */
+.kpi-input {
+    min-width: 9.5rem;
+    max-width: 13rem;
+}
+
+.kpi-table th[scope="row"] {
+    min-width: 14rem;
 }

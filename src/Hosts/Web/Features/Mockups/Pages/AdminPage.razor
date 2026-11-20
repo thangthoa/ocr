@@ -19,34 +19,6 @@
 <div id="@($"panel-{_tab}")" role="tabpanel" aria-labelledby="@($"tab-{_tab}")">
     @switch (_tab)
     {
-        case AdminTab.Roles:
-            <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Roles.Note"]</p>
-            <div class="table-responsive position-relative">
-                <table class="table align-middle">
-                    <caption class="visually-hidden">@Text["Admin.Tab.Roles"]</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">@Text["Roles.Column.Role"]</th>
-                            <th scope="col">@Text["Roles.Column.Group"]</th>
-                            <th scope="col" class="text-end">@Text["Roles.Column.Users"]</th>
-                            <th scope="col">@Text["Roles.Column.Can"]</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var role in Roles)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@Text[$"Role.{role.Key}"]</td>
-                                <td><code dir="ltr">@role.Group</code></td>
-                                <td class="text-end">@FormatNumber(role.Users)</td>
-                                <td>@Text[$"Role.{role.Key}.Can"]</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            break;
-
         case AdminTab.Retention:
             <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Retention.Note"]</p>
             <div class="table-responsive position-relative">
@@ -171,6 +143,112 @@
             </form>
             break;
 
+        case AdminTab.Kpi:
+            <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["KpiSettings.Note"]</p>
+            <form id="kpi-form" novalidate @onsubmit="SaveKpis">
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["KpiSettings.Project"]</legend>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-lg-4">
+                            <label for="@ProjectPagesField" class="form-label">@Text["KpiSettings.ProjectPages"]</label>
+                            <input id="@ProjectPagesField" type="number" min="1" step="1000" dir="ltr"
+                                   class="form-control @(_kpiErrors.ContainsKey(ProjectPagesField) ? "is-invalid" : null)"
+                                   @bind="_kpi.TotalPages" aria-describedby="@ErrorId(ProjectPagesField)" />
+                            <FieldError Id="@ProjectPagesField" Errors="_kpiErrors" />
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <label for="@ProjectStartField" class="form-label">@Text["KpiSettings.ProjectStart"]</label>
+                            <input id="@ProjectStartField" type="date"
+                                   class="form-control @(_kpiErrors.ContainsKey(ProjectStartField) ? "is-invalid" : null)"
+                                   @bind="_kpi.Start" aria-describedby="@ErrorId(ProjectStartField)" />
+                            <FieldError Id="@ProjectStartField" Errors="_kpiErrors" />
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <label for="@ProjectEndField" class="form-label">@Text["KpiSettings.ProjectEnd"]</label>
+                            <input id="@ProjectEndField" type="date"
+                                   class="form-control @(_kpiErrors.ContainsKey(ProjectEndField) ? "is-invalid" : null)"
+                                   @bind="_kpi.End" aria-describedby="@ErrorId(ProjectEndField)" />
+                            <FieldError Id="@ProjectEndField" Errors="_kpiErrors" />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mb-4" aria-describedby="kpi-targets-hint">
+                    <legend class="h6">@Text["KpiSettings.Targets"]</legend>
+                    <p id="kpi-targets-hint" class="small text-muted mb-2">@Text["KpiSettings.TargetsHint"]</p>
+                    <div class="table-responsive position-relative">
+                        <table class="table align-middle kpi-table">
+                            <caption class="visually-hidden">@Text["KpiSettings.Targets"]</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">@Text["KpiSettings.Column.Kpi"]</th>
+                                    <th scope="col">@Text["KpiSettings.Column.Goal"]</th>
+                                    <th scope="col">@Text["KpiSettings.Column.Target"]</th>
+                                    <th scope="col">@Text["KpiSettings.Column.Alert"]</th>
+                                    <th scope="col">@Text["KpiSettings.Column.Show"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in _kpi.Rows)
+                                {
+                                    var kind = row.Kind;
+                                    var name = Text.KpiName(kind);
+                                    var unit = Text[$"KpiUnit.{KpiRules.Unit(kind)}"];
+                                    var step = KpiRules.Unit(kind) switch { KpiUnit.Percent => "0.1", KpiUnit.Hours => "0.5", _ => "1" };
+                                    var targetField = TargetField(kind);
+                                    var alertField = AlertField(kind);
+                                    <tr>
+                                        <th scope="row" class="fw-normal">
+                                            <span class="fw-semibold">@name</span>
+                                            <span class="d-block small text-muted">@Text[$"KpiDef.{kind}.Hint"]</span>
+                                        </th>
+                                        <td class="text-nowrap">@Text[$"KpiSettings.Direction.{KpiRules.Direction(kind)}"]</td>
+                                        <td>
+                                            <div class="input-group input-group-sm has-validation kpi-input">
+                                                <input id="@targetField" type="number" min="0" step="@step" dir="ltr"
+                                                       class="form-control @(_kpiErrors.ContainsKey(targetField) ? "is-invalid" : null)"
+                                                       @bind="row.Target" aria-label="@Text["KpiSettings.TargetFor", name]"
+                                                       aria-describedby="@ErrorId(targetField)" />
+                                                <span class="input-group-text">@unit</span>
+                                                <FieldError Id="@targetField" Errors="_kpiErrors" />
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group input-group-sm has-validation kpi-input">
+                                                <input id="@alertField" type="number" min="0" step="@step" dir="ltr"
+                                                       class="form-control @(_kpiErrors.ContainsKey(alertField) ? "is-invalid" : null)"
+                                                       @bind="row.Alert" aria-label="@Text["KpiSettings.AlertFor", name]"
+                                                       aria-describedby="@ErrorId(alertField)" />
+                                                <span class="input-group-text">@unit</span>
+                                                <FieldError Id="@alertField" Errors="_kpiErrors" />
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input id="@($"kpi-{kind}-show")" type="checkbox" class="form-check-input" @bind="row.Show"
+                                                   aria-label="@Text["KpiSettings.ShowFor", name]" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="submit" id="kpi-save" class="btn btn-primary">@Text["KpiSettings.Save"]</button>
+                    <button type="button" id="kpi-defaults" class="btn btn-outline-secondary" @onclick="KpiDefaults">@Text["QualitySettings.Defaults"]</button>
+                    @if (_kpiSaved)
+                    {
+                        <span id="kpi-saved" class="small" role="status">@Text["KpiSettings.Saved"] <a href="dashboard">@Text["KpiSettings.OpenDashboard"]</a></span>
+                    }
+                    else if (_kpiErrors.Count > 0)
+                    {
+                        <span class="small text-danger" role="alert">@Text["Edit.FixErrors"]</span>
+                    }
+                </div>
+            </form>
+            break;
+
         case AdminTab.Integrations:
             <p class="small text-muted">@Text["Integrations.Note"]</p>
             <div class="table-responsive position-relative">
@@ -216,55 +294,6 @@
                     </tbody>
                 </table>
             </div>
-            break;
-
-        case AdminTab.Audit:
-            var entries = Audit.Latest();
-            <p class="small text-muted">@Text["Audit.Note"]</p>
-            @if (entries.Count == 0)
-            {
-                <div class="empty-state" role="status">@Text["Audit.Empty"]</div>
-            }
-            else
-            {
-                <div class="table-responsive position-relative">
-                    <table class="table align-middle audit-table">
-                        <caption class="visually-hidden">@Text["Admin.Tab.Audit"]</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">@Text["Audit.Column.Time"]</th>
-                                <th scope="col">@Text["Audit.Column.User"]</th>
-                                <th scope="col">@Text["Audit.Column.Action"]</th>
-                                <th scope="col">@Text["Audit.Column.Document"]</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var entry in entries)
-                            {
-                                <tr>
-                                    <td class="small text-nowrap">@FormatDateTime(entry.AtUtc)</td>
-                                    <td class="text-nowrap" dir="ltr">@entry.User</td>
-                                    <td>@Describe(entry)</td>
-                                    <td>
-                                        @if (entry.DocumentId is null)
-                                        {
-                                            <span class="text-muted">@Missing</span>
-                                        }
-                                        else if (entry.Action == AuditAction.Deleted)
-                                        {
-                                            <span dir="auto">@(entry.DocumentName ?? entry.DocumentId)</span>
-                                        }
-                                        else
-                                        {
-                                            <a href="@OcrEndpoints.JobUrl(entry.DocumentId)" dir="auto">@(entry.DocumentName ?? entry.DocumentId)</a>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
             break;
     }
 </div>

@@ -1,0 +1,87 @@
+@* Users › Roles & access: what each role may do, one checkbox per role and permission. *@
+<p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Roles.Note"]</p>
+<form id="roles-form" novalidate @onsubmit="Save">
+    <div class="table-responsive position-relative">
+        <table class="table align-middle roles-table">
+            <caption class="visually-hidden">@Text["Roles.Title"]</caption>
+            <thead>
+                <tr>
+                    <th scope="col">@Text["Roles.Column.Permission"]</th>
+                    @foreach (var role in Enum.GetValues<UserRole>())
+                    {
+                        <th scope="col" id="@($"role-{role}")" class="text-center">
+                            <span class="d-block">@Text.RoleName(role)</span>
+                            <code class="d-block small fw-normal" dir="ltr">@AccessRules.AdGroup(role)</code>
+                            <span class="d-block small fw-normal text-muted">@Text["Roles.Users", FormatNumber(Accounts.Users.Count(u => u.Role == role && u.IsActive))]</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var permission in Enum.GetValues<AccessRight>())
+                {
+                    <tr>
+                        <th scope="row" id="@($"perm-{permission}")" class="fw-normal">@Text.PermissionName(permission)</th>
+                        @foreach (var role in Enum.GetValues<UserRole>())
+                        {
+                            var locked = AccessRules.IsLocked(role, permission);
+                            <td class="text-center">
+                                <input id="@($"perm-{role}-{permission}")" type="checkbox" class="form-check-input"
+                                       checked="@_matrix[role].Contains(permission)" disabled="@locked"
+                                       aria-labelledby="@($"role-{role} perm-{permission}")"
+                                       title="@(locked ? Text["Roles.Locked"].Value : null)"
+                                       @onchange="e => Set(role, permission, e.Value is true)" />
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="small text-muted">@Text["Roles.LockedNote"]</p>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <button type="submit" id="roles-save" class="btn btn-primary">@Text["Roles.Save"]</button>
+        <button type="button" id="roles-defaults" class="btn btn-outline-secondary" @onclick="Defaults">@Text["QualitySettings.Defaults"]</button>
+        @if (_saved)
+        {
+            <span id="roles-saved" class="small" role="status">@Text["Roles.Saved"]</span>
+        }
+    </div>
+</form>
+
+@code {
+    private Dictionary<UserRole, HashSet<AccessRight>> _matrix = [];
+    private bool _saved;
+
+    [Inject] private UserDirectory Accounts { get; set; } = default!;
+
+    [Inject] private IStringLocalizer<MockupText> Text { get; set; } = default!;
+
+    protected override void OnInitialized() => Load(Accounts.Permissions);
+
+    private void Load(IReadOnlyDictionary<UserRole, IReadOnlySet<AccessRight>> permissions) =>
+        _matrix = permissions.ToDictionary(p => p.Key, p => p.Value.ToHashSet());
+
+    private void Set(UserRole role, AccessRight permission, bool granted)
+    {
+        if (granted)
+            _matrix[role].Add(permission);
+        else
+            _matrix[role].Remove(permission);
+        _saved = false;
+    }
+
+    /// <summary>Fills the table with the defaults; nothing changes until it is saved.</summary>
+    private void Defaults()
+    {
+        Load(AccessRules.DefaultPermissions);
+        _saved = false;
+    }
+
+    private void Save()
+    {
+        Accounts.SavePermissions(_matrix.ToDictionary(p => p.Key, p => (IReadOnlySet<AccessRight>)p.Value), OppOcr.Web.Features.Mockups.Pages.LoginPage.DemoUserName);
+        Load(Accounts.Permissions);
+        _saved = true;
+    }
+}

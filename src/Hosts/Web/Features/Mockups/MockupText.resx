@@ -45,11 +45,7 @@
   <data name="Period.Day" xml:space="preserve"><value>Day</value></data>
   <data name="Period.Week" xml:space="preserve"><value>Week</value></data>
   <data name="Period.Month" xml:space="preserve"><value>Month</value></data>
-  <data name="Kpi.Heading" xml:space="preserve"><value>Key figures</value></data>
-  <data name="Kpi.Pages" xml:space="preserve"><value>Pages scanned</value></data>
-  <data name="Kpi.PagesTarget" xml:space="preserve"><value>{0} of the {1} target</value></data>
   <data name="Kpi.VsPrevious" xml:space="preserve"><value>{0} vs previous period</value></data>
-  <data name="Kpi.Confidence" xml:space="preserve"><value>Average OCR confidence</value></data>
   <data name="Kpi.PointsChange" xml:space="preserve"><value>{0} pts vs previous period</value></data>
   <data name="Kpi.Review" xml:space="preserve"><value>Waiting for review</value></data>
   <data name="Kpi.Failed" xml:space="preserve"><value>{0} failed</value></data>
@@ -69,9 +65,8 @@
   <data name="Dept.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>Average confidence</value></data>
   <data name="Documents.Title" xml:space="preserve"><value>All Documents</value></data>
-  <data name="Documents.JobsUnavailable" xml:space="preserve"><value>OCR jobs could not be loaded: {0} Sample documents are still shown.</value></data>
+  <data name="Documents.JobsUnavailable" xml:space="preserve"><value>OCR jobs could not be loaded: {0}</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>Showing the newest {0} of {1} OCR jobs.</value></data>
-  <data name="Documents.Upload" xml:space="preserve"><value>Upload files</value></data>
   <data name="Documents.Count" xml:space="preserve"><value>{0} document(s)</value></data>
   <data name="Documents.None" xml:space="preserve"><value>No documents match these filters.</value></data>
   <data name="Filter.Status" xml:space="preserve"><value>Filter by status</value></data>
@@ -94,12 +89,10 @@
   <data name="Column.DocumentDate" xml:space="preserve"><value>Document date</value></data>
   <data name="Column.Status" xml:space="preserve"><value>Status</value></data>
   <data name="Column.Version" xml:space="preserve"><value>Version</value></data>
-  <data name="Column.Updated" xml:space="preserve"><value>Updated</value></data>
   <data name="Column.Actions" xml:space="preserve"><value>Actions</value></data>
   <data name="Pager.Label" xml:space="preserve"><value>Pagination</value></data>
   <data name="Pager.Previous" xml:space="preserve"><value>Previous</value></data>
   <data name="Pager.Next" xml:space="preserve"><value>Next</value></data>
-  <data name="Pager.PageOf" xml:space="preserve"><value>Page {0} of {1}</value></data>
   <data name="Detail.TitleFallback" xml:space="preserve"><value>Document</value></data>
   <data name="Detail.Back" xml:space="preserve"><value>Back to documents</value></data>
   <data name="Detail.NotFound" xml:space="preserve"><value>Document not found.</value></data>
@@ -112,7 +105,6 @@
   <data name="Detail.ProcessingNote" xml:space="preserve"><value>OCR is still running on this file. Text and versions appear when it finishes.</value></data>
   <data name="Detail.FailedNote" xml:space="preserve"><value>OCR could not read this file. Rescan the original or retry OCR.</value></data>
   <data name="Detail.CancelledNote" xml:space="preserve"><value>This OCR job was cancelled before it ran.</value></data>
-  <data name="Detail.DownloadNote" xml:space="preserve"><value>Downloads contain the text as recognized by OCR, without later edits.</value></data>
   <data name="Detail.Saved" xml:space="preserve"><value>Saved as version {0}.</value></data>
   <data name="Detail.StatusChanged" xml:space="preserve"><value>Status changed to {0}.</value></data>
   <data name="Detail.Restored" xml:space="preserve"><value>Version {0} restored as version {1}.</value></data>
@@ -125,7 +117,6 @@
   <data name="Action.Edit" xml:space="preserve"><value>Edit</value></data>
   <data name="Edit.FixErrors" xml:space="preserve"><value>Fix the highlighted fields before saving.</value></data>
   <data name="Edit.Text" xml:space="preserve"><value>Recognized text</value></data>
-  <data name="Edit.PageText" xml:space="preserve"><value>Text of page {0}</value></data>
   <data name="Edit.TitleRequired" xml:space="preserve"><value>Title is required.</value></data>
   <data name="Edit.KeywordsHint" xml:space="preserve"><value>Separate keywords with commas.</value></data>
   <data name="Edit.Note" xml:space="preserve"><value>Change note (optional)</value></data>
@@ -187,41 +178,25 @@
   <data name="Change.Edited" xml:space="preserve"><value>Edited</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>Restored from version {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>Review Queue</value></data>
-  <data name="Review.Oldest" xml:space="preserve"><value>Oldest waiting since</value></data>
-  <data name="Review.Start" xml:space="preserve"><value>Start reviewing</value></data>
   <data name="Review.Empty" xml:space="preserve"><value>Nothing to review. Documents appear here when the automatic quality check flags them.</value></data>
   <data name="Review.Action" xml:space="preserve"><value>Review</value></data>
   <data name="Review.ActionLabel" xml:space="preserve"><value>Review {0}</value></data>
-  <data name="Review.Hours" xml:space="preserve"><value>{0} h</value></data>
-  <data name="Review.Days" xml:space="preserve"><value>{0} d</value></data>
   <data name="Review.NoConfidence" xml:space="preserve"><value>Known once the document has been checked</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>OCR confidence</value></data>
   <data name="Column.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
-  <data name="Column.Waiting" xml:space="preserve"><value>Waiting</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>Back to the review queue</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>Batch</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>Settings</value></data>
   <data name="Admin.Sections" xml:space="preserve"><value>Settings sections</value></data>
-  <data name="Admin.Tab.Roles" xml:space="preserve"><value>Roles &amp; access</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>Classification &amp; retention</value></data>
   <data name="Admin.Tab.Integrations" xml:space="preserve"><value>Connected systems</value></data>
-  <data name="Admin.Tab.Audit" xml:space="preserve"><value>Activity log</value></data>
-  <data name="Roles.Note" xml:space="preserve"><value>Sign-in is not connected to Active Directory yet; these roles show the planned set-up.</value></data>
-  <data name="Roles.Column.Role" xml:space="preserve"><value>Role</value></data>
-  <data name="Roles.Column.Group" xml:space="preserve"><value>AD group</value></data>
-  <data name="Roles.Column.Users" xml:space="preserve"><value>Users</value></data>
-  <data name="Roles.Column.Can" xml:space="preserve"><value>Can</value></data>
+  <data name="Roles.Note" xml:space="preserve"><value>Sign-in is not connected to Active Directory yet. Members of each AD group will get its role; the permissions are kept in memory until the app restarts.</value></data>
   <data name="Role.CaptureOperator" xml:space="preserve"><value>Capture operator</value></data>
-  <data name="Role.CaptureOperator.Can" xml:space="preserve"><value>Create batches and upload files</value></data>
   <data name="Role.Reviewer" xml:space="preserve"><value>OCR reviewer</value></data>
-  <data name="Role.Reviewer.Can" xml:space="preserve"><value>Review, correct and approve documents</value></data>
   <data name="Role.RecordsManager" xml:space="preserve"><value>Records manager</value></data>
-  <data name="Role.RecordsManager.Can" xml:space="preserve"><value>Classify, archive and manage retention</value></data>
   <data name="Role.Reader" xml:space="preserve"><value>Department reader</value></data>
-  <data name="Role.Reader.Can" xml:space="preserve"><value>Search and view their department's documents</value></data>
   <data name="Role.Administrator" xml:space="preserve"><value>Administrator</value></data>
-  <data name="Role.Administrator.Can" xml:space="preserve"><value>Settings and the activity log</value></data>
   <data name="Retention.Note" xml:space="preserve"><value>Retention is not enforced yet: nothing is disposed of or put on legal hold automatically.</value></data>
   <data name="Retention.Column.Keep" xml:space="preserve"><value>Keep for</value></data>
   <data name="Retention.Column.From" xml:space="preserve"><value>Counted from</value></data>
@@ -258,8 +233,6 @@
   <data name="Integration.Status.Down" xml:space="preserve"><value>Not reachable</value></data>
   <data name="Integration.Status.Planned" xml:space="preserve"><value>Planned</value></data>
   <data name="Integration.Status.Checking" xml:space="preserve"><value>Checking…</value></data>
-  <data name="Audit.Note" xml:space="preserve"><value>What was done in this app since it started, newest first. Kept in memory only.</value></data>
-  <data name="Audit.Empty" xml:space="preserve"><value>No activity recorded yet.</value></data>
   <data name="Audit.Column.Time" xml:space="preserve"><value>Time</value></data>
   <data name="Audit.Column.User" xml:space="preserve"><value>User</value></data>
   <data name="Audit.Column.Action" xml:space="preserve"><value>Action</value></data>
@@ -271,7 +244,6 @@
   <data name="Audit.Restored" xml:space="preserve"><value>Restored as version {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>Changed the status to {0}</value></data>
   <data name="Audit.Deleted" xml:space="preserve"><value>Deleted</value></data>
-  <data name="Word.Edit" xml:space="preserve"><value>Edit in Word</value></data>
   <data name="Word.Title" xml:space="preserve"><value>Edit in Word</value></data>
   <data name="Word.Back" xml:space="preserve"><value>Back to the document</value></data>
   <data name="Word.Help" xml:space="preserve"><value>Press Save (Ctrl+S) to keep a new version. Closing the editor also saves your changes after a few seconds.</value></data>
@@ -293,11 +265,9 @@
   <data name="Change.EditedInWord" xml:space="preserve"><value>Edited in Word (file version {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>Saved Word file version {0}</value></data>
   <data name="Approved.Title" xml:space="preserve"><value>Document Archive</value></data>
-  <data name="Approved.Export" xml:space="preserve"><value>Export CSV ({0})</value></data>
   <data name="Approved.Empty" xml:space="preserve"><value>No archived documents yet. Documents appear here once they are approved in the review queue or pass the automatic check.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>Go to the review queue</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>Download {0} as {1}</value></data>
-  <data name="Approved.DownloadNote" xml:space="preserve"><value>Final version = the reviewed text. DOCX keeps the Word formatting when the document was last edited in Word.</value></data>
   <data name="Column.Approved" xml:space="preserve"><value>Approved</value></data>
   <data name="Column.Download" xml:space="preserve"><value>Download</value></data>
   <data name="Filter.AllConfidentiality" xml:space="preserve"><value>All levels</value></data>
@@ -305,14 +275,11 @@
   <data name="Filter.ApprovedTo" xml:space="preserve"><value>Approved to</value></data>
   <data name="Meta.ApprovedBy" xml:space="preserve"><value>Approved by</value></data>
   <data name="Meta.Approved" xml:space="preserve"><value>Approved</value></data>
-  <data name="Detail.FinalDownload" xml:space="preserve"><value>Final version</value></data>
   <data name="Audit.Downloaded" xml:space="preserve"><value>Downloaded final version {1} as {0}</value></data>
   <data name="Audit.Exported" xml:space="preserve"><value>Exported the approved list ({0} documents)</value></data>
   <data name="Approved.Version" xml:space="preserve"><value>Version {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>Flagged by the automatic check</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>Approved automatically</value></data>
-  <data name="Review.NotChecked" xml:space="preserve"><value>Not checked yet (runs when the document is opened)</value></data>
-  <data name="Review.PassedCheck" xml:space="preserve"><value>Passed the automatic check</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>Why it is here</value></data>
   <data name="Confidence.Simulated" xml:space="preserve"><value>Simulated</value></data>
   <data name="Confidence.SimulatedNote" xml:space="preserve"><value>Made up for this demo: the OCR service does not report confidence yet.</value></data>
@@ -384,4 +351,308 @@
   <data name="Steps.StateDone" xml:space="preserve"><value>completed</value></data>
   <data name="Steps.StateCurrent" xml:space="preserve"><value>in progress</value></data>
   <data name="Steps.StateTodo" xml:space="preserve"><value>not started</value></data>
+  <data name="Steps.ChooseFile" xml:space="preserve"><value>Choose the file and upload it</value></data>
+  <data name="Column.LastUpdated" xml:space="preserve"><value>Last updated</value></data>
+  <data name="Pager.RowsPerPage" xml:space="preserve"><value>Rows per page</value></data>
+  <data name="Pager.Range" xml:space="preserve"><value>{0}–{1} of {2}</value></data>
+  <data name="Pager.Page" xml:space="preserve"><value>Page {0}</value></data>
+  <data name="Approved.DownloadMenu" xml:space="preserve"><value>Download {0}</value></data>
+  <data name="Action.Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Download.Format" xml:space="preserve"><value>File format</value></data>
+  <data name="Action.EditDetails" xml:space="preserve"><value>Edit details</value></data>
+  <data name="Documents.Empty" xml:space="preserve"><value>No documents yet. Documents appear here once a file is scanned.</value></data>
+  <data name="Admin.Tab.Kpi" xml:space="preserve"><value>KPI targets</value></data>
+  <data name="KpiDef.PagesPerDay" xml:space="preserve"><value>Pages scanned per day</value></data>
+  <data name="KpiDef.PagesPerDay.Hint" xml:space="preserve"><value>Daily average over the period.</value></data>
+  <data name="KpiDef.OcrAccuracy" xml:space="preserve"><value>OCR accuracy</value></data>
+  <data name="KpiDef.OcrAccuracy.Hint" xml:space="preserve"><value>Average OCR confidence of the pages (the tender asks for at least 90 %).</value></data>
+  <data name="KpiDef.AutoArchiveRate" xml:space="preserve"><value>Archived without manual review</value></data>
+  <data name="KpiDef.AutoArchiveRate.Hint" xml:space="preserve"><value>Share of documents that passed the automatic quality check.</value></data>
+  <data name="KpiDef.ReviewBacklog" xml:space="preserve"><value>Review backlog</value></data>
+  <data name="KpiDef.ReviewBacklog.Hint" xml:space="preserve"><value>Documents waiting in the review queue now.</value></data>
+  <data name="KpiDef.ReviewTime" xml:space="preserve"><value>Time in review</value></data>
+  <data name="KpiDef.ReviewTime.Hint" xml:space="preserve"><value>Average time from entering the review queue to being archived.</value></data>
+  <data name="KpiDef.FailureRate" xml:space="preserve"><value>OCR failure rate</value></data>
+  <data name="KpiDef.FailureRate.Hint" xml:space="preserve"><value>Share of documents whose OCR job failed.</value></data>
+  <data name="KpiDef.PagesPerOperator" xml:space="preserve"><value>Pages per operator per day</value></data>
+  <data name="KpiDef.PagesPerOperator.Hint" xml:space="preserve"><value>Pages a day divided by the capture operators on the line.</value></data>
+  <data name="KpiStatus.OnTrack" xml:space="preserve"><value>On track</value></data>
+  <data name="KpiStatus.AtRisk" xml:space="preserve"><value>At risk</value></data>
+  <data name="KpiStatus.OffTrack" xml:space="preserve"><value>Off track</value></data>
+  <data name="KpiUnit.Pages" xml:space="preserve"><value>pages</value></data>
+  <data name="KpiUnit.Documents" xml:space="preserve"><value>documents</value></data>
+  <data name="KpiUnit.Percent" xml:space="preserve"><value>%</value></data>
+  <data name="KpiUnit.Hours" xml:space="preserve"><value>hours</value></data>
+  <data name="Kpi.Hours" xml:space="preserve"><value>{0} h</value></data>
+  <data name="Kpi.Operators" xml:space="preserve"><value>{0} capture operators</value></data>
+  <data name="KpiCard.AtLeast" xml:space="preserve"><value>Target at least {0} · alert below {1}</value></data>
+  <data name="KpiCard.AtMost" xml:space="preserve"><value>Target at most {0} · alert above {1}</value></data>
+  <data name="KpiBoard.Heading" xml:space="preserve"><value>KPI targets</value></data>
+  <data name="KpiBoard.Summary" xml:space="preserve"><value>{0} on track · {1} at risk · {2} off track</value></data>
+  <data name="KpiBoard.Edit" xml:space="preserve"><value>Set targets</value></data>
+  <data name="KpiBoard.None" xml:space="preserve"><value>No KPI is shown on the dashboard. Choose them in Settings › KPI targets.</value></data>
+  <data name="Project.Heading" xml:space="preserve"><value>Project progress</value></data>
+  <data name="Project.Report" xml:space="preserve"><value>View progress report</value></data>
+  <data name="Project.OfTotal" xml:space="preserve"><value>of {0} pages ({1})</value></data>
+  <data name="Project.Summary" xml:space="preserve"><value>{0} of {1} pages scanned; the plan expects {2} by today.</value></data>
+  <data name="Project.PlanToDate" xml:space="preserve"><value>Plan to date: {0} ({1})</value></data>
+  <data name="Project.Ahead" xml:space="preserve"><value>Ahead of plan by {0} pages</value></data>
+  <data name="Project.Behind" xml:space="preserve"><value>Behind plan by {0} pages</value></data>
+  <data name="Project.Dates" xml:space="preserve"><value>Project: {0} – {1}</value></data>
+  <data name="Project.Pace" xml:space="preserve"><value>{0} days left · {1} pages a day needed</value></data>
+  <data name="Project.Done" xml:space="preserve"><value>All pages scanned</value></data>
+  <data name="Project.Late" xml:space="preserve"><value>End date passed · {0} pages left</value></data>
+  <data name="KpiSettings.Note" xml:space="preserve"><value>Targets apply to the dashboard and the reports as soon as they are saved. They are kept in memory until the app restarts.</value></data>
+  <data name="KpiSettings.Project" xml:space="preserve"><value>Digitization project</value></data>
+  <data name="KpiSettings.ProjectPages" xml:space="preserve"><value>Total pages to digitize</value></data>
+  <data name="KpiSettings.ProjectStart" xml:space="preserve"><value>Start date</value></data>
+  <data name="KpiSettings.ProjectEnd" xml:space="preserve"><value>End date</value></data>
+  <data name="KpiSettings.Targets" xml:space="preserve"><value>Targets</value></data>
+  <data name="KpiSettings.TargetsHint" xml:space="preserve"><value>A KPI is on track when it reaches its target, at risk up to its alert level, and off track beyond it.</value></data>
+  <data name="KpiSettings.Column.Kpi" xml:space="preserve"><value>KPI</value></data>
+  <data name="KpiSettings.Column.Goal" xml:space="preserve"><value>Goal</value></data>
+  <data name="KpiSettings.Column.Target" xml:space="preserve"><value>Target</value></data>
+  <data name="KpiSettings.Column.Alert" xml:space="preserve"><value>Alert level</value></data>
+  <data name="KpiSettings.Column.Show" xml:space="preserve"><value>On dashboard</value></data>
+  <data name="KpiSettings.Direction.AtLeast" xml:space="preserve"><value>At least</value></data>
+  <data name="KpiSettings.Direction.AtMost" xml:space="preserve"><value>At most</value></data>
+  <data name="KpiSettings.TargetFor" xml:space="preserve"><value>Target for {0}</value></data>
+  <data name="KpiSettings.AlertFor" xml:space="preserve"><value>Alert level for {0}</value></data>
+  <data name="KpiSettings.ShowFor" xml:space="preserve"><value>Show {0} on the dashboard</value></data>
+  <data name="KpiSettings.Save" xml:space="preserve"><value>Save targets</value></data>
+  <data name="KpiSettings.Saved" xml:space="preserve"><value>Targets saved.</value></data>
+  <data name="KpiSettings.OpenDashboard" xml:space="preserve"><value>Open the dashboard</value></data>
+  <data name="KpiSettings.Error.Missing" xml:space="preserve"><value>Enter a number.</value></data>
+  <data name="KpiSettings.Error.Range" xml:space="preserve"><value>Enter a number from 0 to {0}.</value></data>
+  <data name="KpiSettings.Error.AlertAboveTarget" xml:space="preserve"><value>The alert level cannot be above the target.</value></data>
+  <data name="KpiSettings.Error.AlertBelowTarget" xml:space="preserve"><value>The alert level cannot be below the target.</value></data>
+  <data name="KpiSettings.Error.Pages" xml:space="preserve"><value>Enter a number of pages from 1 to {0}.</value></data>
+  <data name="KpiSettings.Error.DatesMissing" xml:space="preserve"><value>Enter the start and end dates.</value></data>
+  <data name="KpiSettings.Error.EndBeforeStart" xml:space="preserve"><value>The end date cannot be before the start date.</value></data>
+  <data name="Audit.KpiSettingsChanged" xml:space="preserve"><value>Changed the KPI targets</value></data>
+  <data name="Audit.ReportExported" xml:space="preserve"><value>Exported the report “{0}”</value></data>
+  <data name="Reports.Title" xml:space="preserve"><value>Reports</value></data>
+  <data name="Reports.Intro" xml:space="preserve"><value>Choose a report and a period, then view it, export it to CSV or print it.</value></data>
+  <data name="Reports.Catalog" xml:space="preserve"><value>Available reports</value></data>
+  <data name="Reports.Presets" xml:space="preserve"><value>Quick periods</value></data>
+  <data name="Reports.Preset.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Reports.Preset.Last7Days" xml:space="preserve"><value>Last 7 days</value></data>
+  <data name="Reports.Preset.Last30Days" xml:space="preserve"><value>Last 30 days</value></data>
+  <data name="Reports.Preset.ThisMonth" xml:space="preserve"><value>This month</value></data>
+  <data name="Reports.From" xml:space="preserve"><value>From</value></data>
+  <data name="Reports.To" xml:space="preserve"><value>To</value></data>
+  <data name="Reports.View" xml:space="preserve"><value>View report</value></data>
+  <data name="Reports.Generated" xml:space="preserve"><value>generated {0}</value></data>
+  <data name="Reports.LiveData" xml:space="preserve"><value>Live data</value></data>
+  <data name="Reports.Export" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="Reports.Print" xml:space="preserve"><value>Print</value></data>
+  <data name="Reports.Empty" xml:space="preserve"><value>Nothing to report for this period.</value></data>
+  <data name="Reports.Error.Missing" xml:space="preserve"><value>Choose both dates.</value></data>
+  <data name="Reports.Error.FromAfterTo" xml:space="preserve"><value>The start date cannot be after the end date.</value></data>
+  <data name="Reports.Error.InFuture" xml:space="preserve"><value>A report cannot include days after today.</value></data>
+  <data name="Reports.Error.TooLong" xml:space="preserve"><value>Choose a period of at most {0} days.</value></data>
+  <data name="Report.Progress.Title" xml:space="preserve"><value>Digitization progress</value></data>
+  <data name="Report.Progress.Description" xml:space="preserve"><value>Pages and documents scanned each day, against the daily target and the project plan.</value></data>
+  <data name="Report.Progress.Note" xml:space="preserve"><value>Daily target: the pages scanned per day KPI. Project columns: pages scanned since the project started, and the plan at an even pace (Settings › KPI targets).</value></data>
+  <data name="Report.Quality.Title" xml:space="preserve"><value>OCR quality</value></data>
+  <data name="Report.Quality.Description" xml:space="preserve"><value>Confidence, pages below the threshold and what the automatic check did, by department.</value></data>
+  <data name="Report.Quality.Note" xml:space="preserve"><value>Confidence comes from the OCR service (simulated for now). Pages below the threshold use the page threshold of the automatic quality check.</value></data>
+  <data name="Report.Productivity.Title" xml:space="preserve"><value>Operator productivity</value></data>
+  <data name="Report.Productivity.Description" xml:space="preserve"><value>Documents and pages scanned by each operator, documents reviewed by each reviewer.</value></data>
+  <data name="Report.Productivity.Note" xml:space="preserve"><value>Pages per hour assume an 8-hour shift on every day of the period. Minutes per review: average time a reviewer spent on a document.</value></data>
+  <data name="Report.Exceptions.Title" xml:space="preserve"><value>Review and exceptions</value></data>
+  <data name="Report.Exceptions.Description" xml:space="preserve"><value>Documents sent to review by main reason, failed OCR jobs, and what is still open.</value></data>
+  <data name="Report.Exceptions.Note" xml:space="preserve"><value>Still open: not yet approved, or a failed job not yet retried. Hours to resolve: average for the resolved ones.</value></data>
+  <data name="Report.Archive.Title" xml:space="preserve"><value>Archive statistics</value></data>
+  <data name="Report.Archive.Description" xml:space="preserve"><value>Documents and pages archived by department and confidentiality, with the storage used.</value></data>
+  <data name="Report.Archive.Note" xml:space="preserve"><value>Storage counts the original image, the searchable PDF and the Word file: about 0.42 MB a page.</value></data>
+  <data name="Report.Activity.Title" xml:space="preserve"><value>User activity</value></data>
+  <data name="Report.Activity.Description" xml:space="preserve"><value>What each user did in the app, from the activity log.</value></data>
+  <data name="Report.Activity.Note" xml:space="preserve"><value>From the activity log: the latest 500 actions since the app started (kept in memory).</value></data>
+  <data name="Report.Total" xml:space="preserve"><value>Total</value></data>
+  <data name="Report.Column.Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Report.Column.PagesScanned" xml:space="preserve"><value>Pages scanned</value></data>
+  <data name="Report.Column.Documents" xml:space="preserve"><value>Documents</value></data>
+  <data name="Report.Column.DailyTarget" xml:space="preserve"><value>Daily target</value></data>
+  <data name="Report.Column.OfTarget" xml:space="preserve"><value>% of target</value></data>
+  <data name="Report.Column.ProjectPages" xml:space="preserve"><value>Project to date</value></data>
+  <data name="Report.Column.ProjectPlan" xml:space="preserve"><value>Plan to date</value></data>
+  <data name="Report.Column.Department" xml:space="preserve"><value>Department</value></data>
+  <data name="Report.Column.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Report.Column.Confidence" xml:space="preserve"><value>Average confidence</value></data>
+  <data name="Report.Column.LowPages" xml:space="preserve"><value>Pages below threshold</value></data>
+  <data name="Report.Column.AutoArchived" xml:space="preserve"><value>Archived automatically</value></data>
+  <data name="Report.Column.SentToReview" xml:space="preserve"><value>Sent to review</value></data>
+  <data name="Report.Column.Failed" xml:space="preserve"><value>OCR failed</value></data>
+  <data name="Report.Column.User" xml:space="preserve"><value>User</value></data>
+  <data name="Report.Column.Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Report.Column.DocumentsScanned" xml:space="preserve"><value>Documents scanned</value></data>
+  <data name="Report.Column.PagesPerHour" xml:space="preserve"><value>Pages per hour</value></data>
+  <data name="Report.Column.DocumentsReviewed" xml:space="preserve"><value>Documents reviewed</value></data>
+  <data name="Report.Column.MinutesPerReview" xml:space="preserve"><value>Minutes per review</value></data>
+  <data name="Report.Column.Reason" xml:space="preserve"><value>Main reason</value></data>
+  <data name="Report.Column.Flagged" xml:space="preserve"><value>Documents</value></data>
+  <data name="Report.Column.Resolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Report.Column.Open" xml:space="preserve"><value>Still open</value></data>
+  <data name="Report.Column.HoursToResolve" xml:space="preserve"><value>Hours to resolve</value></data>
+  <data name="Report.Column.DocumentsArchived" xml:space="preserve"><value>Documents archived</value></data>
+  <data name="Report.Column.Storage" xml:space="preserve"><value>Storage (GB)</value></data>
+  <data name="Report.Column.SignIns" xml:space="preserve"><value>Sign‑ins</value></data>
+  <data name="Report.Column.Uploads" xml:space="preserve"><value>Uploads</value></data>
+  <data name="Report.Column.Edits" xml:space="preserve"><value>Edits</value></data>
+  <data name="Report.Column.StatusChanges" xml:space="preserve"><value>Status changes</value></data>
+  <data name="Report.Column.Deletions" xml:space="preserve"><value>Deletions</value></data>
+  <data name="Report.Column.Downloads" xml:space="preserve"><value>Downloads and exports</value></data>
+  <data name="Report.Column.SettingsChanges" xml:space="preserve"><value>Settings changes</value></data>
+  <data name="Report.Column.AllActions" xml:space="preserve"><value>All actions</value></data>
+  <data name="Report.Reason.LowPageConfidence" xml:space="preserve"><value>A page below the confidence threshold</value></data>
+  <data name="Report.Reason.LowDocumentConfidence" xml:space="preserve"><value>Document below the confidence threshold</value></data>
+  <data name="Report.Reason.PageWarnings" xml:space="preserve"><value>OCR warnings on a page</value></data>
+  <data name="Report.Reason.EmptyPage" xml:space="preserve"><value>Page without text</value></data>
+  <data name="Report.Reason.MissingMetadata" xml:space="preserve"><value>Missing required details</value></data>
+  <data name="Report.Reason.OcrFailed" xml:space="preserve"><value>OCR job failed</value></data>
+  <data name="Roles.Column.Permission" xml:space="preserve"><value>Permission</value></data>
+  <data name="Roles.Users" xml:space="preserve"><value>{0} active users</value></data>
+  <data name="Roles.Locked" xml:space="preserve"><value>Administrators always keep this permission.</value></data>
+  <data name="Roles.LockedNote" xml:space="preserve"><value>Administrators always keep Manage users and roles and Change settings, so nobody can be locked out.</value></data>
+  <data name="Roles.Save" xml:space="preserve"><value>Save permissions</value></data>
+  <data name="Roles.Saved" xml:space="preserve"><value>Permissions saved.</value></data>
+  <data name="Permission.ViewDocuments" xml:space="preserve"><value>View and search documents</value></data>
+  <data name="Permission.Scan" xml:space="preserve"><value>Scan and upload</value></data>
+  <data name="Permission.Review" xml:space="preserve"><value>Review and correct OCR text</value></data>
+  <data name="Permission.Approve" xml:space="preserve"><value>Approve and archive</value></data>
+  <data name="Permission.Download" xml:space="preserve"><value>Download and print</value></data>
+  <data name="Permission.Delete" xml:space="preserve"><value>Delete documents</value></data>
+  <data name="Permission.ManageRetention" xml:space="preserve"><value>Manage classification and retention</value></data>
+  <data name="Permission.ViewReports" xml:space="preserve"><value>View the dashboard and reports</value></data>
+  <data name="Permission.ExportData" xml:space="preserve"><value>Export lists and reports</value></data>
+  <data name="Permission.ManageSettings" xml:space="preserve"><value>Change settings</value></data>
+  <data name="Permission.ManageUsers" xml:space="preserve"><value>Manage users and roles</value></data>
+  <data name="Permission.ViewAuditLog" xml:space="preserve"><value>View the activity log</value></data>
+  <data name="Users.Note" xml:space="preserve"><value>Accounts from Active Directory will be synchronised; local accounts are created here. Changes are kept in memory until the app restarts.</value></data>
+  <data name="Users.Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Users.SearchHint" xml:space="preserve"><value>Name, user name or e-mail</value></data>
+  <data name="Users.AllRoles" xml:space="preserve"><value>All roles</value></data>
+  <data name="Users.AllStatuses" xml:space="preserve"><value>All statuses</value></data>
+  <data name="Users.Add" xml:space="preserve"><value>Add user</value></data>
+  <data name="Users.Summary" xml:space="preserve"><value>{0} users · {1} active · {2} disabled</value></data>
+  <data name="Users.Empty" xml:space="preserve"><value>No user matches these filters.</value></data>
+  <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Users.Column.Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Users.Column.Departments" xml:space="preserve"><value>Departments</value></data>
+  <data name="Users.Column.Clearance" xml:space="preserve"><value>Clearance</value></data>
+  <data name="Users.Column.Mfa" xml:space="preserve"><value>MFA</value></data>
+  <data name="Users.Column.Source" xml:space="preserve"><value>Account</value></data>
+  <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Users.Column.LastSignIn" xml:space="preserve"><value>Last sign-in</value></data>
+  <data name="Users.Column.Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Users.Yes" xml:space="preserve"><value>Required</value></data>
+  <data name="Users.Never" xml:space="preserve"><value>Never</value></data>
+  <data name="Users.Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Users.EditFor" xml:space="preserve"><value>Edit {0}</value></data>
+  <data name="UserStatus.Active" xml:space="preserve"><value>Active</value></data>
+  <data name="UserStatus.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="UserSource.ActiveDirectory" xml:space="preserve"><value>Active Directory</value></data>
+  <data name="UserSource.Local" xml:space="preserve"><value>Local</value></data>
+  <data name="Users.AddTitle" xml:space="preserve"><value>Add a user</value></data>
+  <data name="Users.EditTitle" xml:space="preserve"><value>Edit {0}</value></data>
+  <data name="Users.Account" xml:space="preserve"><value>Account</value></data>
+  <data name="Users.FromDirectory" xml:space="preserve"><value>The name and e-mail come from Active Directory and are changed there.</value></data>
+  <data name="Users.UserName" xml:space="preserve"><value>User name</value></data>
+  <data name="Users.Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Users.Active" xml:space="preserve"><value>Account active</value></data>
+  <data name="Users.Mfa" xml:space="preserve"><value>Ask for a one-time code at sign-in (MFA)</value></data>
+  <data name="Users.Access" xml:space="preserve"><value>Access</value></data>
+  <data name="Users.ClearanceHint" xml:space="preserve"><value>The highest confidentiality this user may see.</value></data>
+  <data name="Users.AllDepartments" xml:space="preserve"><value>All departments</value></data>
+  <data name="Users.Effective" xml:space="preserve"><value>What this user can do</value></data>
+  <data name="Users.EffectiveDisabled" xml:space="preserve"><value>The account is disabled: it cannot sign in.</value></data>
+  <data name="Users.Allowed" xml:space="preserve"><value>Allowed:</value></data>
+  <data name="Users.NotAllowed" xml:space="preserve"><value>Not allowed:</value></data>
+  <data name="Users.Visible" xml:space="preserve"><value>Sees {0} of the {1} documents listed now.</value></data>
+  <data name="Users.VisibleUnknown" xml:space="preserve"><value>The documents could not be counted.</value></data>
+  <data name="Users.Save" xml:space="preserve"><value>Save user</value></data>
+  <data name="Users.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>{0} saved.</value></data>
+  <data name="Users.Error.Required" xml:space="preserve"><value>This field is required.</value></data>
+  <data name="Users.Error.InvalidUserName" xml:space="preserve"><value>Use 2 to 64 lower-case letters, digits, dots, hyphens or underscores.</value></data>
+  <data name="Users.Error.UserNameTaken" xml:space="preserve"><value>Another account already uses this user name.</value></data>
+  <data name="Users.Error.InvalidEmail" xml:space="preserve"><value>Enter an e-mail address such as name@example.org.</value></data>
+  <data name="Users.Error.LastAdministrator" xml:space="preserve"><value>This is the last active administrator: keep the role and the account active.</value></data>
+  <data name="Users.Error.NoDepartment" xml:space="preserve"><value>Choose at least one department, or All departments.</value></data>
+  <data name="Audit.UserAdded" xml:space="preserve"><value>Added the user {0}</value></data>
+  <data name="Audit.UserChanged" xml:space="preserve"><value>Changed the user {0}</value></data>
+  <data name="Audit.RolesChanged" xml:space="preserve"><value>Changed the role permissions</value></data>
+  <data name="Audit.OtpFailed" xml:space="preserve"><value>Entered a wrong one-time code</value></data>
+  <data name="Otp.Title" xml:space="preserve"><value>Verify it's you</value></data>
+  <data name="Otp.Intro" xml:space="preserve"><value>Enter the one-time code sent to your e-mail, or the code shown in your authenticator app.</value></data>
+  <data name="Otp.Code" xml:space="preserve"><value>One-time code</value></data>
+  <data name="Otp.Hint" xml:space="preserve"><value>{0} digits</value></data>
+  <data name="Otp.Digit" xml:space="preserve"><value>Digit {0} of {1}</value></data>
+  <data name="Otp.Submit" xml:space="preserve"><value>Verify</value></data>
+  <data name="Otp.Resend" xml:space="preserve"><value>Send a new code</value></data>
+  <data name="Otp.ResendIn" xml:space="preserve"><value>Send a new code in {0}s</value></data>
+  <data name="Otp.Resent" xml:space="preserve"><value>A new code was sent.</value></data>
+  <data name="Otp.Back" xml:space="preserve"><value>Use another account</value></data>
+  <data name="Otp.Format" xml:space="preserve"><value>Enter the {0} digits of the code.</value></data>
+  <data name="Otp.Wrong" xml:space="preserve"><value>The code is not correct. Attempts left: {0}.</value></data>
+  <data name="Otp.TooMany" xml:space="preserve"><value>Too many wrong codes. Sign in again.</value></data>
+  <data name="Users.Title" xml:space="preserve"><value>Users</value></data>
+  <data name="Roles.Title" xml:space="preserve"><value>Roles &amp; access</value></data>
+  <data name="Activity.Title" xml:space="preserve"><value>Activity logs</value></data>
+  <data name="Activity.Intro" xml:space="preserve"><value>Who did what, when and from where: sign-ins, document access and changes, administration and system events.</value></data>
+  <data name="Activity.Export" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="Activity.IntegrityTitle" xml:space="preserve"><value>Integrity of the log</value></data>
+  <data name="Activity.Integrity" xml:space="preserve"><value>Integrity verified: {0} entries in an unbroken SHA-256 chain · checked {1}</value></data>
+  <data name="Activity.IntegrityBroken" xml:space="preserve"><value>Integrity check failed at entry #{0}: the log was changed after it was written.</value></data>
+  <data name="Activity.Protection" xml:space="preserve"><value>Append-only · kept {0} years · forwarded to the SIEM as syslog (CEF), simulated in this mockup</value></data>
+  <data name="Activity.Verify" xml:space="preserve"><value>Verify again</value></data>
+  <data name="Activity.SampleNote" xml:space="preserve"><value>Entries before this app started are sample data; what is done in the app now is added live (marked Live).</value></data>
+  <data name="Activity.Live" xml:space="preserve"><value>Live</value></data>
+  <data name="Activity.Stats" xml:space="preserve"><value>Summary of the entries shown</value></data>
+  <data name="Activity.Stat.Entries" xml:space="preserve"><value>Entries</value></data>
+  <data name="Activity.Stat.SignIns" xml:space="preserve"><value>Sign-ins</value></data>
+  <data name="Activity.Stat.Failed" xml:space="preserve"><value>Failed sign-ins and codes</value></data>
+  <data name="Activity.Stat.Denied" xml:space="preserve"><value>Access refused</value></data>
+  <data name="Activity.Stat.Downloads" xml:space="preserve"><value>Opened, downloaded, printed, exported</value></data>
+  <data name="Activity.Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Activity.SearchHint" xml:space="preserve"><value>User, document, details or IP address</value></data>
+  <data name="Activity.AllUsers" xml:space="preserve"><value>All users</value></data>
+  <data name="Activity.AllCategories" xml:space="preserve"><value>All categories</value></data>
+  <data name="Activity.AllResults" xml:space="preserve"><value>All results</value></data>
+  <data name="Activity.Clear" xml:space="preserve"><value>Clear filters</value></data>
+  <data name="Activity.Empty" xml:space="preserve"><value>No entry matches these filters.</value></data>
+  <data name="Activity.Column.Category" xml:space="preserve"><value>Category</value></data>
+  <data name="Activity.Column.Ip" xml:space="preserve"><value>IP address</value></data>
+  <data name="Activity.Column.Client" xml:space="preserve"><value>Client</value></data>
+  <data name="Activity.Column.Result" xml:space="preserve"><value>Result</value></data>
+  <data name="Activity.Column.Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Activity.ShowDetails" xml:space="preserve"><value>Details</value></data>
+  <data name="Activity.HideDetails" xml:space="preserve"><value>Hide</value></data>
+  <data name="Activity.Detail.Entry" xml:space="preserve"><value>Entry</value></data>
+  <data name="Activity.Detail.Source" xml:space="preserve"><value>Source</value></data>
+  <data name="Activity.Source.Sample" xml:space="preserve"><value>Sample history</value></data>
+  <data name="Activity.Source.Live" xml:space="preserve"><value>Done in this app since it started</value></data>
+  <data name="Activity.Siem" xml:space="preserve"><value>SIEM event</value></data>
+  <data name="Activity.Hash" xml:space="preserve"><value>Hash</value></data>
+  <data name="Activity.PreviousHash" xml:space="preserve"><value>Previous hash</value></data>
+  <data name="ActivityCategory.Security" xml:space="preserve"><value>Security</value></data>
+  <data name="ActivityCategory.DocumentAccess" xml:space="preserve"><value>Document access</value></data>
+  <data name="ActivityCategory.DocumentChange" xml:space="preserve"><value>Document change</value></data>
+  <data name="ActivityCategory.Administration" xml:space="preserve"><value>Administration</value></data>
+  <data name="ActivityCategory.System" xml:space="preserve"><value>System</value></data>
+  <data name="ActivityResult.Success" xml:space="preserve"><value>Success</value></data>
+  <data name="ActivityResult.Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="ActivityResult.Denied" xml:space="preserve"><value>Refused</value></data>
+  <data name="Audit.SignedOut" xml:space="preserve"><value>Signed out</value></data>
+  <data name="Audit.AccountLocked" xml:space="preserve"><value>Account locked after 5 failed sign-ins</value></data>
+  <data name="Audit.AccessDenied.Department" xml:space="preserve"><value>Opening refused: the document is not in their departments</value></data>
+  <data name="Audit.AccessDenied.Clearance" xml:space="preserve"><value>Opening refused: the document is above their clearance</value></data>
+  <data name="Audit.Viewed" xml:space="preserve"><value>Opened the document</value></data>
+  <data name="Audit.Searched" xml:space="preserve"><value>Searched for “{0}”</value></data>
+  <data name="Audit.Printed" xml:space="preserve"><value>Printed version {0}</value></data>
+  <data name="Audit.MetadataChanged" xml:space="preserve"><value>Changed the details (version {0})</value></data>
+  <data name="Audit.OcrFailed" xml:space="preserve"><value>OCR failed ({0})</value></data>
+  <data name="Audit.OcrRetried" xml:space="preserve"><value>OCR sent again</value></data>
+  <data name="Audit.ActivityExported" xml:space="preserve"><value>Exported the activity log ({0} entries)</value></data>
 </root>

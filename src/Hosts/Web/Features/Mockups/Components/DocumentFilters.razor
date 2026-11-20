@@ -1,0 +1,60 @@
+@inject IStringLocalizer<MockupText> Text
+
+@* The filters of a document list (All Documents, Review Queue). Every change applies at once. *@
+<div class="doc-filters" role="search">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label for="@($"{Id}-search")" class="form-label">@Text["Search.Label"]</label>
+            <div class="input-group">
+                <label for="@($"{Id}-field")" class="visually-hidden">@Text["Search.Field"]</label>
+                <select id="@($"{Id}-field")" class="form-select doc-field" @bind="Filter.Field" @bind:after="ChangedAsync">
+                    @foreach (var field in Enum.GetValues<DocumentSearchField>())
+                    {
+                        <option value="@field">@Text.Field(field)</option>
+                    }
+                </select>
+                <input id="@($"{Id}-search")" type="search" class="form-control" dir="auto" autocomplete="off" spellcheck="false"
+                       placeholder="@Text["Search.Placeholder"]" @bind="Filter.Search" @bind:event="oninput" @bind:after="ChangedAsync" />
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="@($"{Id}-department")" class="form-label">@Text["Filter.Department"]</label>
+            <select id="@($"{Id}-department")" class="form-select" @bind="Filter.Department" @bind:after="ChangedAsync">
+                <option value="">@Text["Filter.AllDepartments"]</option>
+                @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                {
+                    <option value="@department">@Text.Department(department)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="@($"{Id}-kind")" class="form-label">@Text["Filter.Kind"]</label>
+            <select id="@($"{Id}-kind")" class="form-select" @bind="Filter.Kind" @bind:after="ChangedAsync">
+                <option value="">@Text["Filter.AllKinds"]</option>
+                @foreach (var kind in Enum.GetValues<DocumentKind>())
+                {
+                    <option value="@kind">@Text.Kind(kind)</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="@($"{Id}-from")" class="form-label">@Text["Filter.From"]</label>
+            <input id="@($"{Id}-from")" type="date" class="form-control" @bind="Filter.From" @bind:after="ChangedAsync" />
+        </div>
+        <div class="col-6 col-lg-3">
+            <label for="@($"{Id}-to")" class="form-label">@Text["Filter.To"]</label>
+            <input id="@($"{Id}-to")" type="date" class="form-control" @bind="Filter.To" @bind:after="ChangedAsync" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DocumentFilterState Filter { get; set; } = default!;
+
+    /// <summary>Prefix of the element ids, unique on the page.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = default!;
+
+    [Parameter] public EventCallback OnChange { get; set; }
+
+    private Task ChangedAsync() => OnChange.InvokeAsync();
+}

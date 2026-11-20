@@ -15,3 +15,40 @@
 .login-submit {
     width: 100%;
 }
+
+/* One-time code: six square boxes in a row (left to right in both languages), shrinking on narrow screens. */
+.otp-boxes {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+}
+
+.otp-digit {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    text-align: center;
+    font-family: var(--app-font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    caret-color: var(--app-primary);
+}
+
+    /* A small gap after the third box reads the code as two groups of three. */
+    .otp-digit:nth-child(3) {
+        margin-inline-end: .5rem;
+    }
+
+    /* The red border says which boxes are wrong; Bootstrap's warning icon does not fit a one-digit box. */
+    .otp-digit.is-invalid {
+        padding: 0;
+        background-image: none;
+    }
+
+/* The countdown changes every second: equal-width digits keep the text from jumping. */
+.otp-resend {
+    font-variant-numeric: tabular-nums;
+}

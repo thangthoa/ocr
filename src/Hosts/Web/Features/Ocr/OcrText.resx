@@ -40,7 +40,6 @@
   <data name="Upload" xml:space="preserve"><value>Upload</value></data>
   <data name="ClearSelection" xml:space="preserve"><value>Clear</value></data>
   <data name="Uploading" xml:space="preserve"><value>Sending to the OCR service…</value></data>
-  <data name="GoToJobs" xml:space="preserve"><value>View documents</value></data>
   <data name="NewUpload" xml:space="preserve"><value>New upload</value></data>
   <data name="View" xml:space="preserve"><value>View</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
@@ -66,7 +65,6 @@
   <data name="JobNotFound" xml:space="preserve"><value>OCR job not found.</value></data>
   <data name="JobDeleted" xml:space="preserve"><value>This job has been deleted.</value></data>
   <data name="Detail.Completed" xml:space="preserve"><value>Finished</value></data>
-  <data name="Download" xml:space="preserve"><value>Download result</value></data>
   <data name="PagesPending" xml:space="preserve"><value>Pages appear here as they finish. Most pages complete together at the last step.</value></data>
   <data name="PageHeading" xml:space="preserve"><value>Page {0} / {1}</value></data>
   <data name="PageImageAlt" xml:space="preserve"><value>Image of page {0}</value></data>

@@ -12,7 +12,7 @@
 .upload-zone:hover,
 .upload-zone:focus-within,
 .upload-zone.drag-over {
-    border-color: var(--ae-gold-600);
+    border-color: var(--app-primary);
     background-color: var(--ae-gold-100);
 }
 

@@ -7,14 +7,18 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 
 | Route | Màn hình | Dữ liệu |
 |---|---|---|
-| `/login` | Đăng nhập (layout riêng, không có menu) | Giả: `admin` / `admin` |
-| `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng; trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó) | Số liệu mẫu cố định, ngày theo hôm nay |
-| `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh) và tên (bắt buộc), xem / sắp xếp trang rồi Upload. Upload xong thì **mở trang của document**, nơi tiến trình hiện theo từng bước | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
-| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào; document thật trước, rồi cũ nhất trước | Job thật + mẫu |
-| `/documents` | **All Documents**: job OCR thật + 14 tài liệu mẫu (nhãn *Sample*); thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái | Job thật + phần lưu trong bộ nhớ |
-| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, tải bản cuối (DOCX, TXT), xuất CSV | Job thật + mẫu |
-| `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn); preview ảnh gốc cạnh trang Word (từng trang); bên dưới là metadata và lịch sử phiên bản; duyệt (= lưu trữ), sửa (lưu thành phiên bản mới) | Job thật + phần lưu trong bộ nhớ |
-| `/admin` (`?tab=Roles\|Retention\|Quality\|Integrations\|Audit`) | **Settings** (mục cuối của menu): vai trò, phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, hệ thống kết nối, nhật ký hoạt động | Vai trò và lưu giữ: mẫu. Cài đặt kiểm tra: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật. Nhật ký: ghi thật, trong bộ nhớ |
+| `/login` | Đăng nhập 2 bước (layout riêng, không có menu): mật khẩu rồi mã OTP. Mọi trang khác chuyển về đây khi chưa đăng nhập | Giả: `admin` / `admin`, mã `123456`; phiên lưu trong localStorage |
+| `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng. Trên cùng là **tiến độ dự án** so với kế hoạch, rồi trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó), rồi các **thẻ KPI** so với mục tiêu đặt ở Settings | Số liệu mẫu cố định, ngày theo hôm nay; mục tiêu KPI lấy từ Settings |
+| `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: một cột giữa trang; nhập tên (bắt buộc) trước, rồi chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh), xem / sắp xếp trang rồi Upload. Trên cùng là thanh tiến trình đang ở bước **Scan** (khi đang gửi file thì bước này hiện "Sending to the OCR service…"). Upload xong thì **mở trang của document**, thanh tiến trình chạy tiếp từ Recognizing | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
+| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và thời điểm cập nhật cuối; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Job thật |
+| `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; cột Version và Last updated tách riêng | Job thật + phần lưu trong bộ nhớ |
+| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Job thật |
+| `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn), cùng hàng là các nút **Approve and archive** (hoặc *Send back to review*), **Edit** (mở Word) và **Delete**; preview ảnh gốc cạnh trang Word (từng trang), bên phải số trang là ô chọn **DOCX / PDF / TXT** và nút **Download** (bản hiện tại; bản cuối khi đã lưu trữ); bên dưới là metadata (nút *Edit details* để sửa, lưu thành phiên bản mới) và lịch sử phiên bản | Job thật + phần lưu trong bộ nhớ |
+| `/reports` (`?report=…&from=yyyy-MM-dd&to=yyyy-MM-dd`) | **Reports**: chọn một trong 6 báo cáo và khoảng ngày, xem dạng bảng, xuất CSV, in | Mẫu, trừ báo cáo hoạt động người dùng (đọc nhật ký thật) |
+| `/users` | **Users › Users**: danh sách người dùng, thêm / sửa | Dùng thật, trong bộ nhớ; tài khoản ban đầu là mẫu |
+| `/users/roles` | **Users › Roles & access**: ma trận vai trò × quyền | Dùng thật, trong bộ nhớ |
+| `/users/activity` (`?user=&category=&result=&from=&to=&q=`) | **Users › Activity logs**: nhật ký hoạt động, kiểm tra toàn vẹn, lọc, xuất CSV | Một tháng mẫu + nhật ký thật của app |
+| `/admin` (`?tab=Retention\|Quality\|Kpi\|Integrations`) | **Settings** (mục cuối của menu): phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, mục tiêu KPI, hệ thống kết nối. Link cũ `?tab=Users\|Roles\|Audit` chuyển sang trang mới | Lưu giữ: mẫu. Cài đặt kiểm tra, mục tiêu KPI: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật |
 | `/ocr/jobs`, `/ocr/jobs/{id}` | Không còn trang riêng: chuyển hướng sang `/documents`, `/documents/{id}` | — |
 
 ## Document = job OCR
@@ -41,9 +45,14 @@ App lưu thêm **trong bộ nhớ** (`Features/Mockups/Data/DocumentStore.cs`): 
 Document upload từ Scan được gắn người upload và mã lần upload (hiện ở metadata và nhật ký); phòng ban không còn
 được chọn lúc upload, nhập ở metadata của document.
 
-**Nhật ký hoạt động** (`AuditLog`) ghi: đăng nhập (thành công/thất bại, không ghi mật khẩu), upload, sửa, khôi
-phục phiên bản, đổi trạng thái, xoá, tải bản cuối, xuất CSV, kết quả kiểm tra tự động (người dùng `quality-check`)
-và đổi cài đặt kiểm tra. Chỉ giữ 500 dòng gần nhất trong bộ nhớ; nhật ký thật (append-only, đẩy sang SIEM) cần database.
+**Nhật ký hoạt động** (`AuditLog`) ghi những gì làm trong app:
+- đăng nhập thành công / thất bại (không ghi mật khẩu), sai mã OTP;
+- upload, sửa, khôi phục phiên bản, đổi trạng thái, xoá, tải bản cuối, xuất CSV;
+- kết quả kiểm tra tự động (người dùng `quality-check`);
+- đổi cài đặt kiểm tra, mục tiêu KPI, người dùng, quyền; xuất báo cáo và xuất nhật ký.
+
+Chỉ giữ 500 dòng gần nhất trong bộ nhớ; nhật ký thật (append-only, đẩy sang SIEM) cần database. Trang xem nhật ký:
+*Users › Activity logs* (xem mục bên dưới).
 
 ## Kiểm tra chất lượng tự động (duyệt vòng 1) và confidence
 
@@ -80,34 +89,172 @@ kèm danh sách lý do.
 - Quy tắc kiểm tra là quy tắc nghiệp vụ. Hiện chúng nằm trong Web host như phần mockup còn lại. Khi có module
   Documents, `QualityCheck` và `QualitySettings` chuyển vào Domain/Application của module đó, cài đặt lưu PostgreSQL.
 
+## Mục tiêu KPI và Dashboard
+
+Code ở `Features/Mockups/Kpi/`. Cài đặt ở `/admin?tab=Kpi`, lưu trong bộ nhớ (về mặc định khi restart), dùng chung cho mọi
+người, mỗi lần lưu ghi một dòng nhật ký.
+
+- **Dự án số hoá**: tổng số trang, ngày bắt đầu, ngày kết thúc. Mặc định 2.000.000 trang trong 100 ngày (20.000 trang/ngày,
+  mục tiêu vận hành của hồ sơ thầu), bắt đầu 45 ngày trước hôm nay để số liệu mẫu luôn cho thấy một dự án đang chạy.
+  Dashboard so số trang đã scan từ ngày bắt đầu với kế hoạch chia đều theo ngày: đạt hoặc vượt kế hoạch là *On track*,
+  chậm dưới 5 % là *At risk*, chậm hơn là *Off track*. Thẻ này không đổi theo nút Ngày / Tuần / Tháng.
+- **KPI**: danh sách cố định, người dùng chỉ đặt **mục tiêu**, **mức cảnh báo** và có hiện trên Dashboard hay không.
+
+  | KPI | Hướng | Mục tiêu / cảnh báo mặc định | Số đo trên Dashboard |
+  |---|---|---|---|
+  | Pages scanned per day | ≥ | 20.000 / 18.000 | Trung bình mỗi ngày của kỳ |
+  | OCR accuracy | ≥ | 90 % / 88 % | Confidence trung bình (tender yêu cầu ≥ 90 %) |
+  | Archived without manual review | ≥ | 80 % / 70 % | Tỉ lệ tự duyệt |
+  | Review backlog | ≤ | 300 / 500 | Số document đang chờ duyệt (không theo kỳ) |
+  | Time in review | ≤ | 24 / 48 giờ | Thời gian chờ duyệt trung bình |
+  | OCR failure rate | ≤ | 1 % / 2 % | Tỉ lệ job lỗi |
+  | Pages per operator per day | ≥ | 1.800 / 1.500 | Trang mỗi ngày chia cho 12 nhân viên scan |
+
+  Trạng thái: đạt mục tiêu là *On track*; chưa đạt nhưng chưa vượt mức cảnh báo là *At risk*; vượt mức cảnh báo là
+  *Off track*. Với KPI "≥", mức cảnh báo phải không cao hơn mục tiêu; với KPI "≤", không thấp hơn.
+- Đường mục tiêu trên biểu đồ Dashboard là mục tiêu *Pages scanned per day* (chia đều cho các giờ khi xem theo Ngày),
+  không còn là hằng số 26.000. Ba ô số liệu cũ (Pages scanned, Average OCR confidence, Waiting for review) được thay bằng
+  các thẻ KPI. Nút *Start reviewing* và link số job lỗi nằm trong thẻ tương ứng.
+- Số đo vẫn là số liệu mẫu (`SampleReports`). Khi có dữ liệu thật, các quy tắc trong `KpiRules` chuyển vào module báo cáo
+  (Domain/Application), cài đặt lưu PostgreSQL.
+
+## Báo cáo (Reports)
+
+Code ở `Features/Mockups/Reports/`. Trang `/reports` liệt kê 6 báo cáo. Người dùng chọn báo cáo, khoảng ngày (hoặc nút
+nhanh: Today, Last 7 days, Last 30 days, This month), bấm **View report**. Mặc định là *Digitization progress* của 7 ngày gần
+nhất. Khoảng ngày không quá 366 ngày, không có ngày sau hôm nay.
+
+| Báo cáo | Dòng | Cột chính |
+|---|---|---|
+| Digitization progress | Mỗi ngày | Trang, document, mục tiêu ngày (KPI), % mục tiêu, luỹ kế dự án, kế hoạch luỹ kế |
+| OCR quality | Mỗi phòng ban | Document, trang, confidence, % trang dưới ngưỡng, % tự duyệt, % vào review, % lỗi |
+| Operator productivity | Mỗi người (12 scan, 6 duyệt) | Document và trang đã scan, trang/giờ (ca 8 giờ), document đã duyệt, phút/lần duyệt |
+| Review and exceptions | Mỗi lý do chính | Số document, đã xử lý, còn mở, số giờ xử lý trung bình |
+| Archive statistics | Mỗi phòng ban | Document và trang đã lưu trữ, theo mức mật, dung lượng (≈ 0,42 MB/trang) |
+| User activity | Mỗi người dùng | Đăng nhập, upload, sửa, đổi trạng thái, xoá, tải/xuất, đổi cài đặt. **Dữ liệu thật** từ nhật ký |
+
+- Mỗi báo cáo có dòng tổng. Số liệu mẫu theo ngày (`SampleReportFacts`) dùng đúng số trang của Dashboard cho 30 ngày gần
+  nhất, và một số cố định cùng khoảng cho các ngày trước đó, nên các báo cáo khớp nhau và khớp Dashboard (ví dụ tổng 7 ngày
+  là 180.610 trang ở cả Dashboard *Week* và báo cáo tiến độ).
+- **Export CSV**: `/reports/export.csv?report=…&from=…&to=…`. UTF-8 có BOM, tiêu đề cột theo ngôn ngữ đang chọn, số
+  không định dạng và ngày ISO để Excel đọc là số. Mỗi lần xuất ghi một dòng nhật ký. Khoảng ngày sai trả 400.
+- **Print**: dùng lệnh in của trình duyệt; CSS in (`@media print` trong `app.css`) bỏ header, menu, danh sách báo cáo và các
+  nút, chỉ còn tiêu đề, kỳ báo cáo và bảng.
+- Link tới một báo cáo cụ thể: `reports?report=Quality&from=2026-11-01&to=2026-11-20`. Thẻ tiến độ dự án trên Dashboard
+  link tới báo cáo *Digitization progress*.
+
+## Đăng nhập (mockup)
+
+- **Bước 1**: `admin` / `admin`. Sai thì báo lỗi và ghi nhật ký *Sign-in failed* (không ghi mật khẩu).
+- **Bước 2**: mã OTP 6 số. Mockup chấp nhận `123456`; sau này mã gửi qua e-mail hoặc lấy từ authenticator app. Có
+  *Send a new code* (chỉ báo đã gửi) và *Use another account* (quay lại bước 1).
+  - *Send a new code* bị khoá 30 giây sau mỗi lần gửi mã (kể cả lần đầu), nút hiện số giây còn lại. Server cũng từ chối
+    gửi lại trước khi hết 30 giây.
+  - Mã nhập vào **6 ô**, mỗi ô một số, luôn trái sang phải (cả tiếng Ả Rập), chia 2 nhóm 3 số.
+  - `wwwroot/js/otp-input.js`: gõ số thì sang ô sau; Backspace ở ô trống thì về ô trước; phím mũi tên để di chuyển.
+    Dán cả mã (hoặc điện thoại tự điền từ tin nhắn) thì mã điền vào đủ 6 ô.
+  - Script chép các số vào ô ẩn `login-otp`; trang đọc mã từ ô đó. Đủ 6 số thì tự gửi.
+  - Mã sai hoặc gửi mã mới thì 6 ô được làm trống và con trỏ về ô đầu.
+  - Mã sai ghi nhật ký *Entered a wrong one-time code*.
+  - Sai 5 lần thì phải nhập lại mật khẩu.
+  - Chỉ khi mã đúng mới ghi *Signed in*.
+- **Phiên**: `wwwroot/js/session.js` lưu `{ user, expires }` vào localStorage key `ocr.session`: 8 giờ, hoặc 30 ngày nếu
+  chọn *Remember me*. Script nạp trong `<head>`, chạy trước khi trang hiện ra:
+  - Không có phiên (hoặc hết hạn) thì chuyển ngay sang `/login?returnUrl=<trang đang mở>`.
+  - Kiểm tra lại sau mỗi lần chuyển trang kiểu enhanced navigation và khi tab khác đăng xuất.
+  - Đăng nhập xong thì quay về `returnUrl`, chỉ khi đó là đường dẫn trong site (`/…`, không phải `//…`); còn lại về
+    Dashboard.
+- **Sign out** (menu tài khoản) xoá phiên rồi mở `/login`.
+
+## Người dùng và phân quyền
+
+Code ở `Features/Mockups/Access/` (`UserDirectory`, `AccessRules`) và `Components/UsersPanel`, `Components/RolesPanel`.
+Lưu trong bộ nhớ, mỗi thay đổi ghi một dòng nhật ký.
+
+Menu **Users** (dưới vạch phân cách, trên Settings) là một nhóm có 3 mục con: *Users*, *Roles & access*, *Activity logs*.
+Nhóm là thẻ `<details>` nên chạy được không cần Blazor. Nhóm tự mở khi đang ở một trang `/users…`, và chữ của nhóm đổi
+màu như mục đang chọn kể cả khi đã thu gọn.
+
+- **Users** (`/users`):
+  - Danh sách 12 tài khoản mẫu: `admin` (tài khoản demo, Local) và các tài khoản AD cho từng vai trò, một tài khoản bị
+    khoá. Tìm theo tên / user name / e-mail, lọc theo vai trò và trạng thái, phân trang.
+  - **Thêm / sửa**: tên, user name, e-mail, vai trò, phòng ban được xem (hoặc *All departments*), mức mật cao nhất được
+    xem, bắt buộc MFA, tài khoản hoạt động.
+  - Tài khoản AD không sửa được tên và e-mail (lấy từ AD). User name không đổi sau khi tạo.
+  - Kiểm tra: bắt buộc tên, user name, e-mail; user name 2–64 ký tự `a-z 0-9 . _ -` và không trùng; e-mail hợp lệ; chọn
+    ít nhất một phòng ban. Không được hạ vai trò hoặc khoá **administrator cuối cùng** đang hoạt động.
+  - Bên cạnh form là khung **What this user can do**: các quyền của vai trò đang chọn và số document người đó thấy
+    trong danh sách hiện tại. Thấy được khi: tài khoản hoạt động, vai trò có quyền xem, document thuộc phòng ban được
+    xem, mức mật không vượt mức của người dùng. Document chưa có phòng ban chỉ người xem mọi phòng ban mới thấy.
+- **Roles & access** (`/users/roles`): ma trận 5 vai trò × 12 quyền, mỗi cột ghi nhóm AD và số người dùng đang
+  hoạt động. Administrator luôn giữ quyền *Manage users and roles* và *Change settings* (ô bị khoá), để không ai bị khoá
+  ngoài hệ thống.
+- Đây là màn quản trị. Quyền **chưa được áp** lên menu, trang hay link tải, vì đăng nhập vẫn chỉ là tài khoản demo.
+
+## Nhật ký hoạt động (Activity logs)
+
+Code ở `Features/Mockups/Activity/` (`SampleActivity`, `ActivityTrail`, `ActivityEndpoints`) và `Pages/ActivityLogPage`.
+Trang `/users/activity` trả lời các câu hỏi 60, 66, 69, 70, 106 và 110 của khách.
+
+- **Dữ liệu**: gộp hai nguồn, mới nhất trước.
+  - **Một tháng mẫu** (khoảng 7.000 dòng), tạo lại giống hệt mỗi lần chạy, theo dây chuyền số hoá:
+    - nhân viên scan upload; kiểm tra tự động lưu trữ hoặc đưa vào review; người duyệt sửa Word rồi duyệt;
+    - records manager tìm, tải, xuất danh sách / báo cáo, thỉnh thoảng xoá hoặc trả về review;
+    - người đọc tìm, mở, tải, in, và đôi khi bị **từ chối truy cập** (khác phòng ban hoặc vượt mức mật);
+    - admin sửa người dùng, quyền, cài đặt, xuất nhật ký;
+    - OCR lỗi rồi gửi lại;
+    - các sự cố bảo mật: gõ sai mật khẩu / OTP, và 3 đêm có IP bên ngoài dò mật khẩu (một lần làm **khoá tài khoản**).
+    - Mỗi dòng có IP và trình duyệt / dịch vụ. Tài khoản demo `admin` không có trong dữ liệu mẫu.
+  - **Nhật ký thật** (`AuditLog`) của lần chạy này, có nhãn *Live* và nền xanh nhạt. Document của nó có link.
+- **Toàn vẹn**: các dòng được nối bằng SHA-256 (mỗi hash gồm hash trước và nội dung dòng).
+  - Mỗi lần tải trang hoặc bấm *Verify again*, app băm lại toàn bộ chuỗi. Khung xanh báo số dòng và thời điểm kiểm tra.
+  - Nếu một dòng bị sửa, khung đỏ chỉ ra dòng đầu tiên bị sửa.
+  - Khung này cũng ghi chính sách: chỉ ghi thêm, giữ 7 năm, đẩy sang SIEM (syslog / CEF); phần SIEM là giả lập.
+- **Số liệu nhanh** theo bộ lọc: tổng số dòng, đăng nhập, đăng nhập / OTP thất bại, truy cập bị từ chối, mở / tải /
+  in / xuất. Bấm 3 ô cuối để lọc theo đúng loại đó.
+- **Lọc**: tìm (người dùng, document, chi tiết, IP), người dùng, nhóm (bảo mật, truy cập document, thay đổi document,
+  quản trị, hệ thống), kết quả (thành công, thất bại, bị từ chối), khoảng ngày. Bộ lọc đọc được từ địa chỉ trang.
+- Mỗi dòng có nút *Details*: số thứ tự, mã sự kiện SIEM, trình duyệt, nguồn (mẫu / thật), hash và hash trước.
+- **Export CSV** (`/users/activity/export.csv`, cùng bộ lọc): UTF-8 có BOM, giờ UTC, có hash. Mỗi lần xuất ghi một dòng
+  nhật ký.
+
 ## Tài liệu đã duyệt (Document Archive)
 
 - Bấm **Approve and archive** thì app lưu *người duyệt* và *thời điểm duyệt* (hiện ở metadata trang document,
   trên thanh tiến trình và trang `/archive`) và chuyển document sang *Archived*. **Send back to review** thì xoá.
 - Trang `/archive` chỉ liệt kê document *Archived*, document thật trước, rồi mới duyệt nhất. Lọc theo phòng
   ban, loại, mức mật, khoảng ngày duyệt (ngày theo giờ server) và tìm như trang Documents.
-- **Bản cuối** (`/documents/{id}/final?format=docx|txt`, chỉ cho document *Archived*):
+- **Bản cuối** (`/documents/{id}/final?format=docx|pdf|txt`, chỉ cho document *Archived*):
   - DOCX là file Word mới nhất nếu nó chứa đúng text hiện tại (lưu từ editor Word, hoặc DOCX OCR chưa sửa);
-    nếu text đã được sửa sau đó (nút Edit, khôi phục phiên bản) thì app tạo DOCX từ text hiện tại.
+    nếu text đã đổi sau đó (khôi phục phiên bản) thì app tạo DOCX từ text hiện tại. Sửa riêng metadata
+    không làm file Word lỗi thời.
+  - Trang document dùng cùng cách đó cho bản hiện tại (`/documents/{id}/file?format=…`, document *Reviewing* hoặc
+    *Archived*).
+  - PDF là chính DOCX đó, do document server (OnlyOffice, cùng engine với editor Word) chuyển sang PDF, nên chữ Ả
+    Rập hiển thị như trong Word. Chỉ có khi đã cấu hình document server; không có thì dropdown chỉ còn DOCX và TXT.
+    - Với DOCX tạo từ text, document server đọc file qua link `/documents/{id}/text.docx`, có chữ ký HMAC và
+      hết hạn như link file Word.
+    - Document server lỗi hoặc không trả về PDF thì trả 503 và không ghi vào nhật ký tải.
   - TXT là text hiện tại (UTF-8 có BOM), các trang ngăn bằng ký tự form feed.
-- **Xuất CSV** (`/approved/export.csv?…`, cùng bộ lọc đang chọn): UTF-8 có BOM để Excel đọc được tiếng Ả Rập,
+- **Xuất CSV** (`/approved/export.csv?…`, cùng bộ lọc): trang Archive không còn nút xuất, nhưng địa chỉ này vẫn dùng được. UTF-8 có BOM để Excel đọc được tiếng Ả Rập,
   tiêu đề cột theo ngôn ngữ đang chọn, thời gian theo UTC (ISO 8601). Ô bắt đầu bằng `= + - @` được thêm
   dấu `'` để Excel không chạy như công thức. Khi không lấy được danh sách job OCR thì không cho xuất (trả 503),
   để file không thiếu document mà người dùng không biết.
 
 ## Sửa Word trực tiếp (OnlyOffice Docs)
 
-Xem ADR 0004. Trên trang document đang *Reviewing*, nút **Edit in Word** mở `/documents/{id}/word`
+Xem ADR 0004. Trên trang document đang *Reviewing*, nút **Edit** mở `/documents/{id}/word`
 với editor OnlyOffice nhúng trong trang. Phiên bản Word đầu tiên là DOCX của dịch vụ OCR (hoặc tạo từ text với tài
 liệu mẫu / khi dịch vụ OCR tắt). Bấm **Save** (Ctrl+S) hoặc đóng editor thì app lưu phiên bản Word mới, cập nhật text
 và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục *Word file*) và dòng *Word file, version n*.
 
 - Biến cấu hình: `DOCS_EDITOR_PUBLIC_URL`, `DOCS_EDITOR_INTERNAL_URL`, `DOCS_EDITOR_APP_URL`, `DOCS_EDITOR_JWT_SECRET`,
-  `DOCS_STORAGE_PATH` (hoặc `Documents:Editor:*`, `Documents:Storage:Path`). Thiếu thì nút Edit in Word ẩn đi.
-- Sửa text bằng nút **Edit** không đổi file Word; sửa trong Word thì cập nhật text. Nên coi Word là bản chính.
+  `DOCS_STORAGE_PATH` (hoặc `Documents:Editor:*`, `Documents:Storage:Path`). Thiếu thì nút Edit ẩn đi, và không còn
+  cách sửa text trên giao diện (sửa metadata vẫn được).
+- Text chỉ sửa trong Word; Word là bản chính. Metadata sửa ở tab Metadata (*Edit details*).
 - **Preview** trên trang document gồm 2 cột: *Original scan* và *Word file*. Cột Word là ảnh từng trang của file Word
   mới nhất, do OnlyOffice render qua Conversion API và lưu cạnh file. Nút *Word / Text* đổi sang xem text. Bấm
-  vào ảnh để mở kích thước đầy đủ. Khi bấm **Edit**, cột phải thành ô sửa text, còn ảnh gốc vẫn hiện để đối chiếu.
+  vào ảnh để mở kích thước đầy đủ.
   Không có document server thì cột phải luôn là text.
 - Chạy local có editor: thêm `DOCS_EDITOR_JWT_SECRET` vào `.env` rồi
   `docker-compose -f devops/local/docker-compose.yml --profile word up -d --build`.
@@ -119,26 +266,43 @@ và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục
 
 ## Khung giao diện
 
-- Góc phải header chỉ có **avatar**; bấm vào mở menu tài khoản (tên, vai trò demo, chọn **ngôn ngữ**, **Sign out**).
-  Menu là thẻ `<details>` nên chạy được cả khi chưa có kết nối Blazor; `wwwroot/js/account-menu.js` chỉ thêm việc
-  đóng menu khi bấm ra ngoài hoặc nhấn Esc. Trang đăng nhập vẫn có chọn ngôn ngữ trên header.
+- Mọi bảng danh sách (Review Queue, All Documents, Document Archive, Users, Activity logs) có thanh phân trang
+  ở dưới (`Components/TablePager.razor`): chọn 10 / 20 / 50 / 100 dòng mỗi trang, dòng đang xem (vd. *11–20 of 103*),
+  các nút trang. Đổi số dòng thì vẫn giữ dòng đầu của trang đang xem. Các bảng cấu hình cố định vài dòng (vai trò, lưu giữ,
+  hệ thống kết nối) và bảng tóm tắt trên Dashboard không phân trang.
+
+- Góc phải header có hai dropdown:
+  - **Ngôn ngữ**: nút hiện ngôn ngữ đang dùng; bấm vào là danh sách English / العربية, ngôn ngữ đang dùng có dấu
+    tích. Chọn ngôn ngữ khác thì tải lại trang. Trang đăng nhập cũng có dropdown này.
+  - **Avatar**: menu tài khoản (tên, vai trò demo, **Sign out**).
+
+  Các dropdown (hai menu này và nút tải trên trang Archive) là thẻ `<details class="popup-menu">`, nên chạy được cả khi
+  chưa có kết nối Blazor. `wwwroot/js/popup-menu.js` thêm hai việc:
+  - Đóng menu khi bấm ra ngoài hoặc nhấn Esc; mở menu này thì menu kia đóng.
+  - Với menu có class `is-floating` (menu tải nằm trong bảng có thanh cuộn), đặt khung menu nổi theo cửa sổ, dưới nút,
+    hoặc trên nút khi phía dưới không đủ chỗ. Nhờ vậy khung cuộn của bảng không cắt mất menu. Menu này đóng khi trang cuộn.
 - **Xoá** luôn hỏi lại bằng hộp thoại cảnh báo (`Components/Shared/ConfirmButton.razor`): focus vào *Cancel*,
   Esc hoặc bấm ra ngoài để đóng, chỉ nút *Delete* màu đỏ mới xoá.
 
 ## Giới hạn cần biết
 
-- **Đăng nhập là giả.** Trang `/login` chỉ chuyển sang Dashboard khi nhập `admin` / `admin`. Không có
-  cookie hay phiên đăng nhập, và **mọi trang vẫn mở cho tất cả**. Khi làm module Identity sẽ thay bằng
-  ASP.NET Core Identity và policy phân quyền phía server.
+- **Đăng nhập là giả, chỉ chặn ở trình duyệt.** Phiên nằm trong localStorage, server không kiểm tra gì: ai ghi key
+  `ocr.session` cũng vào được, và các địa chỉ không phải trang (tải file, CSV, `/api/*`) vẫn mở. Quyền của vai trò chưa
+  được áp lên các trang. Khi làm module Identity sẽ thay bằng ASP.NET Core Identity (cookie, MFA) và policy phân quyền
+  phía server (CLAUDE.md §8.3, §9).
 - **Dữ liệu duyệt, metadata, phiên bản mất khi restart hoặc deploy lại**, dùng chung cho mọi người và chỉ đúng
   khi chạy một instance (app không có database, ADR 0003). Muốn giữ lâu dài cần module Documents có PostgreSQL.
 - Danh sách Documents lấy **100 job mới nhất** rồi lọc trong bộ nhớ; tìm theo nội dung text chỉ áp dụng cho
   document đã mở (đã có text trong app) và tài liệu mẫu, vì danh sách job của dịch vụ không kèm text.
-- Khi dịch vụ OCR không kết nối được, All Documents báo lỗi nhưng vẫn hiện tài liệu mẫu; Scan báo lỗi ngay khi bấm Upload (và ở lại trang).
+- **Tài liệu mẫu** (14 document có nhãn *Sample*, `Data/SampleDocumentSeed.cs`) **tắt mặc định**: các danh sách chỉ có job
+  OCR thật. Muốn demo khi không có dịch vụ OCR thì bật bằng `Documents__Samples__Enabled=true`
+  (`Documents:Samples:Enabled`). Test component bật sẵn và dùng chúng làm dữ liệu kiểm thử. Số liệu Dashboard, Reports,
+  người dùng ban đầu và lịch lưu giữ ở Settings vẫn là dữ liệu mẫu (có nhãn *Sample data*).
+- Khi dịch vụ OCR không kết nối được, All Documents báo lỗi (và vẫn hiện tài liệu mẫu nếu đã bật); Scan báo lỗi ngay khi bấm Upload (và ở lại trang).
 - Trang Document Archive và file CSV cũng chỉ gồm các job trong danh sách job mới nhất mà trang Documents lấy về. Link tải
   bản cuối và xuất CSV, như mọi trang khác, **chưa có phân quyền** (đăng nhập còn là giả).
-- **Vai trò và lịch lưu giữ ở trang Quản trị là dữ liệu mẫu**: không có phân quyền thật, không có tự động
-  huỷ hay legal hold. Các hệ thống AD, SharePoint, CMS, hệ thống nội bộ, SIEM chỉ ghi *Planned*.
+- **Mục tiêu KPI về mặc định khi restart**, và mọi số đo trên Dashboard, Reports (trừ *User activity*) là số liệu mẫu.
+- **Người dùng và quyền về mặc định khi restart.** Lịch lưu giữ là dữ liệu mẫu: không có tự động huỷ hay legal hold. Các hệ thống AD, SharePoint, CMS, hệ thống nội bộ, SIEM chỉ ghi *Planned*.
 - **Confidence của job thật là giả lập** (xem mục kiểm tra tự động). Không có overlay vùng confidence thấp trên
   ảnh vì dịch vụ OCR không trả toạ độ chữ, nên mức chi tiết nhỏ nhất là từng trang.
 - Kiểm tra tự động chỉ chạy một lần. Chưa có nút kiểm tra lại sau khi sửa metadata, và chưa có yêu cầu OCR lại / scan
@@ -164,11 +328,20 @@ Tailwind hay thư viện component nào.
 - **Khung app**:
   - Header một hàng, cao 72px, dính trên cùng: logo và tên app (thẳng cột với menu), nút đổi ngôn ngữ
     (`LanguageSwitch`), menu tài khoản.
-  - Menu dọc rộng 288px, theo thứ tự: Dashboard · Scan · Review Queue · All Documents · Document Archive, rồi
-    Settings tách riêng. Mục đang chọn: chữ AE Gold 700, gạch 3px, nền gold 50.
+  - Menu dọc rộng 288px, theo thứ tự: Dashboard · Scan · Review Queue · All Documents · Document Archive · Reports, rồi
+    tách riêng nhóm Users (Users · Roles & access · Activity logs) và Settings. Mục đang chọn: chữ AE Gold 700, gạch 3px, nền gold 50.
   - Nội dung rộng tối đa 1600px, canh giữa vùng bên phải menu.
 - **Màu**:
-  - Màu chính là AE Gold 600 `#90702a` (hover 700), màu phụ là Camel. Viền focus 2px màu Camel 500.
+  - Màu chính có hai vai trò, đều khai báo trong `wwwroot/app.css`:
+    - **Nền có chữ** (nút chính, số trang đang chọn, ô *Pages scanned*): vàng nhạt, chữ nâu đậm Gold 950.
+      - Nút: nền Gold 300 (`--app-primary-fill`), hover Gold 400. Tương phản chữ 7.3:1, khi hover 5.7:1.
+      - Ô *Pages scanned*: nền Gold 100, viền Gold 300.
+      - Khách chọn cách này thay cho chữ trắng trên nền vàng đậm, vì chữ trắng trên màu nhạt hơn Gold 600 không
+        đạt 4.5:1 (WCAG AA).
+    - **Đồ hoạ và viền** (thanh biểu đồ, chấm tiến trình, checkbox, viền ô nhập, logo): `--app-primary` = `#9b7a33`,
+      nhạt hơn AE Gold 600 (`#90702a`) nửa bậc theo yêu cầu của khách. Đạt 4.0:1 trên nền trắng, trên mức 3:1 cho
+      đồ hoạ. Không đặt chữ trên màu này.
+  - Màu phụ là Camel. Viền focus 2px màu Camel 500.
   - Màu trạng thái dùng badge "soft" của DS: Recognizing xanh biển, Reviewing camel, Archived xanh lá, Failed
     đỏ, Cancelled xám. Luôn đi kèm chữ, không dùng màu đơn lẻ để phân biệt.
 - **Font**: Roboto (chữ thường) và Inter (tiêu đề) cho chữ Latin; Noto Kufi Arabic và Alexandria cho chữ Ả Rập.
@@ -193,4 +366,4 @@ restore từ `.csproj` trước khi copy code), và không trang nào tương t�
 dotnet run --project src/Hosts/Web --launch-profile http
 ```
 
-Mở `/login` và đăng nhập `admin` / `admin`. Đổi ngôn ngữ bằng English / العربية ở góc header.
+Mở `/login`, đăng nhập `admin` / `admin`, nhập mã `123456`. Đổi ngôn ngữ bằng English / العربية ở góc header.

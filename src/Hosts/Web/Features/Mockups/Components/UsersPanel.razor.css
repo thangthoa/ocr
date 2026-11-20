@@ -1,0 +1,93 @@
+/* Filters on the start side, the Add button on the end side; they wrap on narrow screens. */
+.users-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.users-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+}
+
+    .users-filters > div {
+        min-width: 11rem;
+    }
+
+    .users-filters .users-search {
+        min-width: 16rem;
+    }
+
+.users-table th,
+.users-table td {
+    white-space: nowrap;
+}
+
+.users-empty {
+    padding: 2rem 1rem;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
+    text-align: center;
+}
+
+/* The form beside what the account would be allowed to do. */
+.user-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.user-access {
+    padding: 1.25rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    background-color: var(--ae-whitely-50, #fafafa);
+}
+
+.user-permissions {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+    font-size: .875rem;
+}
+
+    .user-permissions li {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .125rem 0;
+    }
+
+        /* A tick for what is allowed, a dash for what is not; the hidden text says it for screen readers. */
+        .user-permissions li::before {
+            flex: none;
+            width: 1rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+    .user-permissions .granted::before {
+        content: "✓";
+        color: var(--ae-green-700);
+    }
+
+    .user-permissions .denied {
+        color: var(--app-ink-muted);
+    }
+
+        .user-permissions .denied::before {
+            content: "–";
+        }
+
+@media (max-width: 1100px) {
+    .user-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

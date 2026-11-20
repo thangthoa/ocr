@@ -19,5 +19,10 @@
   <data name="UnhandledError" xml:space="preserve"><value>حدث خطأ غير متوقع.</value></data>
   <data name="Reload" xml:space="preserve"><value>إعادة التحميل</value></data>
   <data name="NavApproved" xml:space="preserve"><value>أرشيف المستندات</value></data>
-  <data name="SwitchLanguage" xml:space="preserve"><value>تغيير اللغة إلى {0}</value></data>
+  <data name="LanguageMenu" xml:space="preserve"><value>اللغة: {0}</value></data>
+  <data name="NavReports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="NavUsersGroup" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="NavUsers" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="NavRoles" xml:space="preserve"><value>الأدوار والصلاحيات</value></data>
+  <data name="NavActivity" xml:space="preserve"><value>سجلات النشاط</value></data>
 </root>

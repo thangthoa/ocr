@@ -55,61 +55,7 @@
     font-weight: 500;
 }
 
-/* Key figures: the headline figure on the primary colour, the review queue on camel (it needs action). */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.kpi {
-    display: flex;
-    flex-direction: column;
-    gap: .375rem;
-    min-width: 0;
-    padding: 1.5rem;
-    border: 2px solid var(--app-border-subtle);
-    border-radius: var(--app-radius-card);
-    background-color: #fff;
-}
-
-.kpi-primary {
-    background-color: var(--ae-gold-600);
-    border-color: var(--ae-gold-600);
-    color: var(--ae-gold-50);
-}
-
-.kpi-attention {
-    background-color: var(--ae-camel-50);
-    border-color: var(--ae-camel-200);
-}
-
-.kpi-label {
-    font-size: .875rem;
-    font-weight: 500;
-}
-
-.kpi-value {
-    font-family: var(--app-font-heading);
-    font-size: 2.125rem;
-    font-weight: 800;
-    line-height: 1.25;
-    font-variant-numeric: tabular-nums;
-}
-
-.kpi-note {
-    font-size: .875rem;
-}
-
-.kpi-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .625rem 1rem;
-    margin-top: auto;
-    padding-top: .5rem;
-}
-
+/* The review queue link and the failed documents link, inside their KPI cards. */
 .kpi-failed {
     display: inline-flex;
     align-items: center;
@@ -126,28 +72,74 @@
         background-color: var(--ae-red-600);
     }
 
-.kpi-meter {
-    display: block;
-    height: .5rem;
+/* KPI cards: as many columns as fit, at least 15rem wide. */
+.kpi-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+}
+
+/* Project progress: pages scanned since the start against the whole project, the plan to date marked. */
+.project-figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem .75rem;
+}
+
+.project-value {
+    font-family: var(--app-font-heading);
+    font-size: 2.125rem;
+    font-weight: 800;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+}
+
+.project-meter {
+    position: relative;
+    height: .875rem;
     border-radius: 999px;
-    background-color: var(--ae-black-200);
-    overflow: hidden;
+    background-color: var(--ae-black-100);
 }
 
-    .kpi-meter > span {
-        display: block;
-        height: 100%;
-        border-radius: 999px;
-        background-color: var(--ae-gold-600);
-    }
-
-.kpi-primary .kpi-meter {
-    background-color: rgba(255, 255, 255, .3);
+.project-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--kpi-fill);
 }
 
-    .kpi-primary .kpi-meter > span {
-        background-color: var(--ae-gold-50);
+.project-plan {
+    position: absolute;
+    top: -.375rem;
+    bottom: -.375rem;
+    width: 3px;
+    margin-inline-start: -1.5px;
+    background-color: var(--ae-black-800);
+}
+
+.project-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem 1.5rem;
+    margin: .875rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: .875rem;
+    color: var(--app-ink-muted);
+}
+
+    .project-facts li {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
     }
+
+.legend-plan {
+    width: 3px;
+    height: .875rem;
+    background-color: var(--ae-black-800);
+}
 
 /* Chart next to the department table. */
 .dash-row {
@@ -225,14 +217,14 @@
     width: 72%;
     max-width: 2.5rem;
     border-radius: .25rem .25rem 0 0;
-    background-color: var(--ae-gold-600);
+    background-color: var(--app-primary);
 }
 
 /* The hour or day still in progress: hatched, so it is not read as a finished period below target. */
 .bar-current,
 .legend-current {
-    background: repeating-linear-gradient(135deg, var(--ae-gold-600) 0 2px, var(--ae-gold-100) 2px 6px);
-    box-shadow: inset 0 0 0 1px var(--ae-gold-600);
+    background: repeating-linear-gradient(135deg, var(--app-primary) 0 2px, var(--ae-gold-100) 2px 6px);
+    box-shadow: inset 0 0 0 1px var(--app-primary);
 }
 
 .bar-target {
@@ -297,7 +289,7 @@
     width: .75rem;
     height: .75rem;
     border-radius: 3px;
-    background-color: var(--ae-gold-600);
+    background-color: var(--app-primary);
 }
 
 .legend-target {
@@ -307,12 +299,6 @@
 
 @media (max-width: 1100px) {
     .dash-row {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-@media (max-width: 840px) {
-    .kpi-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 }

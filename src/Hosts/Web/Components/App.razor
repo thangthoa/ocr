@@ -6,6 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    @* Sign-in mockup: runs before the page is drawn, so a visitor without a session goes to /login straight away. *@
+    <script src="@Assets["js/session.js"]"></script>
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets[IsRightToLeft ? "lib/bootstrap/dist/css/bootstrap.rtl.min.css" : "lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
@@ -19,7 +21,8 @@
     <Routes />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
-    <script src="@Assets["js/account-menu.js"]"></script>
+    <script src="@Assets["js/popup-menu.js"]"></script>
+    <script src="@Assets["js/otp-input.js"]"></script>
 </body>
 
 </html>

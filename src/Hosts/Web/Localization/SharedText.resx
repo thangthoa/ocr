@@ -19,5 +19,10 @@
   <data name="UnhandledError" xml:space="preserve"><value>An unhandled error has occurred.</value></data>
   <data name="Reload" xml:space="preserve"><value>Reload</value></data>
   <data name="NavApproved" xml:space="preserve"><value>Document Archive</value></data>
-  <data name="SwitchLanguage" xml:space="preserve"><value>Switch the language to {0}</value></data>
+  <data name="LanguageMenu" xml:space="preserve"><value>Language: {0}</value></data>
+  <data name="NavReports" xml:space="preserve"><value>Reports</value></data>
+  <data name="NavUsersGroup" xml:space="preserve"><value>Users</value></data>
+  <data name="NavUsers" xml:space="preserve"><value>Users</value></data>
+  <data name="NavRoles" xml:space="preserve"><value>Roles &amp; access</value></data>
+  <data name="NavActivity" xml:space="preserve"><value>Activity logs</value></data>
 </root>

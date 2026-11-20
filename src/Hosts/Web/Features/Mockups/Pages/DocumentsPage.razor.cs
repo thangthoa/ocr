@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
+using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Ocr;
 
@@ -12,21 +13,14 @@ namespace OppOcr.Web.Features.Mockups.Pages;
 /// </summary>
 public sealed partial class DocumentsPage : IDisposable
 {
-    public const int PageSize = 10;
-
     private readonly CancellationTokenSource _disposed = new();
+    private readonly DocumentFilterState _filter = new();
+    private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
     private DocumentList? _list;
     private IReadOnlyList<DocumentRecord> _results = [];
     private IReadOnlyDictionary<DocumentStatus, int> _counts = new Dictionary<DocumentStatus, int>();
-    private string _search = string.Empty;
-    private DocumentSearchField _field = DocumentSearchField.All;
     private DocumentStatus? _status;
-    private DocumentDepartment? _department;
-    private DocumentKind? _kind;
-    private DateOnly? _from;
-    private DateOnly? _to;
-    private int _page = 1;
     private string? _loadError;
     private string? _deletingId;
     private string? _deleteError;
@@ -58,12 +52,7 @@ public sealed partial class DocumentsPage : IDisposable
 
     [Inject] private ILogger<DocumentsPage> Logger { get; set; } = default!;
 
-    private int TotalPages => Math.Max(1, (int)Math.Ceiling(_results.Count / (double)PageSize));
-
-    private IEnumerable<DocumentRecord> PageItems => _results.Skip((_page - 1) * PageSize).Take(PageSize);
-
-    private bool HasFilters => !string.IsNullOrWhiteSpace(_search) || _field != DocumentSearchField.All || _status is not null
-        || _department is not null || _kind is not null || _from is not null || _to is not null;
+    private bool HasFilters => _filter.HasValues || _status is not null;
 
     public void Dispose()
     {
@@ -77,14 +66,13 @@ public sealed partial class DocumentsPage : IDisposable
     protected override async Task OnParametersSetAsync()
     {
         // Links from the detail page and the dashboard (e.g. ?field=Reference&q=2019/413) arrive here.
-        _search = QueryText ?? string.Empty;
-        _field = Parse<DocumentSearchField>(QueryField) ?? DocumentSearchField.All;
+        _filter.Clear();
+        _filter.Search = QueryText ?? string.Empty;
+        _filter.Field = Parse<DocumentSearchField>(QueryField) ?? DocumentSearchField.All;
+        _filter.Department = Parse<DocumentDepartment>(QueryDepartment);
+        _filter.Kind = Parse<DocumentKind>(QueryKind);
         _status = Parse<DocumentStatus>(QueryStatus);
-        _department = Parse<DocumentDepartment>(QueryDepartment);
-        _kind = Parse<DocumentKind>(QueryKind);
-        _from = null;
-        _to = null;
-        _page = 1;
+        _paging.Reset();
         await LoadAsync();
     }
 
@@ -115,8 +103,11 @@ public sealed partial class DocumentsPage : IDisposable
     {
         var documents = _list?.Documents ?? [];
         _counts = documents.GroupBy(d => d.Status).ToDictionary(g => g.Key, g => g.Count());
-        _results = DocumentStore.Filter(documents, new DocumentQuery(_search, _field, _status, _department, _kind, _from, _to));
-        _page = keepPage ? Math.Min(_page, TotalPages) : 1;
+        _results = DocumentStore.Filter(documents, _filter.ToQuery(_status));
+        if (keepPage)
+            _paging.Clamp(_results.Count);
+        else
+            _paging.Reset();
     }
 
     /// <summary>Every status, so the legend keeps its place when a status has no documents.</summary>
@@ -131,13 +122,8 @@ public sealed partial class DocumentsPage : IDisposable
 
     private void ClearFilters()
     {
-        _search = string.Empty;
-        _field = DocumentSearchField.All;
+        _filter.Clear();
         _status = null;
-        _department = null;
-        _kind = null;
-        _from = null;
-        _to = null;
         Apply();
     }
 

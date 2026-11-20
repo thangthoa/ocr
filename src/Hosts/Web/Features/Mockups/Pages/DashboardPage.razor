@@ -22,6 +22,28 @@
     </div>
 </div>
 
+<section class="dash-card project-card mb-4" aria-labelledby="project-title">
+    <div class="dash-card-head">
+        <h2 id="project-title" class="h5 mb-0">@Text["Project.Heading"]</h2>
+        <span id="project-status" class="badge kpi-status @KpiStatusClass(ProjectStatus)">@Text.KpiStatusName(ProjectStatus)</span>
+        <a class="dash-card-link" href="reports?report=Progress">@Text["Project.Report"]</a>
+    </div>
+    <p class="project-figure mb-2">
+        <span id="project-pages" class="project-value">@FormatNumber(ProjectPages)</span>
+        <span>@Text["Project.OfTotal", FormatNumber(Plan.TotalPages), FormatPercent(ProjectPercent)]</span>
+    </p>
+    <div class="project-meter" role="img" aria-label="@ProjectSummary">
+        <span class="project-fill @KpiStatusClass(ProjectStatus)" style="width: @CssPercent(ProjectPercent)"></span>
+        <span class="project-plan" style="inset-inline-start: @CssPercent(PlannedPercent)"></span>
+    </div>
+    <ul class="project-facts">
+        <li><i class="legend-plan" aria-hidden="true"></i>@Text["Project.PlanToDate", FormatNumber(PlannedPages), FormatPercent(PlannedPercent)]</li>
+        <li id="project-gap">@ProjectGap</li>
+        <li>@Text["Project.Dates", FormatDate(Plan.Start), FormatDate(Plan.End)]</li>
+        <li id="project-pace">@ProjectPace</li>
+    </ul>
+</section>
+
 <section class="dash-card status-card mb-4" aria-labelledby="status-title">
     <div class="dash-card-head">
         <h2 id="status-title" class="h5 mb-0">@Text["Status.Heading"]</h2>
@@ -34,28 +56,34 @@
     <StatusBreakdown Counts="StatusCounts" Label="@Text["Status.Heading"]" Href="StatusUrl" />
 </section>
 
-<section class="kpi-grid mb-4" aria-label="@Text["Kpi.Heading"]">
-    <div class="kpi kpi-primary">
-        <span class="kpi-label">@Text["Kpi.Pages"]</span>
-        <span class="kpi-value" id="kpi-pages">@FormatNumber(Report.Pages)</span>
-        <span class="kpi-meter" aria-hidden="true"><span style="width: @CssPercent(PagesPercent)"></span></span>
-        <span class="kpi-note">@Text["Kpi.PagesTarget", FormatPercent(PagesPercent), FormatNumber(Report.PagesTarget)]</span>
-        <span class="kpi-note">@Text["Kpi.VsPrevious", FormatSigned(Report.PagesChangePercent, "0.0") + "%"]</span>
+<section class="dash-card kpi-section mb-4" aria-labelledby="kpi-title">
+    <div class="dash-card-head">
+        <h2 id="kpi-title" class="h5 mb-0">@Text["KpiBoard.Heading"]</h2>
+        <span id="kpi-summary" class="text-muted small">@KpiSummary</span>
+        <a class="dash-card-link" href="admin?tab=Kpi">@Text["KpiBoard.Edit"]</a>
     </div>
-    <div class="kpi">
-        <span class="kpi-label">@Text["Kpi.Confidence"]</span>
-        <span class="kpi-value">@FormatPercent(Report.Confidence)</span>
-        <span class="kpi-note">@Text["Kpi.PointsChange", FormatSigned(Report.ConfidenceChangePoints, "0.0")]</span>
-    </div>
-    <div class="kpi kpi-attention">
-        <span class="kpi-label">@Text["Kpi.Review"]</span>
-        <span class="kpi-value">@FormatNumber(Report.WaitingReview)</span>
-        <span class="kpi-note">@Text["Kpi.ReviewNow"]</span>
-        <div class="kpi-actions">
-            <a class="btn btn-sm btn-primary" href="review">@Text["Kpi.OpenReview"]</a>
-            <a class="kpi-failed" href="documents?status=Failed">@Text["Kpi.Failed", FormatNumber(Report.Failed)]</a>
+    @if (VisibleKpis.Count == 0)
+    {
+        <p class="text-muted mb-0">@Text["KpiBoard.None"]</p>
+    }
+    else
+    {
+        <div class="kpi-board">
+            @foreach (var target in VisibleKpis)
+            {
+                <KpiCard Target="target" Actual="Report.Actual(target.Kind)" Note="@KpiNote(target.Kind)">
+                    @if (target.Kind == KpiKind.ReviewBacklog)
+                    {
+                        <a class="btn btn-sm btn-primary" href="review">@Text["Kpi.OpenReview"]</a>
+                    }
+                    else if (target.Kind == KpiKind.FailureRate)
+                    {
+                        <a class="kpi-failed" href="documents?status=Failed">@Text["Kpi.Failed", FormatNumber(Report.Failed)]</a>
+                    }
+                </KpiCard>
+            }
         </div>
-    </div>
+    }
 </section>
 
 <div class="dash-row mb-4">
@@ -81,8 +109,8 @@
                             </div>
                         }
                     </div>
-                    <span class="bar-target" style="bottom: @CssPercent(Report.BarTarget * 100d / ScaleMax)" aria-hidden="true">
-                        <span>@Text["Chart.Target", FormatNumber(Report.BarTarget)]</span>
+                    <span class="bar-target" style="bottom: @CssPercent(BarTarget * 100d / ScaleMax)" aria-hidden="true">
+                        <span>@Text["Chart.Target", FormatNumber(BarTarget)]</span>
                     </span>
                 </div>
                 <div class="bar-labels" aria-hidden="true">

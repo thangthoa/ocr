@@ -8,10 +8,39 @@
 
 @if (_document is { } progressDocument && !_deleted)
 {
-    @* The progress of the file, at the top of the page and kept in view while scrolling. *@
-    <div class="doc-band">
-        <DocumentProgress Document="progressDocument" />
-    </div>
+    @* The progress of the file and its actions, at the top of the page and kept in view while scrolling.
+       Editing the details has its own Save and Cancel in the Metadata tab, so the actions wait meanwhile. *@
+    <DocumentProgress Document="progressDocument">
+        <Actions>
+            @if (!_editing)
+            {
+                @switch (progressDocument.Status)
+                {
+                    case DocumentStatus.NeedsReview:
+                        @* Approving archives the document: the last step of the flow. *@
+                        <button type="button" id="action-approve" class="btn btn-sm btn-primary" @onclick="() => ChangeStatus(DocumentStatus.Archived)">@Text["Action.Approve"]</button>
+                        break;
+                    case DocumentStatus.Archived:
+                        <button type="button" id="action-review" class="btn btn-sm btn-outline-secondary" @onclick="() => ChangeStatus(DocumentStatus.NeedsReview)">@Text["Action.SendToReview"]</button>
+                        break;
+                    case DocumentStatus.Failed when progressDocument.IsSample:
+                        <button type="button" id="action-retry" class="btn btn-sm btn-outline-primary" @onclick="() => ChangeStatus(DocumentStatus.Processing)">@Text["Action.RetryOcr"]</button>
+                        break;
+                }
+                @* The text is edited in Word; the details (title, reference…) from the Metadata tab. *@
+                @if (progressDocument.CanEdit && Word.Enabled)
+                {
+                    <a id="action-edit" class="btn btn-sm btn-outline-primary" href="@WordEditorEndpoints.EditorUrl(progressDocument.Id)">@Text["Action.Edit"]</a>
+                }
+                @if (progressDocument.Job is not null)
+                {
+                    <ConfirmButton Label="@OcrText["Delete"]" ConfirmLabel="@OcrText["Delete"]" CancelLabel="@OcrText["Cancel"]"
+                                   BusyLabel="@OcrText["Deleting"]" Title="@OcrText["DeleteTitle", progressDocument.FileName]" Message="@OcrText["DeleteNote"]"
+                                   AriaLabel="@OcrText["DeleteJob", progressDocument.FileName]" Busy="_deleting" OnConfirm="DeleteAsync" />
+                }
+            }
+        </Actions>
+    </DocumentProgress>
 }
 
 <p class="mb-2"><a href="documents"><span aria-hidden="true">@BackArrow</span> @Text["Detail.Back"]</a></p>
@@ -41,8 +70,7 @@ else
     var job = document.Job;
     var metadata = ShownMetadata;
 
-    <div class="d-flex flex-wrap align-items-start gap-3 mb-3">
-        <div class="me-auto min-w-0">
+    <div class="mb-3 min-w-0">
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <h1 class="h3 mb-0 text-break" dir="auto">@document.FileName</h1>
                 <DocumentStatusTag Status="document.Status" />
@@ -78,44 +106,6 @@ else
                     }
                 }
             </p>
-        </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-            @if (_editing)
-            {
-                <button type="button" id="cancel-edit" class="btn btn-outline-secondary" @onclick="CancelEdit">@Text["Action.Cancel"]</button>
-                <button type="button" id="save-edit" class="btn btn-primary" @onclick="Save">@Text["Action.Save"]</button>
-            }
-            else
-            {
-                @switch (document.Status)
-                {
-                    case DocumentStatus.NeedsReview:
-                        @* Approving archives the document: the last step of the flow. *@
-                        <button type="button" id="action-approve" class="btn btn-primary" @onclick="() => ChangeStatus(DocumentStatus.Archived)">@Text["Action.Approve"]</button>
-                        break;
-                    case DocumentStatus.Archived:
-                        <button type="button" id="action-review" class="btn btn-outline-secondary" @onclick="() => ChangeStatus(DocumentStatus.NeedsReview)">@Text["Action.SendToReview"]</button>
-                        break;
-                    case DocumentStatus.Failed when document.IsSample:
-                        <button type="button" id="action-retry" class="btn btn-outline-primary" @onclick="() => ChangeStatus(DocumentStatus.Processing)">@Text["Action.RetryOcr"]</button>
-                        break;
-                }
-                @if (document.CanEdit)
-                {
-                    <button type="button" id="action-edit" class="btn btn-outline-primary" @onclick="StartEdit">@Text["Action.Edit"]</button>
-                    @if (Word.Enabled)
-                    {
-                        <a id="action-word" class="btn btn-outline-primary" href="@WordEditorEndpoints.EditorUrl(document.Id)">@Text["Word.Edit"]</a>
-                    }
-                }
-                @if (job is not null)
-                {
-                    <ConfirmButton Label="@OcrText["Delete"]" ConfirmLabel="@OcrText["Delete"]" CancelLabel="@OcrText["Cancel"]"
-                                   BusyLabel="@OcrText["Deleting"]" Title="@OcrText["DeleteTitle", document.FileName]" Message="@OcrText["DeleteNote"]"
-                                   AriaLabel="@OcrText["DeleteJob", document.FileName]" Busy="_deleting" OnConfirm="DeleteAsync" />
-                }
-            }
-        </div>
     </div>
 
     @if (_deleteError is not null)
@@ -169,7 +159,7 @@ else
             break;
     }
 
-    @if (document.Quality is { } check && !_editing)
+    @if (document.Quality is { } check)
     {
         <section id="quality-check" class="quality-panel @(check.Passed ? "passed" : "flagged") mb-3" aria-labelledby="quality-title">
             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -207,33 +197,24 @@ else
         </section>
     }
 
-    @if (document.IsFinal && !_editing)
-    {
-        <div id="final-download" class="mb-3 d-flex flex-wrap align-items-center gap-2">
-            <span class="small">@Text["Detail.FinalDownload"]:</span>
-            @foreach (var format in Enum.GetValues<FinalFileFormat>())
-            {
-                <a class="btn btn-sm btn-primary" href="@ApprovedDocumentEndpoints.FinalFileUrl(document.Id, format)" download>@format.ToString().ToUpperInvariant()</a>
-            }
-            <span class="small text-muted">@Text["Approved.DownloadNote"]</span>
-        </div>
-    }
-
-    @if (job is { Status: OcrJobStatus.Done } && !_editing)
-    {
-        <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
-            <span class="small">@OcrText["Download"]:</span>
-            @foreach (var format in Enum.GetValues<OcrResultFormat>())
-            {
-                <a class="btn btn-sm btn-outline-primary" href="@OcrEndpoints.DownloadUrl(document.Id, format)" download>@format.ToString().ToUpperInvariant()</a>
-            }
-            <span class="small text-muted">@Text["Detail.DownloadNote"]</span>
-        </div>
-    }
-
     <section class="detail-preview mb-4" aria-labelledby="preview-title">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <h2 id="preview-title" class="h5 mb-0 me-auto">@Text["Preview.Heading"]</h2>
+            @if (ApprovedDocumentFiles.HasText(document))
+            {
+                @* Before the page numbers: the current version (the final one once archived); a plain link, so the browser downloads it. *@
+                <div class="download-picker">
+                    <label for="download-format" class="visually-hidden">@Text["Download.Format"]</label>
+                    <select id="download-format" class="form-select" @bind="_downloadFormat">
+                        @foreach (var format in FinalFiles.Formats)
+                        {
+                            <option value="@format">@format.ToString().ToUpperInvariant()</option>
+                        }
+                    </select>
+                    <a id="download-file" class="btn btn-sm btn-primary" href="@ApprovedDocumentEndpoints.CurrentFileUrl(document.Id, DownloadFormat)" download
+                       aria-label="@Text["Approved.DownloadLabel", document.FileName, DownloadFormat.ToString().ToUpperInvariant()]">@Text["Action.Download"]</a>
+                </div>
+            }
             @if (PageCount > 0)
             {
                 @* ‹ and › are mirrored by the browser in Arabic, so they keep pointing the right way. *@
@@ -309,14 +290,7 @@ else
             <section class="preview-pane" aria-labelledby="pane-result-title">
                 <div class="pane-head">
                     <h3 id="pane-result-title" class="pane-title me-auto">@ResultPaneTitle</h3>
-                    @if (_wordVersions.Count > 0 && !_editing && _viewing is null)
-                    {
-                        var latestWord = _wordVersions[^1];
-                        <span class="small text-muted" title="@FormatDateTime(latestWord.SavedAtUtc)">v@(latestWord.Number) · @WordSource(latestWord)</span>
-                        <a id="word-latest" class="btn btn-sm btn-outline-primary" href="@WordEditorEndpoints.VersionDownloadUrl(document.Id, latestWord.Number)"
-                           download aria-label="@Text["Word.DownloadLabel", latestWord.Number]">DOCX</a>
-                    }
-                    @if (_previewState == PreviewState.Ready && !_editing && _viewing is null)
+                    @if (_previewState == PreviewState.Ready && _viewing is null)
                     {
                         <div class="pane-switch" role="group" aria-label="@Text["Preview.Show"]">
                             <button type="button" id="show-word" aria-pressed="@(_showText ? "false" : "true")" @onclick="() => _showText = false">Word</button>
@@ -325,13 +299,7 @@ else
                     }
                 </div>
                 <div class="page-stage" id="pane-result">
-                    @if (_editing)
-                    {
-                        <label for="edit-text" class="visually-hidden">@Text["Edit.PageText", _page]</label>
-                        <textarea id="edit-text" class="form-control edit-text" lang="ar" dir="rtl" rows="14"
-                                  @bind:get="_form.PageText(_page)" @bind:set="value => _form.SetPageText(_page, value)"></textarea>
-                    }
-                    else if (ShowsWord)
+                    @if (ShowsWord)
                     {
                         if (_page <= _wordPreview!.PageCount)
                         {
@@ -382,7 +350,7 @@ else
                         </div>
                     }
                 </div>
-                @if (_previewState == PreviewState.Unavailable && !_editing && _viewing is null)
+                @if (_previewState == PreviewState.Unavailable && _viewing is null)
                 {
                     <div class="pane-note" role="status">
                         <span class="me-auto">@Text["Preview.WordUnavailable"]</span>
@@ -433,6 +401,12 @@ else
         @if (_tab == DetailTab.Metadata)
         {
             <div id="panel-metadata" role="tabpanel" aria-labelledby="tab-metadata" class="tab-body">
+                @if (document.CanEdit && !_editing)
+                {
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" id="edit-metadata" class="btn btn-sm btn-outline-primary" @onclick="StartEdit">@Text["Action.EditDetails"]</button>
+                    </div>
+                }
                 @if (_editing)
                 {
                     <div class="mb-3">
@@ -488,9 +462,13 @@ else
                         <input id="edit-keywords" class="form-control" lang="ar" dir="auto" @bind="_form.Keywords" aria-describedby="edit-keywords-hint" />
                         <div id="edit-keywords-hint" class="form-text">@Text["Edit.KeywordsHint"]</div>
                     </div>
-                    <div class="mb-1">
+                    <div class="mb-3">
                         <label for="edit-note" class="form-label">@Text["Edit.Note"]</label>
                         <input id="edit-note" class="form-control" dir="auto" @bind="_form.Note" />
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                        <button type="button" id="cancel-edit" class="btn btn-outline-secondary" @onclick="CancelEdit">@Text["Action.Cancel"]</button>
+                        <button type="button" id="save-edit" class="btn btn-primary" @onclick="Save">@Text["Action.Save"]</button>
                     </div>
                 }
                 else

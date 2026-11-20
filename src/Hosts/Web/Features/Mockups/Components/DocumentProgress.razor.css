@@ -1,10 +1,39 @@
-/* UAE Design System timeline, horizontal. Completed: filled primary 600 with a check. Current: 2px
-   primary 600 ring on white. Pending: slate 200 with a slate 400 number. Connector: solid primary 500
-   after a completed step, dashed slate 300 otherwise. */
+/* The band: right under the app header, across the content column, kept in view while the page
+   scrolls. Pages put it first, so it cancels the content padding to sit flush with the header. */
+.doc-band {
+    position: sticky;
+    top: var(--header-height, 4.5rem);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin: calc(-1 * var(--content-pad-top, 1.5rem)) calc(-1 * var(--content-pad-x, 1rem)) 1.5rem;
+    padding: 1rem var(--content-pad-x, 1rem);
+    background-color: var(--ae-whitely-300);
+    border-bottom: 1px solid var(--app-border-subtle);
+    box-shadow: 0 4px 12px rgba(26, 28, 32, .06);
+}
+
+/* At the end of the row; when the steps need the width, the buttons move under them. */
+.doc-band-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    margin-inline-start: auto;
+}
+
+/* UAE Design System timeline, horizontal and centred: each step is a column with its dot and text in
+   the middle, and the connector runs from one dot to the next. Completed: filled primary 600 with a
+   check. Current: 2px primary 600 ring on white. Pending: slate 200 with a slate 400 number. Connector:
+   solid primary 500 after a completed step, dashed slate 300 otherwise. */
 .doc-steps {
+    flex: 1 1 36rem;
     list-style: none;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
+    max-width: 60rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -13,17 +42,20 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: .625rem;
-    padding-inline-end: .75rem;
+    padding-inline: .5rem;
     min-width: 0;
+    text-align: center;
 }
 
+    /* From 1.5rem past this dot's centre to 1.5rem before the next one's (one column width on). */
     .doc-step:not(:last-child)::after {
         content: "";
         position: absolute;
         top: 15px;
-        inset-inline-start: 42px;
-        inset-inline-end: 8px;
+        inset-inline-start: calc(50% + 1.5rem);
+        inset-inline-end: calc(-50% + 1.5rem);
         height: 2px;
         background: repeating-linear-gradient(90deg, var(--ae-slate-300) 0 6px, transparent 6px 12px);
     }
@@ -51,14 +83,14 @@
     }
 
 .is-done .doc-step-dot {
-    background: var(--ae-gold-600);
+    background: var(--app-primary);
     color: #fff;
 }
 
 .is-current .doc-step-dot {
     background: #fff;
-    border: 2px solid var(--ae-gold-600);
-    color: var(--ae-gold-600);
+    border: 2px solid var(--app-primary);
+    color: var(--ae-gold-700);
     box-shadow: 0 0 0 3px rgba(198, 160, 72, .3);
 }
 
@@ -70,7 +102,9 @@
 .doc-step-text {
     display: flex;
     flex-direction: column;
+    align-items: center;
     min-width: 0;
+    max-width: 100%;
 }
 
 .doc-step-name {
@@ -100,8 +134,8 @@
 
 .doc-step-progress {
     display: block;
-    width: 100%;
-    max-width: 11rem;
+    width: 11rem;
+    max-width: 100%;
     height: .5rem;
     margin-top: .375rem;
     border-radius: 999px;
@@ -113,7 +147,7 @@
         display: block;
         height: 100%;
         border-radius: 999px;
-        background: var(--ae-gold-600);
+        background: var(--app-primary);
         transition: width .4s;
     }
 
@@ -139,8 +173,12 @@
     }
 }
 
-/* Phones: the steps stack, with a vertical connector. */
+/* Phones: the steps stack, aligned to the start, with a vertical connector; the band scrolls away. */
 @media (max-width: 640.98px) {
+    .doc-band {
+        position: static;
+    }
+
     .doc-steps {
         grid-template-columns: minmax(0, 1fr);
         gap: 1rem;
@@ -148,7 +186,14 @@
 
     .doc-step {
         flex-direction: row;
+        align-items: flex-start;
         gap: .875rem;
+        padding-inline: 0;
+        text-align: start;
+    }
+
+    .doc-step-text {
+        align-items: flex-start;
     }
 
     .doc-step-dot {

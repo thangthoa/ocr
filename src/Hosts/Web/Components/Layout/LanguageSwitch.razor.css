@@ -1,29 +1,122 @@
-.language-switch {
+.language-menu {
+    position: relative;
+}
+
+/* The toggle keeps the look of a Design System secondary button: globe, current language, chevron. */
+.language-toggle {
+    list-style: none;
     display: inline-flex;
     align-items: center;
     gap: .5rem;
     min-height: 2.5rem;
-    padding: 0 .75rem;
+    padding: 0 .625rem 0 .75rem;
     border: 1px solid var(--ae-black-200);
     border-radius: var(--app-radius);
     background: #fff;
     color: var(--ae-black-800);
     font-weight: 500;
-    text-decoration: none;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
 }
 
-    .language-switch:hover {
-        border-color: var(--ae-gold-600);
+    .language-toggle::-webkit-details-marker {
+        display: none;
+    }
+
+    .language-toggle:hover,
+    .language-menu[open] > .language-toggle {
+        border-color: var(--app-primary);
         color: var(--ae-gold-700);
     }
 
-    .language-switch svg {
-        width: 1.25rem;
-        height: 1.25rem;
-        flex: none;
+    .language-toggle:focus-visible {
+        outline: 2px solid var(--app-focus);
+        outline-offset: 2px;
     }
 
-    .language-switch:lang(ar) {
-        font-family: "Noto Kufi Arabic", var(--app-font-body);
+.language-globe {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+}
+
+.language-chevron {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    transition: transform .15s;
+}
+
+.language-menu[open] .language-chevron {
+    transform: rotate(180deg);
+}
+
+/* Same panel as the account menu. */
+.language-panel {
+    position: absolute;
+    top: calc(100% + .5rem);
+    inset-inline-end: 0;
+    min-width: 12rem;
+    margin: 0;
+    padding: .375rem;
+    list-style: none;
+    background-color: #fff;
+    border: 1px solid var(--app-border-subtle);
+    border-radius: var(--app-radius);
+    box-shadow: 0 10px 30px rgba(26, 28, 32, .14);
+    z-index: 30;
+}
+
+.language-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    min-height: 2.5rem;
+    padding: 0 .625rem;
+    border-radius: .375rem;
+    color: var(--app-ink);
+    text-decoration: none;
+}
+
+    .language-item:hover {
+        background-color: var(--ae-whitely-300);
+        color: var(--app-ink);
     }
+
+    .language-item:focus-visible {
+        outline: 2px solid var(--app-focus);
+        outline-offset: -2px;
+    }
+
+    .language-item.is-current {
+        background-color: var(--ae-gold-50);
+        color: var(--ae-gold-800);
+        font-weight: 600;
+    }
+
+.language-check {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+}
+
+/* Arabic names in an Arabic face, whatever the page language. */
+.language-item:lang(ar),
+.language-current:lang(ar) {
+    font-family: "Noto Kufi Arabic", var(--app-font-body);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .language-chevron {
+        transition: none;
+    }
+}
+
+/* Small phones: the globe and chevron are enough next to the brand; the name stays for screen readers. */
+@media (max-width: 380px) {
+    .language-current {
+        display: none;
+    }
+}

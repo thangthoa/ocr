@@ -1,0 +1,141 @@
+/* Integrity of the log: green when the hash chain is whole, red when an entry was changed. */
+.integrity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--ae-green-200);
+    border-radius: var(--app-radius-card);
+    background-color: var(--ae-green-50);
+}
+
+    .integrity.is-broken {
+        border-color: var(--ae-red-200);
+        background-color: var(--ae-red-50);
+    }
+
+.integrity-main {
+    flex: 1 1 24rem;
+    min-width: 0;
+}
+
+    .integrity-main > p:first-child::before {
+        content: "✓ ";
+        color: var(--ae-green-700);
+    }
+
+.integrity.is-broken .integrity-main > p:first-child::before {
+    content: "✕ ";
+    color: var(--ae-red-700);
+}
+
+/* Summary figures for the entries shown; the alert ones and downloads are buttons that filter on them. */
+.activity-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: .75rem;
+}
+
+.activity-stat {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .875rem 1rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    background-color: #fff;
+    color: inherit;
+    text-align: start;
+}
+
+button.activity-stat:hover {
+    border-color: var(--ae-gold-300);
+}
+
+button.activity-stat:focus-visible {
+    outline: 2px solid var(--app-focus);
+    outline-offset: 2px;
+}
+
+.activity-stat.is-alert .activity-stat-value {
+    color: var(--ae-red-700);
+}
+
+.activity-stat-label {
+    font-size: .8125rem;
+    color: var(--app-ink-muted);
+}
+
+.activity-stat-value {
+    font-family: var(--app-font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+}
+
+    .activity-filters > div {
+        min-width: 10rem;
+    }
+
+    .activity-filters .activity-search {
+        flex: 1 1 16rem;
+    }
+
+.activity-table td {
+    vertical-align: top;
+}
+
+.activity-table tr.is-live > td {
+    background-color: var(--ae-green-50);
+}
+
+.activity-category {
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--app-ink-muted);
+    text-transform: uppercase;
+}
+
+/* The details of an entry: where it sits in the chain and what the SIEM receives. */
+.activity-details > td {
+    background-color: var(--ae-black-50);
+}
+
+.activity-details dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: .5rem 1.5rem;
+    margin: 0;
+    font-size: .8125rem;
+}
+
+    .activity-details dl > div.wide {
+        grid-column: 1 / -1;
+    }
+
+.activity-details dt {
+    font-weight: 600;
+}
+
+.activity-details dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.activity-empty {
+    padding: 2rem 1rem;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
+    text-align: center;
+}

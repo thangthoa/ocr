@@ -3,10 +3,7 @@
 
 <PageTitle>@Text["Documents.Title"]</PageTitle>
 
-<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-    <h1 class="h3 mb-0 me-auto">@Text["Documents.Title"]</h1>
-    <a class="btn btn-primary" href="scan">@Text["Documents.Upload"]</a>
-</div>
+<h1 class="h3 mb-3">@Text["Documents.Title"]</h1>
 
 @if (_list?.JobsError is { } jobsError)
 {
@@ -36,51 +33,8 @@ else if (_loadError is not null)
                      Selected="_status" OnSelect="SetStatus" />
 </section>
 
-<div class="doc-filters mb-3" role="search">
-    <div class="row g-3 align-items-end">
-        <div class="col-12 col-lg-6">
-            <label for="doc-search" class="form-label">@Text["Search.Label"]</label>
-            <div class="input-group">
-                <label for="doc-field" class="visually-hidden">@Text["Search.Field"]</label>
-                <select id="doc-field" class="form-select doc-field" @bind="_field" @bind:after="() => Apply()">
-                    @foreach (var field in Enum.GetValues<DocumentSearchField>())
-                    {
-                        <option value="@field">@Text.Field(field)</option>
-                    }
-                </select>
-                <input id="doc-search" type="search" class="form-control" dir="auto" autocomplete="off" spellcheck="false"
-                       placeholder="@Text["Search.Placeholder"]" @bind="_search" @bind:event="oninput" @bind:after="() => Apply()" />
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="doc-department" class="form-label">@Text["Filter.Department"]</label>
-            <select id="doc-department" class="form-select" @bind="_department" @bind:after="() => Apply()">
-                <option value="">@Text["Filter.AllDepartments"]</option>
-                @foreach (var department in Enum.GetValues<DocumentDepartment>())
-                {
-                    <option value="@department">@Text.Department(department)</option>
-                }
-            </select>
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="doc-kind" class="form-label">@Text["Filter.Kind"]</label>
-            <select id="doc-kind" class="form-select" @bind="_kind" @bind:after="() => Apply()">
-                <option value="">@Text["Filter.AllKinds"]</option>
-                @foreach (var kind in Enum.GetValues<DocumentKind>())
-                {
-                    <option value="@kind">@Text.Kind(kind)</option>
-                }
-            </select>
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="doc-from" class="form-label">@Text["Filter.From"]</label>
-            <input id="doc-from" type="date" class="form-control" @bind="_from" @bind:after="() => Apply()" />
-        </div>
-        <div class="col-6 col-lg-3">
-            <label for="doc-to" class="form-label">@Text["Filter.To"]</label>
-            <input id="doc-to" type="date" class="form-control" @bind="_to" @bind:after="() => Apply()" />
-        </div>
-    </div>
+<div class="mb-3">
+    <DocumentFilters Filter="_filter" Id="doc" OnChange="() => Apply()" />
 </div>
 
 @if (_list is null && _loadError is null)
@@ -105,7 +59,7 @@ else
     @if (_results.Count == 0)
     {
         <div class="empty-state">
-            <p class="mb-2">@Text["Documents.None"]</p>
+            <p class="mb-2">@(HasFilters ? Text["Documents.None"] : Text["Documents.Empty"])</p>
             @if (HasFilters)
             {
                 <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
@@ -127,11 +81,12 @@ else
                         <th scope="col">@Text["Column.DocumentDate"]</th>
                         <th scope="col">@Text["Column.Status"]</th>
                         <th scope="col">@Text["Column.Version"]</th>
+                        <th scope="col">@Text["Column.LastUpdated"]</th>
                         <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var document in PageItems)
+                    @foreach (var document in _paging.Slice(_results))
                     {
                         var metadata = document.Metadata;
                         <tr @key="document.Id" class="doc-row" @onclick="() => Open(document.Id)">
@@ -170,10 +125,8 @@ else
                                     <div class="small text-danger mt-1">@OcrText.JobError(failed.ErrorCode)</div>
                                 }
                             </td>
-                            <td class="text-nowrap">
-                                <span dir="ltr">@(document.CurrentVersion?.Number ?? Missing)</span>
-                                <div class="small text-muted" title="@($"{Text["Column.Updated"]}: {FormatDateTime(document.UpdatedAtUtc)}")">@FormatShortDate(document.UpdatedAtUtc)</div>
-                            </td>
+                            <td class="text-nowrap doc-version" dir="ltr">@(document.CurrentVersion?.Number ?? Missing)</td>
+                            <td class="small text-nowrap doc-updated">@FormatDateTime(document.UpdatedAtUtc)</td>
                             <td class="text-end text-nowrap" @onclick:stopPropagation="true">
                                 @if (!document.IsSample)
                                 {
@@ -189,13 +142,6 @@ else
             </table>
         </div>
 
-        @if (TotalPages > 1)
-        {
-            <nav class="d-flex align-items-center gap-2" aria-label="@Text["Pager.Label"]">
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page <= 1)" @onclick="() => _page--">@Text["Pager.Previous"]</button>
-                <span class="small">@Text["Pager.PageOf", _page, TotalPages]</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page >= TotalPages)" @onclick="() => _page++">@Text["Pager.Next"]</button>
-            </nav>
-        }
+        <TablePager Paging="_paging" Total="_results.Count" Id="doc-pager" OnChange="StateHasChanged" />
     }
 }

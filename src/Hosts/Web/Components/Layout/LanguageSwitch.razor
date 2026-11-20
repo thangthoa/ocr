@@ -2,22 +2,49 @@
 @inject NavigationManager Navigation
 @inject IStringLocalizer<SharedText> Text
 
-@* One button to the other language (the app has two). A full page load so the new culture applies
-   to the server render and to the Blazor circuit. *@
-<a class="language-switch" href="@SetCultureUrl(Target)" data-enhance-nav="false" lang="@Target" hreflang="@Target"
-   title="@Text["SwitchLanguage", Label]">
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
-    </svg>
-    <span>@Label</span>
-</a>
+@* A dropdown of the app's languages, like the account menu: a native disclosure that works in the
+   static layout without a circuit (wwwroot/js/popup-menu.js closes it on an outside click or Escape).
+   Each language is a full page load, so the new culture applies to the server render and to the
+   Blazor circuit. *@
+<details class="language-menu popup-menu">
+    <summary class="language-toggle" title="@Text["LanguageMenu", CurrentLabel]">
+        <svg class="language-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
+        </svg>
+        <span class="language-current" aria-hidden="true">@CurrentLabel</span>
+        <span class="visually-hidden">@Text["LanguageMenu", CurrentLabel]</span>
+        <svg class="language-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6" />
+        </svg>
+    </summary>
+    <ul class="language-panel">
+        @foreach (var culture in LocalizationSetup.SupportedCultures)
+        {
+            var current = IsCurrent(culture);
+            <li>
+                <a class="language-item @(current ? "is-current" : null)" href="@SetCultureUrl(culture)" data-enhance-nav="false"
+                   lang="@culture" hreflang="@culture" aria-current="@(current ? "true" : null)">
+                    <span>@Label(culture)</span>
+                    @if (current)
+                    {
+                        <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m5 12.5 4.5 4.5L19 7.5" />
+                        </svg>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+</details>
 
 @code {
-    private static string Target => LocalizationSetup.SupportedCultures.First(culture =>
-        !string.Equals(culture, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase));
+    private static string CurrentLabel => Label(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 
-    private static string Label => CultureInfo.GetCultureInfo(Target).NativeName;
+    private static bool IsCurrent(string culture) =>
+        string.Equals(culture, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase);
+
+    private static string Label(string culture) => CultureInfo.GetCultureInfo(culture).NativeName;
 
     private string SetCultureUrl(string culture)
     {

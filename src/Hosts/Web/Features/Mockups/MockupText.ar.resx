@@ -45,11 +45,7 @@
   <data name="Period.Day" xml:space="preserve"><value>يوم</value></data>
   <data name="Period.Week" xml:space="preserve"><value>أسبوع</value></data>
   <data name="Period.Month" xml:space="preserve"><value>شهر</value></data>
-  <data name="Kpi.Heading" xml:space="preserve"><value>الأرقام الرئيسية</value></data>
-  <data name="Kpi.Pages" xml:space="preserve"><value>الصفحات الممسوحة</value></data>
-  <data name="Kpi.PagesTarget" xml:space="preserve"><value>{0} من الهدف البالغ {1}</value></data>
   <data name="Kpi.VsPrevious" xml:space="preserve"><value>{0} مقارنةً بالفترة السابقة</value></data>
-  <data name="Kpi.Confidence" xml:space="preserve"><value>متوسط دقة التعرّف الضوئي</value></data>
   <data name="Kpi.PointsChange" xml:space="preserve"><value>{0} نقطة مقارنةً بالفترة السابقة</value></data>
   <data name="Kpi.Review" xml:space="preserve"><value>بانتظار المراجعة</value></data>
   <data name="Kpi.Failed" xml:space="preserve"><value>فشل {0}</value></data>
@@ -69,9 +65,8 @@
   <data name="Dept.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Dept.Confidence" xml:space="preserve"><value>متوسط الدقة</value></data>
   <data name="Documents.Title" xml:space="preserve"><value>كل المستندات</value></data>
-  <data name="Documents.JobsUnavailable" xml:space="preserve"><value>تعذّر تحميل مهام OCR: {0} لا تزال المستندات التجريبية معروضة.</value></data>
+  <data name="Documents.JobsUnavailable" xml:space="preserve"><value>تعذّر تحميل مهام OCR: {0}</value></data>
   <data name="Documents.NewestOnly" xml:space="preserve"><value>عرض أحدث {0} من أصل {1} مهمة OCR.</value></data>
-  <data name="Documents.Upload" xml:space="preserve"><value>رفع ملفات</value></data>
   <data name="Documents.Count" xml:space="preserve"><value>{0} مستند</value></data>
   <data name="Documents.None" xml:space="preserve"><value>لا توجد مستندات مطابقة لعوامل التصفية.</value></data>
   <data name="Filter.Status" xml:space="preserve"><value>التصفية حسب الحالة</value></data>
@@ -94,12 +89,10 @@
   <data name="Column.DocumentDate" xml:space="preserve"><value>تاريخ المستند</value></data>
   <data name="Column.Status" xml:space="preserve"><value>الحالة</value></data>
   <data name="Column.Version" xml:space="preserve"><value>الإصدار</value></data>
-  <data name="Column.Updated" xml:space="preserve"><value>آخر تحديث</value></data>
   <data name="Column.Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="Pager.Label" xml:space="preserve"><value>التنقل بين الصفحات</value></data>
   <data name="Pager.Previous" xml:space="preserve"><value>السابق</value></data>
   <data name="Pager.Next" xml:space="preserve"><value>التالي</value></data>
-  <data name="Pager.PageOf" xml:space="preserve"><value>الصفحة {0} من {1}</value></data>
   <data name="Detail.TitleFallback" xml:space="preserve"><value>مستند</value></data>
   <data name="Detail.Back" xml:space="preserve"><value>العودة إلى المستندات</value></data>
   <data name="Detail.NotFound" xml:space="preserve"><value>المستند غير موجود.</value></data>
@@ -112,7 +105,6 @@
   <data name="Detail.ProcessingNote" xml:space="preserve"><value>لا يزال التعرّف الضوئي جاريًا على هذا الملف. يظهر النص والإصدارات عند الانتهاء.</value></data>
   <data name="Detail.FailedNote" xml:space="preserve"><value>تعذّر على التعرّف الضوئي قراءة هذا الملف. أعد مسح الأصل ضوئيًا أو أعد المحاولة.</value></data>
   <data name="Detail.CancelledNote" xml:space="preserve"><value>أُلغيت مهمة OCR هذه قبل تشغيلها.</value></data>
-  <data name="Detail.DownloadNote" xml:space="preserve"><value>تحتوي التنزيلات على النص كما تعرّف عليه OCR، دون التعديلات اللاحقة.</value></data>
   <data name="Detail.Saved" xml:space="preserve"><value>تم الحفظ كإصدار {0}.</value></data>
   <data name="Detail.StatusChanged" xml:space="preserve"><value>تم تغيير الحالة إلى {0}.</value></data>
   <data name="Detail.Restored" xml:space="preserve"><value>تمت استعادة الإصدار {0} كإصدار {1}.</value></data>
@@ -125,7 +117,6 @@
   <data name="Action.Edit" xml:space="preserve"><value>تعديل</value></data>
   <data name="Edit.FixErrors" xml:space="preserve"><value>صحّح الحقول المحددة قبل الحفظ.</value></data>
   <data name="Edit.Text" xml:space="preserve"><value>النص المستخرج</value></data>
-  <data name="Edit.PageText" xml:space="preserve"><value>نص الصفحة {0}</value></data>
   <data name="Edit.TitleRequired" xml:space="preserve"><value>العنوان مطلوب.</value></data>
   <data name="Edit.KeywordsHint" xml:space="preserve"><value>افصل الكلمات المفتاحية بفواصل.</value></data>
   <data name="Edit.Note" xml:space="preserve"><value>ملاحظة التغيير (اختياري)</value></data>
@@ -187,41 +178,25 @@
   <data name="Change.Edited" xml:space="preserve"><value>تعديل</value></data>
   <data name="Change.Restored" xml:space="preserve"><value>مستعاد من الإصدار {0}</value></data>
   <data name="Review.Title" xml:space="preserve"><value>قائمة المراجعة</value></data>
-  <data name="Review.Oldest" xml:space="preserve"><value>أقدم مستند ينتظر منذ</value></data>
-  <data name="Review.Start" xml:space="preserve"><value>بدء المراجعة</value></data>
   <data name="Review.Empty" xml:space="preserve"><value>لا يوجد ما يُراجع. تظهر المستندات هنا عندما يشير إليها الفحص الآلي للجودة.</value></data>
   <data name="Review.Action" xml:space="preserve"><value>مراجعة</value></data>
   <data name="Review.ActionLabel" xml:space="preserve"><value>مراجعة {0}</value></data>
-  <data name="Review.Hours" xml:space="preserve"><value>{0} ساعة</value></data>
-  <data name="Review.Days" xml:space="preserve"><value>{0} يوم</value></data>
   <data name="Review.NoConfidence" xml:space="preserve"><value>تُعرف بعد فحص المستند</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>دقة التعرّف</value></data>
   <data name="Column.Uploaded" xml:space="preserve"><value>تاريخ الرفع</value></data>
-  <data name="Column.Waiting" xml:space="preserve"><value>مدة الانتظار</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>العودة إلى قائمة المراجعة</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>الدفعة</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Admin.Sections" xml:space="preserve"><value>أقسام الإعدادات</value></data>
-  <data name="Admin.Tab.Roles" xml:space="preserve"><value>الأدوار والصلاحيات</value></data>
   <data name="Admin.Tab.Retention" xml:space="preserve"><value>التصنيف والاحتفاظ</value></data>
   <data name="Admin.Tab.Integrations" xml:space="preserve"><value>الأنظمة المرتبطة</value></data>
-  <data name="Admin.Tab.Audit" xml:space="preserve"><value>سجل النشاط</value></data>
-  <data name="Roles.Note" xml:space="preserve"><value>تسجيل الدخول غير مرتبط بـ Active Directory بعد؛ تعرض هذه الأدوار الإعداد المخطط له.</value></data>
-  <data name="Roles.Column.Role" xml:space="preserve"><value>الدور</value></data>
-  <data name="Roles.Column.Group" xml:space="preserve"><value>مجموعة AD</value></data>
-  <data name="Roles.Column.Users" xml:space="preserve"><value>المستخدمون</value></data>
-  <data name="Roles.Column.Can" xml:space="preserve"><value>الصلاحيات</value></data>
+  <data name="Roles.Note" xml:space="preserve"><value>تسجيل الدخول غير مرتبط بـ Active Directory بعد. سيحصل أعضاء كل مجموعة على دورها؛ وتُحفظ الصلاحيات في الذاكرة حتى إعادة تشغيل التطبيق.</value></data>
   <data name="Role.CaptureOperator" xml:space="preserve"><value>مشغّل المسح</value></data>
-  <data name="Role.CaptureOperator.Can" xml:space="preserve"><value>إنشاء الدفعات ورفع الملفات</value></data>
   <data name="Role.Reviewer" xml:space="preserve"><value>مراجع OCR</value></data>
-  <data name="Role.Reviewer.Can" xml:space="preserve"><value>مراجعة المستندات وتصحيحها واعتمادها</value></data>
   <data name="Role.RecordsManager" xml:space="preserve"><value>مدير السجلات</value></data>
-  <data name="Role.RecordsManager.Can" xml:space="preserve"><value>التصنيف والأرشفة وإدارة الاحتفاظ</value></data>
   <data name="Role.Reader" xml:space="preserve"><value>قارئ الإدارة</value></data>
-  <data name="Role.Reader.Can" xml:space="preserve"><value>البحث في مستندات إدارته وعرضها</value></data>
   <data name="Role.Administrator" xml:space="preserve"><value>مسؤول النظام</value></data>
-  <data name="Role.Administrator.Can" xml:space="preserve"><value>الإعدادات وسجل النشاط</value></data>
   <data name="Retention.Note" xml:space="preserve"><value>لا يُطبَّق الاحتفاظ بعد: لا يُتلف أي مستند ولا يوضع تحت الحجز القانوني تلقائيًا.</value></data>
   <data name="Retention.Column.Keep" xml:space="preserve"><value>مدة الاحتفاظ</value></data>
   <data name="Retention.Column.From" xml:space="preserve"><value>تُحتسب من</value></data>
@@ -258,8 +233,6 @@
   <data name="Integration.Status.Down" xml:space="preserve"><value>غير متاح</value></data>
   <data name="Integration.Status.Planned" xml:space="preserve"><value>مخطط</value></data>
   <data name="Integration.Status.Checking" xml:space="preserve"><value>جارٍ الفحص…</value></data>
-  <data name="Audit.Note" xml:space="preserve"><value>ما تم في هذا التطبيق منذ بدء تشغيله، الأحدث أولًا. محفوظ في الذاكرة فقط.</value></data>
-  <data name="Audit.Empty" xml:space="preserve"><value>لم يُسجَّل أي نشاط بعد.</value></data>
   <data name="Audit.Column.Time" xml:space="preserve"><value>الوقت</value></data>
   <data name="Audit.Column.User" xml:space="preserve"><value>المستخدم</value></data>
   <data name="Audit.Column.Action" xml:space="preserve"><value>الإجراء</value></data>
@@ -271,7 +244,6 @@
   <data name="Audit.Restored" xml:space="preserve"><value>استعاد كإصدار {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>غيّر الحالة إلى {0}</value></data>
   <data name="Audit.Deleted" xml:space="preserve"><value>حذف</value></data>
-  <data name="Word.Edit" xml:space="preserve"><value>تحرير في Word</value></data>
   <data name="Word.Title" xml:space="preserve"><value>تحرير في Word</value></data>
   <data name="Word.Back" xml:space="preserve"><value>العودة إلى المستند</value></data>
   <data name="Word.Help" xml:space="preserve"><value>اضغط حفظ (Ctrl+S) لحفظ إصدار جديد. يحفظ إغلاق المحرر تغييراتك أيضًا بعد بضع ثوانٍ.</value></data>
@@ -293,11 +265,9 @@
   <data name="Change.EditedInWord" xml:space="preserve"><value>تعديل في Word (إصدار الملف {0})</value></data>
   <data name="Audit.EditedInWord" xml:space="preserve"><value>حفظ إصدار ملف Word رقم {0}</value></data>
   <data name="Approved.Title" xml:space="preserve"><value>أرشيف المستندات</value></data>
-  <data name="Approved.Export" xml:space="preserve"><value>تصدير CSV ({0})</value></data>
   <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات مؤرشفة بعد. تظهر المستندات هنا بعد اعتمادها في قائمة المراجعة أو اجتيازها الفحص التلقائي.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى قائمة المراجعة</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>تنزيل {0} بصيغة {1}</value></data>
-  <data name="Approved.DownloadNote" xml:space="preserve"><value>النسخة النهائية هي النص بعد المراجعة. يحتفظ ملف DOCX بتنسيق Word إذا كان آخر تعديل للمستند في Word.</value></data>
   <data name="Column.Approved" xml:space="preserve"><value>الاعتماد</value></data>
   <data name="Column.Download" xml:space="preserve"><value>تنزيل</value></data>
   <data name="Filter.AllConfidentiality" xml:space="preserve"><value>كل المستويات</value></data>
@@ -305,14 +275,11 @@
   <data name="Filter.ApprovedTo" xml:space="preserve"><value>معتمد حتى تاريخ</value></data>
   <data name="Meta.ApprovedBy" xml:space="preserve"><value>اعتمده</value></data>
   <data name="Meta.Approved" xml:space="preserve"><value>تاريخ الاعتماد</value></data>
-  <data name="Detail.FinalDownload" xml:space="preserve"><value>النسخة النهائية</value></data>
   <data name="Audit.Downloaded" xml:space="preserve"><value>نزّل النسخة النهائية {1} بصيغة {0}</value></data>
   <data name="Audit.Exported" xml:space="preserve"><value>صدّر قائمة المستندات المعتمدة ({0} مستند)</value></data>
   <data name="Approved.Version" xml:space="preserve"><value>الإصدار {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>أشار إليها الفحص الآلي</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>اعتُمدت آليًا</value></data>
-  <data name="Review.NotChecked" xml:space="preserve"><value>لم يُفحص بعد (يُفحص عند فتح المستند)</value></data>
-  <data name="Review.PassedCheck" xml:space="preserve"><value>اجتاز الفحص الآلي</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>سبب وجوده هنا</value></data>
   <data name="Confidence.Simulated" xml:space="preserve"><value>محاكاة</value></data>
   <data name="Confidence.SimulatedNote" xml:space="preserve"><value>قيمة مُختلَقة لهذا العرض: لا تقدّم خدمة OCR دقة التعرّف بعد.</value></data>
@@ -384,4 +351,308 @@
   <data name="Steps.StateDone" xml:space="preserve"><value>مكتملة</value></data>
   <data name="Steps.StateCurrent" xml:space="preserve"><value>جارية</value></data>
   <data name="Steps.StateTodo" xml:space="preserve"><value>لم تبدأ</value></data>
+  <data name="Steps.ChooseFile" xml:space="preserve"><value>اختر الملف وارفعه</value></data>
+  <data name="Column.LastUpdated" xml:space="preserve"><value>آخر تحديث</value></data>
+  <data name="Pager.RowsPerPage" xml:space="preserve"><value>عدد الصفوف في الصفحة</value></data>
+  <data name="Pager.Range" xml:space="preserve"><value>{0}–{1} من {2}</value></data>
+  <data name="Pager.Page" xml:space="preserve"><value>الصفحة {0}</value></data>
+  <data name="Approved.DownloadMenu" xml:space="preserve"><value>تنزيل {0}</value></data>
+  <data name="Action.Download" xml:space="preserve"><value>تنزيل</value></data>
+  <data name="Download.Format" xml:space="preserve"><value>صيغة الملف</value></data>
+  <data name="Action.EditDetails" xml:space="preserve"><value>تعديل البيانات</value></data>
+  <data name="Documents.Empty" xml:space="preserve"><value>لا توجد مستندات بعد. تظهر المستندات هنا بعد مسح ملف.</value></data>
+  <data name="Admin.Tab.Kpi" xml:space="preserve"><value>أهداف مؤشرات الأداء</value></data>
+  <data name="KpiDef.PagesPerDay" xml:space="preserve"><value>الصفحات الممسوحة يوميًا</value></data>
+  <data name="KpiDef.PagesPerDay.Hint" xml:space="preserve"><value>المتوسط اليومي خلال الفترة.</value></data>
+  <data name="KpiDef.OcrAccuracy" xml:space="preserve"><value>دقة التعرّف الضوئي</value></data>
+  <data name="KpiDef.OcrAccuracy.Hint" xml:space="preserve"><value>متوسط ثقة التعرّف الضوئي للصفحات (تشترط المناقصة 90٪ على الأقل).</value></data>
+  <data name="KpiDef.AutoArchiveRate" xml:space="preserve"><value>المؤرشفة دون مراجعة يدوية</value></data>
+  <data name="KpiDef.AutoArchiveRate.Hint" xml:space="preserve"><value>نسبة المستندات التي اجتازت فحص الجودة الآلي.</value></data>
+  <data name="KpiDef.ReviewBacklog" xml:space="preserve"><value>المتراكم في قائمة المراجعة</value></data>
+  <data name="KpiDef.ReviewBacklog.Hint" xml:space="preserve"><value>المستندات التي تنتظر في قائمة المراجعة الآن.</value></data>
+  <data name="KpiDef.ReviewTime" xml:space="preserve"><value>مدة المراجعة</value></data>
+  <data name="KpiDef.ReviewTime.Hint" xml:space="preserve"><value>متوسط المدة من دخول قائمة المراجعة حتى الأرشفة.</value></data>
+  <data name="KpiDef.FailureRate" xml:space="preserve"><value>نسبة فشل التعرّف الضوئي</value></data>
+  <data name="KpiDef.FailureRate.Hint" xml:space="preserve"><value>نسبة المستندات التي فشلت مهمة التعرّف الضوئي لها.</value></data>
+  <data name="KpiDef.PagesPerOperator" xml:space="preserve"><value>الصفحات لكل مشغّل يوميًا</value></data>
+  <data name="KpiDef.PagesPerOperator.Hint" xml:space="preserve"><value>الصفحات اليومية مقسومة على عدد مشغّلي المسح.</value></data>
+  <data name="KpiStatus.OnTrack" xml:space="preserve"><value>على المسار</value></data>
+  <data name="KpiStatus.AtRisk" xml:space="preserve"><value>معرّض للخطر</value></data>
+  <data name="KpiStatus.OffTrack" xml:space="preserve"><value>خارج المسار</value></data>
+  <data name="KpiUnit.Pages" xml:space="preserve"><value>صفحة</value></data>
+  <data name="KpiUnit.Documents" xml:space="preserve"><value>مستند</value></data>
+  <data name="KpiUnit.Percent" xml:space="preserve"><value>٪</value></data>
+  <data name="KpiUnit.Hours" xml:space="preserve"><value>ساعة</value></data>
+  <data name="Kpi.Hours" xml:space="preserve"><value>{0} ساعة</value></data>
+  <data name="Kpi.Operators" xml:space="preserve"><value>{0} مشغّل مسح</value></data>
+  <data name="KpiCard.AtLeast" xml:space="preserve"><value>الهدف {0} على الأقل · تنبيه دون {1}</value></data>
+  <data name="KpiCard.AtMost" xml:space="preserve"><value>الهدف {0} كحد أقصى · تنبيه فوق {1}</value></data>
+  <data name="KpiBoard.Heading" xml:space="preserve"><value>أهداف مؤشرات الأداء</value></data>
+  <data name="KpiBoard.Summary" xml:space="preserve"><value>{0} على المسار · {1} معرّض للخطر · {2} خارج المسار</value></data>
+  <data name="KpiBoard.Edit" xml:space="preserve"><value>تعديل الأهداف</value></data>
+  <data name="KpiBoard.None" xml:space="preserve"><value>لا تظهر أي مؤشرات أداء في لوحة المعلومات. اخترها من الإعدادات › أهداف مؤشرات الأداء.</value></data>
+  <data name="Project.Heading" xml:space="preserve"><value>تقدّم المشروع</value></data>
+  <data name="Project.Report" xml:space="preserve"><value>عرض تقرير التقدّم</value></data>
+  <data name="Project.OfTotal" xml:space="preserve"><value>من {0} صفحة ({1})</value></data>
+  <data name="Project.Summary" xml:space="preserve"><value>تم مسح {0} من {1} صفحة؛ تتوقع الخطة {2} حتى اليوم.</value></data>
+  <data name="Project.PlanToDate" xml:space="preserve"><value>المخطط حتى اليوم: {0} ({1})</value></data>
+  <data name="Project.Ahead" xml:space="preserve"><value>متقدّم على الخطة بـ {0} صفحة</value></data>
+  <data name="Project.Behind" xml:space="preserve"><value>متأخر عن الخطة بـ {0} صفحة</value></data>
+  <data name="Project.Dates" xml:space="preserve"><value>المشروع: {0} – {1}</value></data>
+  <data name="Project.Pace" xml:space="preserve"><value>متبقٍ {0} يوم · المطلوب {1} صفحة يوميًا</value></data>
+  <data name="Project.Done" xml:space="preserve"><value>تم مسح كل الصفحات</value></data>
+  <data name="Project.Late" xml:space="preserve"><value>انقضى تاريخ الانتهاء · متبقٍ {0} صفحة</value></data>
+  <data name="KpiSettings.Note" xml:space="preserve"><value>تُطبَّق الأهداف على لوحة المعلومات والتقارير فور حفظها، وتُحفظ في الذاكرة حتى إعادة تشغيل التطبيق.</value></data>
+  <data name="KpiSettings.Project" xml:space="preserve"><value>مشروع الرقمنة</value></data>
+  <data name="KpiSettings.ProjectPages" xml:space="preserve"><value>إجمالي الصفحات المطلوب رقمنتها</value></data>
+  <data name="KpiSettings.ProjectStart" xml:space="preserve"><value>تاريخ البدء</value></data>
+  <data name="KpiSettings.ProjectEnd" xml:space="preserve"><value>تاريخ الانتهاء</value></data>
+  <data name="KpiSettings.Targets" xml:space="preserve"><value>الأهداف</value></data>
+  <data name="KpiSettings.TargetsHint" xml:space="preserve"><value>يكون المؤشر على المسار عند بلوغ هدفه، ومعرّضًا للخطر حتى مستوى التنبيه، وخارج المسار بعده.</value></data>
+  <data name="KpiSettings.Column.Kpi" xml:space="preserve"><value>المؤشر</value></data>
+  <data name="KpiSettings.Column.Goal" xml:space="preserve"><value>الاتجاه</value></data>
+  <data name="KpiSettings.Column.Target" xml:space="preserve"><value>الهدف</value></data>
+  <data name="KpiSettings.Column.Alert" xml:space="preserve"><value>مستوى التنبيه</value></data>
+  <data name="KpiSettings.Column.Show" xml:space="preserve"><value>في لوحة المعلومات</value></data>
+  <data name="KpiSettings.Direction.AtLeast" xml:space="preserve"><value>على الأقل</value></data>
+  <data name="KpiSettings.Direction.AtMost" xml:space="preserve"><value>كحد أقصى</value></data>
+  <data name="KpiSettings.TargetFor" xml:space="preserve"><value>هدف {0}</value></data>
+  <data name="KpiSettings.AlertFor" xml:space="preserve"><value>مستوى التنبيه لـ {0}</value></data>
+  <data name="KpiSettings.ShowFor" xml:space="preserve"><value>إظهار {0} في لوحة المعلومات</value></data>
+  <data name="KpiSettings.Save" xml:space="preserve"><value>حفظ الأهداف</value></data>
+  <data name="KpiSettings.Saved" xml:space="preserve"><value>تم حفظ الأهداف.</value></data>
+  <data name="KpiSettings.OpenDashboard" xml:space="preserve"><value>فتح لوحة المعلومات</value></data>
+  <data name="KpiSettings.Error.Missing" xml:space="preserve"><value>أدخل رقمًا.</value></data>
+  <data name="KpiSettings.Error.Range" xml:space="preserve"><value>أدخل رقمًا من 0 إلى {0}.</value></data>
+  <data name="KpiSettings.Error.AlertAboveTarget" xml:space="preserve"><value>لا يمكن أن يكون مستوى التنبيه أعلى من الهدف.</value></data>
+  <data name="KpiSettings.Error.AlertBelowTarget" xml:space="preserve"><value>لا يمكن أن يكون مستوى التنبيه أدنى من الهدف.</value></data>
+  <data name="KpiSettings.Error.Pages" xml:space="preserve"><value>أدخل عدد صفحات من 1 إلى {0}.</value></data>
+  <data name="KpiSettings.Error.DatesMissing" xml:space="preserve"><value>أدخل تاريخَي البدء والانتهاء.</value></data>
+  <data name="KpiSettings.Error.EndBeforeStart" xml:space="preserve"><value>لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.</value></data>
+  <data name="Audit.KpiSettingsChanged" xml:space="preserve"><value>غيّر أهداف مؤشرات الأداء</value></data>
+  <data name="Audit.ReportExported" xml:space="preserve"><value>صدّر التقرير «{0}»</value></data>
+  <data name="Reports.Title" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Reports.Intro" xml:space="preserve"><value>اختر تقريرًا وفترة، ثم اعرضه أو صدّره بصيغة CSV أو اطبعه.</value></data>
+  <data name="Reports.Catalog" xml:space="preserve"><value>التقارير المتاحة</value></data>
+  <data name="Reports.Presets" xml:space="preserve"><value>فترات سريعة</value></data>
+  <data name="Reports.Preset.Today" xml:space="preserve"><value>اليوم</value></data>
+  <data name="Reports.Preset.Last7Days" xml:space="preserve"><value>آخر 7 أيام</value></data>
+  <data name="Reports.Preset.Last30Days" xml:space="preserve"><value>آخر 30 يومًا</value></data>
+  <data name="Reports.Preset.ThisMonth" xml:space="preserve"><value>هذا الشهر</value></data>
+  <data name="Reports.From" xml:space="preserve"><value>من</value></data>
+  <data name="Reports.To" xml:space="preserve"><value>إلى</value></data>
+  <data name="Reports.View" xml:space="preserve"><value>عرض التقرير</value></data>
+  <data name="Reports.Generated" xml:space="preserve"><value>أُنشئ في {0}</value></data>
+  <data name="Reports.LiveData" xml:space="preserve"><value>بيانات فعلية</value></data>
+  <data name="Reports.Export" xml:space="preserve"><value>تصدير CSV</value></data>
+  <data name="Reports.Print" xml:space="preserve"><value>طباعة</value></data>
+  <data name="Reports.Empty" xml:space="preserve"><value>لا توجد بيانات لهذه الفترة.</value></data>
+  <data name="Reports.Error.Missing" xml:space="preserve"><value>اختر التاريخين.</value></data>
+  <data name="Reports.Error.FromAfterTo" xml:space="preserve"><value>لا يمكن أن يكون تاريخ البدء بعد تاريخ الانتهاء.</value></data>
+  <data name="Reports.Error.InFuture" xml:space="preserve"><value>لا يمكن أن يتضمن التقرير أيامًا بعد اليوم.</value></data>
+  <data name="Reports.Error.TooLong" xml:space="preserve"><value>اختر فترة لا تتجاوز {0} يومًا.</value></data>
+  <data name="Report.Progress.Title" xml:space="preserve"><value>تقدّم الرقمنة</value></data>
+  <data name="Report.Progress.Description" xml:space="preserve"><value>الصفحات والمستندات الممسوحة يوميًا مقارنةً بالهدف اليومي وخطة المشروع.</value></data>
+  <data name="Report.Progress.Note" xml:space="preserve"><value>الهدف اليومي: مؤشر الصفحات الممسوحة يوميًا. أعمدة المشروع: الصفحات الممسوحة منذ بدء المشروع، والخطة بوتيرة ثابتة (الإعدادات › أهداف مؤشرات الأداء).</value></data>
+  <data name="Report.Quality.Title" xml:space="preserve"><value>جودة التعرّف الضوئي</value></data>
+  <data name="Report.Quality.Description" xml:space="preserve"><value>الثقة والصفحات دون الحد وما فعله الفحص الآلي، حسب الإدارة.</value></data>
+  <data name="Report.Quality.Note" xml:space="preserve"><value>تأتي الثقة من خدمة التعرّف الضوئي (محاكاة حاليًا). تُحتسب الصفحات دون الحد وفق حدّ الصفحة في فحص الجودة الآلي.</value></data>
+  <data name="Report.Productivity.Title" xml:space="preserve"><value>إنتاجية الموظفين</value></data>
+  <data name="Report.Productivity.Description" xml:space="preserve"><value>المستندات والصفحات التي مسحها كل مشغّل، والمستندات التي راجعها كل مراجع.</value></data>
+  <data name="Report.Productivity.Note" xml:space="preserve"><value>تفترض الصفحات في الساعة نوبة من 8 ساعات في كل يوم من الفترة. الدقائق لكل مراجعة: متوسط الوقت الذي قضاه المراجع في المستند.</value></data>
+  <data name="Report.Exceptions.Title" xml:space="preserve"><value>المراجعة والاستثناءات</value></data>
+  <data name="Report.Exceptions.Description" xml:space="preserve"><value>المستندات المحالة إلى المراجعة حسب السبب الرئيسي، ومهام التعرّف الضوئي الفاشلة، وما لا يزال مفتوحًا.</value></data>
+  <data name="Report.Exceptions.Note" xml:space="preserve"><value>لا يزال مفتوحًا: لم يُعتمد بعد، أو مهمة فاشلة لم يُعَد تشغيلها. ساعات المعالجة: المتوسط لما تمت معالجته.</value></data>
+  <data name="Report.Archive.Title" xml:space="preserve"><value>إحصاءات الأرشيف</value></data>
+  <data name="Report.Archive.Description" xml:space="preserve"><value>المستندات والصفحات المؤرشفة حسب الإدارة ودرجة السرية، مع مساحة التخزين المستخدمة.</value></data>
+  <data name="Report.Archive.Note" xml:space="preserve"><value>تشمل مساحة التخزين الصورة الأصلية وملف PDF القابل للبحث وملف Word: نحو 0.42 ميغابايت للصفحة.</value></data>
+  <data name="Report.Activity.Title" xml:space="preserve"><value>نشاط المستخدمين</value></data>
+  <data name="Report.Activity.Description" xml:space="preserve"><value>ما قام به كل مستخدم في التطبيق، من سجل النشاط.</value></data>
+  <data name="Report.Activity.Note" xml:space="preserve"><value>من سجل النشاط: آخر 500 إجراء منذ تشغيل التطبيق (محفوظة في الذاكرة).</value></data>
+  <data name="Report.Total" xml:space="preserve"><value>الإجمالي</value></data>
+  <data name="Report.Column.Date" xml:space="preserve"><value>التاريخ</value></data>
+  <data name="Report.Column.PagesScanned" xml:space="preserve"><value>الصفحات الممسوحة</value></data>
+  <data name="Report.Column.Documents" xml:space="preserve"><value>المستندات</value></data>
+  <data name="Report.Column.DailyTarget" xml:space="preserve"><value>الهدف اليومي</value></data>
+  <data name="Report.Column.OfTarget" xml:space="preserve"><value>٪ من الهدف</value></data>
+  <data name="Report.Column.ProjectPages" xml:space="preserve"><value>المشروع حتى التاريخ</value></data>
+  <data name="Report.Column.ProjectPlan" xml:space="preserve"><value>المخطط حتى التاريخ</value></data>
+  <data name="Report.Column.Department" xml:space="preserve"><value>الإدارة</value></data>
+  <data name="Report.Column.Pages" xml:space="preserve"><value>الصفحات</value></data>
+  <data name="Report.Column.Confidence" xml:space="preserve"><value>متوسط الثقة</value></data>
+  <data name="Report.Column.LowPages" xml:space="preserve"><value>صفحات دون الحد</value></data>
+  <data name="Report.Column.AutoArchived" xml:space="preserve"><value>مؤرشفة آليًا</value></data>
+  <data name="Report.Column.SentToReview" xml:space="preserve"><value>محالة إلى المراجعة</value></data>
+  <data name="Report.Column.Failed" xml:space="preserve"><value>فشل التعرّف</value></data>
+  <data name="Report.Column.User" xml:space="preserve"><value>المستخدم</value></data>
+  <data name="Report.Column.Role" xml:space="preserve"><value>الدور</value></data>
+  <data name="Report.Column.DocumentsScanned" xml:space="preserve"><value>المستندات الممسوحة</value></data>
+  <data name="Report.Column.PagesPerHour" xml:space="preserve"><value>الصفحات في الساعة</value></data>
+  <data name="Report.Column.DocumentsReviewed" xml:space="preserve"><value>المستندات المراجَعة</value></data>
+  <data name="Report.Column.MinutesPerReview" xml:space="preserve"><value>الدقائق لكل مراجعة</value></data>
+  <data name="Report.Column.Reason" xml:space="preserve"><value>السبب الرئيسي</value></data>
+  <data name="Report.Column.Flagged" xml:space="preserve"><value>المستندات</value></data>
+  <data name="Report.Column.Resolved" xml:space="preserve"><value>تمت معالجتها</value></data>
+  <data name="Report.Column.Open" xml:space="preserve"><value>لا تزال مفتوحة</value></data>
+  <data name="Report.Column.HoursToResolve" xml:space="preserve"><value>ساعات المعالجة</value></data>
+  <data name="Report.Column.DocumentsArchived" xml:space="preserve"><value>المستندات المؤرشفة</value></data>
+  <data name="Report.Column.Storage" xml:space="preserve"><value>التخزين (غيغابايت)</value></data>
+  <data name="Report.Column.SignIns" xml:space="preserve"><value>تسجيلات الدخول</value></data>
+  <data name="Report.Column.Uploads" xml:space="preserve"><value>عمليات الرفع</value></data>
+  <data name="Report.Column.Edits" xml:space="preserve"><value>التعديلات</value></data>
+  <data name="Report.Column.StatusChanges" xml:space="preserve"><value>تغييرات الحالة</value></data>
+  <data name="Report.Column.Deletions" xml:space="preserve"><value>عمليات الحذف</value></data>
+  <data name="Report.Column.Downloads" xml:space="preserve"><value>التنزيلات والتصدير</value></data>
+  <data name="Report.Column.SettingsChanges" xml:space="preserve"><value>تغييرات الإعدادات</value></data>
+  <data name="Report.Column.AllActions" xml:space="preserve"><value>كل الإجراءات</value></data>
+  <data name="Report.Reason.LowPageConfidence" xml:space="preserve"><value>صفحة دون حد الثقة</value></data>
+  <data name="Report.Reason.LowDocumentConfidence" xml:space="preserve"><value>مستند دون حد الثقة</value></data>
+  <data name="Report.Reason.PageWarnings" xml:space="preserve"><value>تحذيرات التعرّف على صفحة</value></data>
+  <data name="Report.Reason.EmptyPage" xml:space="preserve"><value>صفحة بلا نص</value></data>
+  <data name="Report.Reason.MissingMetadata" xml:space="preserve"><value>بيانات وصفية مطلوبة ناقصة</value></data>
+  <data name="Report.Reason.OcrFailed" xml:space="preserve"><value>فشل مهمة التعرّف الضوئي</value></data>
+  <data name="Roles.Column.Permission" xml:space="preserve"><value>الصلاحية</value></data>
+  <data name="Roles.Users" xml:space="preserve"><value>{0} مستخدم نشط</value></data>
+  <data name="Roles.Locked" xml:space="preserve"><value>يحتفظ المسؤولون بهذه الصلاحية دائمًا.</value></data>
+  <data name="Roles.LockedNote" xml:space="preserve"><value>يحتفظ المسؤولون دائمًا بصلاحيتَي إدارة المستخدمين والأدوار وتغيير الإعدادات، حتى لا يُحرم أحد من الوصول.</value></data>
+  <data name="Roles.Save" xml:space="preserve"><value>حفظ الصلاحيات</value></data>
+  <data name="Roles.Saved" xml:space="preserve"><value>تم حفظ الصلاحيات.</value></data>
+  <data name="Permission.ViewDocuments" xml:space="preserve"><value>عرض المستندات والبحث فيها</value></data>
+  <data name="Permission.Scan" xml:space="preserve"><value>المسح والرفع</value></data>
+  <data name="Permission.Review" xml:space="preserve"><value>مراجعة نص التعرّف الضوئي وتصحيحه</value></data>
+  <data name="Permission.Approve" xml:space="preserve"><value>الاعتماد والأرشفة</value></data>
+  <data name="Permission.Download" xml:space="preserve"><value>التنزيل والطباعة</value></data>
+  <data name="Permission.Delete" xml:space="preserve"><value>حذف المستندات</value></data>
+  <data name="Permission.ManageRetention" xml:space="preserve"><value>إدارة التصنيف والاحتفاظ</value></data>
+  <data name="Permission.ViewReports" xml:space="preserve"><value>عرض لوحة المعلومات والتقارير</value></data>
+  <data name="Permission.ExportData" xml:space="preserve"><value>تصدير القوائم والتقارير</value></data>
+  <data name="Permission.ManageSettings" xml:space="preserve"><value>تغيير الإعدادات</value></data>
+  <data name="Permission.ManageUsers" xml:space="preserve"><value>إدارة المستخدمين والأدوار</value></data>
+  <data name="Permission.ViewAuditLog" xml:space="preserve"><value>عرض سجل النشاط</value></data>
+  <data name="Users.Note" xml:space="preserve"><value>ستُزامَن الحسابات من Active Directory؛ وتُنشأ الحسابات المحلية هنا. تُحفظ التغييرات في الذاكرة حتى إعادة تشغيل التطبيق.</value></data>
+  <data name="Users.Search" xml:space="preserve"><value>بحث</value></data>
+  <data name="Users.SearchHint" xml:space="preserve"><value>الاسم أو اسم المستخدم أو البريد الإلكتروني</value></data>
+  <data name="Users.AllRoles" xml:space="preserve"><value>كل الأدوار</value></data>
+  <data name="Users.AllStatuses" xml:space="preserve"><value>كل الحالات</value></data>
+  <data name="Users.Add" xml:space="preserve"><value>إضافة مستخدم</value></data>
+  <data name="Users.Summary" xml:space="preserve"><value>{0} مستخدم · {1} نشط · {2} معطّل</value></data>
+  <data name="Users.Empty" xml:space="preserve"><value>لا يوجد مستخدم يطابق عوامل التصفية هذه.</value></data>
+  <data name="Users.Column.Name" xml:space="preserve"><value>الاسم</value></data>
+  <data name="Users.Column.Role" xml:space="preserve"><value>الدور</value></data>
+  <data name="Users.Column.Departments" xml:space="preserve"><value>الإدارات</value></data>
+  <data name="Users.Column.Clearance" xml:space="preserve"><value>درجة السرية المسموحة</value></data>
+  <data name="Users.Column.Mfa" xml:space="preserve"><value>التحقق متعدد العوامل</value></data>
+  <data name="Users.Column.Source" xml:space="preserve"><value>الحساب</value></data>
+  <data name="Users.Column.Status" xml:space="preserve"><value>الحالة</value></data>
+  <data name="Users.Column.LastSignIn" xml:space="preserve"><value>آخر تسجيل دخول</value></data>
+  <data name="Users.Column.Actions" xml:space="preserve"><value>الإجراءات</value></data>
+  <data name="Users.Yes" xml:space="preserve"><value>مطلوب</value></data>
+  <data name="Users.Never" xml:space="preserve"><value>لم يسجّل الدخول</value></data>
+  <data name="Users.Edit" xml:space="preserve"><value>تعديل</value></data>
+  <data name="Users.EditFor" xml:space="preserve"><value>تعديل {0}</value></data>
+  <data name="UserStatus.Active" xml:space="preserve"><value>نشط</value></data>
+  <data name="UserStatus.Disabled" xml:space="preserve"><value>معطّل</value></data>
+  <data name="UserSource.ActiveDirectory" xml:space="preserve"><value>Active Directory</value></data>
+  <data name="UserSource.Local" xml:space="preserve"><value>محلي</value></data>
+  <data name="Users.AddTitle" xml:space="preserve"><value>إضافة مستخدم</value></data>
+  <data name="Users.EditTitle" xml:space="preserve"><value>تعديل {0}</value></data>
+  <data name="Users.Account" xml:space="preserve"><value>الحساب</value></data>
+  <data name="Users.FromDirectory" xml:space="preserve"><value>يأتي الاسم والبريد الإلكتروني من Active Directory ويُعدَّلان هناك.</value></data>
+  <data name="Users.UserName" xml:space="preserve"><value>اسم المستخدم</value></data>
+  <data name="Users.Email" xml:space="preserve"><value>البريد الإلكتروني</value></data>
+  <data name="Users.Active" xml:space="preserve"><value>الحساب نشط</value></data>
+  <data name="Users.Mfa" xml:space="preserve"><value>طلب رمز لمرة واحدة عند تسجيل الدخول (MFA)</value></data>
+  <data name="Users.Access" xml:space="preserve"><value>الوصول</value></data>
+  <data name="Users.ClearanceHint" xml:space="preserve"><value>أعلى درجة سرية يمكن لهذا المستخدم الاطلاع عليها.</value></data>
+  <data name="Users.AllDepartments" xml:space="preserve"><value>كل الإدارات</value></data>
+  <data name="Users.Effective" xml:space="preserve"><value>ما يمكن لهذا المستخدم فعله</value></data>
+  <data name="Users.EffectiveDisabled" xml:space="preserve"><value>الحساب معطّل: لا يمكنه تسجيل الدخول.</value></data>
+  <data name="Users.Allowed" xml:space="preserve"><value>مسموح:</value></data>
+  <data name="Users.NotAllowed" xml:space="preserve"><value>غير مسموح:</value></data>
+  <data name="Users.Visible" xml:space="preserve"><value>يرى {0} من أصل {1} مستند مدرج الآن.</value></data>
+  <data name="Users.VisibleUnknown" xml:space="preserve"><value>تعذّر عدّ المستندات.</value></data>
+  <data name="Users.Save" xml:space="preserve"><value>حفظ المستخدم</value></data>
+  <data name="Users.Cancel" xml:space="preserve"><value>إلغاء</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>تم حفظ {0}.</value></data>
+  <data name="Users.Error.Required" xml:space="preserve"><value>هذا الحقل مطلوب.</value></data>
+  <data name="Users.Error.InvalidUserName" xml:space="preserve"><value>استخدم من 2 إلى 64 من الأحرف اللاتينية الصغيرة أو الأرقام أو النقاط أو الشرطات.</value></data>
+  <data name="Users.Error.UserNameTaken" xml:space="preserve"><value>يوجد حساب آخر يستخدم اسم المستخدم هذا.</value></data>
+  <data name="Users.Error.InvalidEmail" xml:space="preserve"><value>أدخل بريدًا إلكترونيًا مثل name@example.org.</value></data>
+  <data name="Users.Error.LastAdministrator" xml:space="preserve"><value>هذا آخر مسؤول نشط: أبقِ الدور والحساب نشطين.</value></data>
+  <data name="Users.Error.NoDepartment" xml:space="preserve"><value>اختر إدارة واحدة على الأقل، أو كل الإدارات.</value></data>
+  <data name="Audit.UserAdded" xml:space="preserve"><value>أضاف المستخدم {0}</value></data>
+  <data name="Audit.UserChanged" xml:space="preserve"><value>عدّل المستخدم {0}</value></data>
+  <data name="Audit.RolesChanged" xml:space="preserve"><value>غيّر صلاحيات الأدوار</value></data>
+  <data name="Audit.OtpFailed" xml:space="preserve"><value>أدخل رمزًا خاطئًا لمرة واحدة</value></data>
+  <data name="Otp.Title" xml:space="preserve"><value>تحقّق من هويتك</value></data>
+  <data name="Otp.Intro" xml:space="preserve"><value>أدخل الرمز لمرة واحدة المرسل إلى بريدك الإلكتروني، أو الرمز الظاهر في تطبيق المصادقة.</value></data>
+  <data name="Otp.Code" xml:space="preserve"><value>الرمز لمرة واحدة</value></data>
+  <data name="Otp.Hint" xml:space="preserve"><value>{0} أرقام</value></data>
+  <data name="Otp.Digit" xml:space="preserve"><value>الرقم {0} من {1}</value></data>
+  <data name="Otp.Submit" xml:space="preserve"><value>تحقّق</value></data>
+  <data name="Otp.Resend" xml:space="preserve"><value>إرسال رمز جديد</value></data>
+  <data name="Otp.ResendIn" xml:space="preserve"><value>إرسال رمز جديد بعد {0} ث</value></data>
+  <data name="Otp.Resent" xml:space="preserve"><value>تم إرسال رمز جديد.</value></data>
+  <data name="Otp.Back" xml:space="preserve"><value>استخدام حساب آخر</value></data>
+  <data name="Otp.Format" xml:space="preserve"><value>أدخل أرقام الرمز الـ {0}.</value></data>
+  <data name="Otp.Wrong" xml:space="preserve"><value>الرمز غير صحيح. المحاولات المتبقية: {0}.</value></data>
+  <data name="Otp.TooMany" xml:space="preserve"><value>عدد كبير من الرموز الخاطئة. سجّل الدخول مجددًا.</value></data>
+  <data name="Users.Title" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="Roles.Title" xml:space="preserve"><value>الأدوار والصلاحيات</value></data>
+  <data name="Activity.Title" xml:space="preserve"><value>سجلات النشاط</value></data>
+  <data name="Activity.Intro" xml:space="preserve"><value>من فعل ماذا ومتى ومن أين: تسجيلات الدخول، والاطلاع على المستندات وتعديلها، والإدارة، وأحداث النظام.</value></data>
+  <data name="Activity.Export" xml:space="preserve"><value>تصدير CSV</value></data>
+  <data name="Activity.IntegrityTitle" xml:space="preserve"><value>سلامة السجل</value></data>
+  <data name="Activity.Integrity" xml:space="preserve"><value>تم التحقق من السلامة: {0} قيد في سلسلة SHA-256 غير منقطعة · آخر تحقق {1}</value></data>
+  <data name="Activity.IntegrityBroken" xml:space="preserve"><value>فشل التحقق من السلامة عند القيد رقم {0}: تم تعديل السجل بعد كتابته.</value></data>
+  <data name="Activity.Protection" xml:space="preserve"><value>إضافة فقط · يُحتفظ به {0} سنوات · يُرسل إلى نظام SIEM بصيغة syslog (CEF)، بشكل محاكى في هذا النموذج</value></data>
+  <data name="Activity.Verify" xml:space="preserve"><value>التحقق مجددًا</value></data>
+  <data name="Activity.SampleNote" xml:space="preserve"><value>القيود السابقة لتشغيل التطبيق بيانات تجريبية؛ وما يتم الآن في التطبيق يُضاف مباشرةً (بعلامة مباشر).</value></data>
+  <data name="Activity.Live" xml:space="preserve"><value>مباشر</value></data>
+  <data name="Activity.Stats" xml:space="preserve"><value>ملخص القيود المعروضة</value></data>
+  <data name="Activity.Stat.Entries" xml:space="preserve"><value>القيود</value></data>
+  <data name="Activity.Stat.SignIns" xml:space="preserve"><value>تسجيلات الدخول</value></data>
+  <data name="Activity.Stat.Failed" xml:space="preserve"><value>محاولات دخول ورموز فاشلة</value></data>
+  <data name="Activity.Stat.Denied" xml:space="preserve"><value>وصول مرفوض</value></data>
+  <data name="Activity.Stat.Downloads" xml:space="preserve"><value>فتح وتنزيل وطباعة وتصدير</value></data>
+  <data name="Activity.Search" xml:space="preserve"><value>بحث</value></data>
+  <data name="Activity.SearchHint" xml:space="preserve"><value>المستخدم أو المستند أو التفاصيل أو عنوان IP</value></data>
+  <data name="Activity.AllUsers" xml:space="preserve"><value>كل المستخدمين</value></data>
+  <data name="Activity.AllCategories" xml:space="preserve"><value>كل الفئات</value></data>
+  <data name="Activity.AllResults" xml:space="preserve"><value>كل النتائج</value></data>
+  <data name="Activity.Clear" xml:space="preserve"><value>مسح عوامل التصفية</value></data>
+  <data name="Activity.Empty" xml:space="preserve"><value>لا يوجد قيد يطابق عوامل التصفية هذه.</value></data>
+  <data name="Activity.Column.Category" xml:space="preserve"><value>الفئة</value></data>
+  <data name="Activity.Column.Ip" xml:space="preserve"><value>عنوان IP</value></data>
+  <data name="Activity.Column.Client" xml:space="preserve"><value>العميل</value></data>
+  <data name="Activity.Column.Result" xml:space="preserve"><value>النتيجة</value></data>
+  <data name="Activity.Column.Details" xml:space="preserve"><value>التفاصيل</value></data>
+  <data name="Activity.ShowDetails" xml:space="preserve"><value>التفاصيل</value></data>
+  <data name="Activity.HideDetails" xml:space="preserve"><value>إخفاء</value></data>
+  <data name="Activity.Detail.Entry" xml:space="preserve"><value>القيد</value></data>
+  <data name="Activity.Detail.Source" xml:space="preserve"><value>المصدر</value></data>
+  <data name="Activity.Source.Sample" xml:space="preserve"><value>سجل تجريبي</value></data>
+  <data name="Activity.Source.Live" xml:space="preserve"><value>تم في هذا التطبيق منذ تشغيله</value></data>
+  <data name="Activity.Siem" xml:space="preserve"><value>حدث SIEM</value></data>
+  <data name="Activity.Hash" xml:space="preserve"><value>البصمة</value></data>
+  <data name="Activity.PreviousHash" xml:space="preserve"><value>البصمة السابقة</value></data>
+  <data name="ActivityCategory.Security" xml:space="preserve"><value>الأمان</value></data>
+  <data name="ActivityCategory.DocumentAccess" xml:space="preserve"><value>الاطلاع على المستندات</value></data>
+  <data name="ActivityCategory.DocumentChange" xml:space="preserve"><value>تعديل المستندات</value></data>
+  <data name="ActivityCategory.Administration" xml:space="preserve"><value>الإدارة</value></data>
+  <data name="ActivityCategory.System" xml:space="preserve"><value>النظام</value></data>
+  <data name="ActivityResult.Success" xml:space="preserve"><value>نجاح</value></data>
+  <data name="ActivityResult.Failed" xml:space="preserve"><value>فشل</value></data>
+  <data name="ActivityResult.Denied" xml:space="preserve"><value>مرفوض</value></data>
+  <data name="Audit.SignedOut" xml:space="preserve"><value>سجّل الخروج</value></data>
+  <data name="Audit.AccountLocked" xml:space="preserve"><value>قُفل الحساب بعد 5 محاولات دخول فاشلة</value></data>
+  <data name="Audit.AccessDenied.Department" xml:space="preserve"><value>رُفض الفتح: المستند ليس ضمن إداراته</value></data>
+  <data name="Audit.AccessDenied.Clearance" xml:space="preserve"><value>رُفض الفتح: المستند أعلى من درجة السرية المسموحة له</value></data>
+  <data name="Audit.Viewed" xml:space="preserve"><value>فتح المستند</value></data>
+  <data name="Audit.Searched" xml:space="preserve"><value>بحث عن «{0}»</value></data>
+  <data name="Audit.Printed" xml:space="preserve"><value>طبع الإصدار {0}</value></data>
+  <data name="Audit.MetadataChanged" xml:space="preserve"><value>عدّل البيانات الوصفية (الإصدار {0})</value></data>
+  <data name="Audit.OcrFailed" xml:space="preserve"><value>فشل التعرّف الضوئي ({0})</value></data>
+  <data name="Audit.OcrRetried" xml:space="preserve"><value>أُعيد إرسال التعرّف الضوئي</value></data>
+  <data name="Audit.ActivityExported" xml:space="preserve"><value>صدّر سجل النشاط ({0} قيد)</value></data>
 </root>

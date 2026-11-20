@@ -14,10 +14,10 @@
         </a>
         <div class="app-header-actions">
             <LanguageSwitch />
-            @* A native disclosure works in this static layout without a circuit; wwwroot/js/account-menu.js
+            @* A native disclosure works in this static layout without a circuit; wwwroot/js/popup-menu.js
                only adds closing on an outside click or Escape.
-               Mockup only: there is no authentication yet, so the user is always the demo account. *@
-            <details class="account-menu">
+               Mockup only: the session is the demo account's, kept in localStorage by js/session.js. *@
+            <details class="account-menu popup-menu">
                 <summary class="account-toggle" title="@Text["AccountMenu", DemoUser]">
                     <span class="avatar" aria-hidden="true">@Initial</span>
                     <span class="visually-hidden">@Text["AccountMenu", DemoUser]</span>
@@ -30,7 +30,7 @@
                             <div class="account-role">@Text["DemoRole"]</div>
                         </div>
                     </div>
-                    <a class="account-item account-signout" href="login">@Text["SignOut"]</a>
+                    <a class="account-item account-signout" href="login" data-sign-out>@Text["SignOut"]</a>
                 </div>
             </details>
         </div>

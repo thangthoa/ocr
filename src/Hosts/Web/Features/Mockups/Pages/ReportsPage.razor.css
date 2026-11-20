@@ -1,0 +1,155 @@
+/* The list of reports beside the chosen one; stacked above it on narrow screens. */
+.report-layout {
+    display: grid;
+    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.report-main {
+    min-width: 0;
+}
+
+.report-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.report-choice {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .875rem 1rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    background-color: #fff;
+    color: var(--ae-black-900);
+    text-align: start;
+}
+
+    .report-choice:hover {
+        border-color: var(--ae-gold-300);
+    }
+
+    .report-choice.active {
+        border-color: var(--app-primary);
+        background-color: var(--ae-gold-50);
+    }
+
+    .report-choice:focus-visible {
+        outline: 2px solid var(--app-focus);
+        outline-offset: 2px;
+    }
+
+.report-choice-title {
+    font-weight: 600;
+}
+
+.report-choice-text {
+    font-size: .8125rem;
+    color: var(--app-ink-muted);
+}
+
+/* Period: quick choices, then the two dates and the button on one line when there is room. */
+.report-params {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+}
+
+.report-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.report-dates {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+}
+
+    .report-dates > div {
+        min-width: 10rem;
+    }
+
+.report-result {
+    padding: 1.5rem;
+    border: 2px solid var(--app-border-subtle);
+    border-radius: var(--app-radius-card);
+    background-color: #fff;
+}
+
+.report-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.report-table th,
+.report-table td {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.report-table thead th {
+    white-space: normal;
+    vertical-align: bottom;
+}
+
+.report-total th,
+.report-total td {
+    font-weight: 700;
+    border-top: 2px solid var(--ae-black-800);
+    border-bottom: 0;
+}
+
+.report-note {
+    margin: 1rem 0 0;
+    font-size: .8125rem;
+    color: var(--app-ink-muted);
+}
+
+.empty-state {
+    padding: 2rem 1rem;
+    border: 2px dashed var(--ae-black-200);
+    border-radius: var(--app-radius-card);
+    color: var(--app-ink-muted);
+    text-align: center;
+}
+
+@media (max-width: 1100px) {
+    .report-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .report-catalog {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    }
+}
+
+@media print {
+    .report-layout {
+        display: block;
+    }
+
+    .report-result {
+        padding: 0;
+        border: 0;
+    }
+}

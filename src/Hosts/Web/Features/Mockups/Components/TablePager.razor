@@ -1,0 +1,103 @@
+@using System.Globalization
+@inject IStringLocalizer<MockupText> Text
+
+@* Under every list table: rows per page (10/20/50/100), which rows are shown, and the pages. Long page
+   ranges keep the first, the last and the pages around the current one. The arrows are bidi-mirrored
+   characters, so they point the right way in Arabic. *@
+@if (Total > 0)
+{
+    <div class="table-pager">
+        <div class="pager-size">
+            <label for="@($"{Id}-size")">@Text["Pager.RowsPerPage"]</label>
+            <select id="@($"{Id}-size")" class="form-select" value="@Paging.Size" @onchange="ResizeAsync">
+                @foreach (var size in TablePaging.Sizes)
+                {
+                    <option value="@size">@size</option>
+                }
+            </select>
+        </div>
+        <p id="@($"{Id}-range")" class="pager-range" role="status">@Text["Pager.Range", First, Last, Total]</p>
+        @if (PageCount > 1)
+        {
+            <nav class="pager-pages" aria-label="@Text["Pager.Label"]">
+                <button type="button" class="pager-step pager-previous" disabled="@(Paging.Page <= 1)" aria-label="@Text["Pager.Previous"]"
+                        @onclick="() => GoToAsync(Paging.Page - 1)"><span aria-hidden="true">‹</span></button>
+                @foreach (var page in Pages())
+                {
+                    if (page is { } number)
+                    {
+                        var current = number == Paging.Page;
+                        <button type="button" class="pager-page @(current ? "is-current" : null)" aria-current="@(current ? "page" : null)"
+                                aria-label="@Text["Pager.Page", number]" @onclick="() => GoToAsync(number)">@number</button>
+                    }
+                    else
+                    {
+                        <span class="pager-gap" aria-hidden="true">…</span>
+                    }
+                }
+                <button type="button" class="pager-step pager-next" disabled="@(Paging.Page >= PageCount)" aria-label="@Text["Pager.Next"]"
+                        @onclick="() => GoToAsync(Paging.Page + 1)"><span aria-hidden="true">›</span></button>
+            </nav>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public TablePaging Paging { get; set; } = default!;
+
+    /// <summary>Rows in the whole list (after filters).</summary>
+    [Parameter, EditorRequired] public int Total { get; set; }
+
+    /// <summary>Prefix of the element ids, unique on the page.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = default!;
+
+    /// <summary>Raised after the page or the size changed, so the page re-renders its table.</summary>
+    [Parameter, EditorRequired] public EventCallback OnChange { get; set; }
+
+    private int PageCount => Paging.PageCount(Total);
+
+    private int First => Math.Min(Total, ((Paging.Page - 1) * Paging.Size) + 1);
+
+    private int Last => Math.Min(Total, Paging.Page * Paging.Size);
+
+    /// <summary>Page numbers, with null for a gap: all of them up to seven pages, otherwise 1 … p-1 p p+1 … n.</summary>
+    private IEnumerable<int?> Pages()
+    {
+        var count = PageCount;
+        if (count <= 7)
+        {
+            for (var page = 1; page <= count; page++)
+                yield return page;
+            yield break;
+        }
+
+        // A gap stands for two pages or more; a single hidden page is shown instead.
+        var start = Math.Clamp(Paging.Page - 1, 2, count - 3);
+        var end = Math.Clamp(Paging.Page + 1, 4, count - 1);
+        if (start == 3)
+            start = 2;
+        if (end == count - 2)
+            end = count - 1;
+        yield return 1;
+        if (start > 2)
+            yield return null;
+        for (var page = start; page <= end; page++)
+            yield return page;
+        if (end < count - 1)
+            yield return null;
+        yield return count;
+    }
+
+    private Task GoToAsync(int page)
+    {
+        Paging.GoTo(page, Total);
+        return OnChange.InvokeAsync();
+    }
+
+    private Task ResizeAsync(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var size))
+            Paging.Resize(size);
+        return OnChange.InvokeAsync();
+    }
+}

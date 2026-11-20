@@ -218,7 +218,11 @@ public sealed class WordEditorTests : BunitContext
     {
         var cut = Render<DocumentDetailPage>(p => p.Add(x => x.Id, Sample));
 
-        cut.WaitForAssertion(() => Assert.Equal($"documents/{Sample}/word", cut.Find("#action-word").GetAttribute("href")));
+        // Edit opens Word, next to Approve in the progress band; there is no separate text editor.
+        cut.WaitForAssertion(() => Assert.Equal($"documents/{Sample}/word", cut.Find(".doc-band-actions #action-edit").GetAttribute("href")));
+        Assert.Equal("Edit", cut.Find("#action-edit").TextContent);
+        Assert.NotNull(cut.Find(".doc-band-actions #action-approve"));
+        Assert.Equal(["DOCX", "PDF", "TXT"], cut.FindAll("#download-format option").Select(o => o.TextContent));
     }
 
     [Fact]
@@ -314,7 +318,7 @@ public sealed class WordEditorTests : BunitContext
         {
             Assert.Equal($"/ocr/jobs/{id}/pages/1/image", cut.Find("#pane-original img.page-image").GetAttribute("src"));
             Assert.Equal($"/documents/{id}/word/preview/1/1", cut.Find("#pane-result img.word-page").GetAttribute("src"));
-            Assert.NotNull(cut.Find("#word-latest"));
+            Assert.Empty(cut.FindAll("#word-latest"));
         });
         // Awaited: the preview's own render may still be finishing when the click is queued.
         await cut.Find("#show-text").ClickAsync(new MouseEventArgs());
@@ -377,6 +381,57 @@ public sealed class WordEditorTests : BunitContext
         return JsonDocument.Parse(JsonSerializer.Serialize(new { payload.key, payload.status, payload.url, payload.users, token = OnlyOfficeJwt.Sign(payload, Secret) })).RootElement;
     }
 
+
+    [Fact]
+    public async Task An_archived_document_downloads_as_a_pdf_printed_by_the_document_server()
+    {
+        Services.GetRequiredService<DocumentStore>().ChangeStatus(Sample, DocumentStatus.Archived, "admin");
+        _server.File = "%PDF-1.7 final"u8.ToArray();
+        var files = Services.GetRequiredService<OppOcr.Web.Features.Mockups.Approved.ApprovedDocumentFiles>();
+
+        var result = await files.FinalAsync(Sample, OppOcr.Web.Features.Mockups.Approved.FinalFileFormat.Pdf, "admin", Ct);
+
+        Assert.True(result.IsSuccess, result.Error?.Code);
+        Assert.Equal("application/pdf", result.Value.ContentType);
+        Assert.Equal("%PDF-1.7 final"u8.ToArray(), result.Value.Content);
+        Assert.EndsWith(".pdf", result.Value.FileName, StringComparison.Ordinal);
+        var conversion = Assert.Single(_server.Conversions);
+        Assert.Equal("pdf", conversion.GetProperty("outputtype").GetString());
+
+        // The text was never edited in Word, so the document server reads the final text through a signed link.
+        var source = new Uri(conversion.GetProperty("url").GetString()!);
+        Assert.Equal("/documents/DOC-2026-000103/text.docx", source.AbsolutePath);
+        var query = HttpUtility.ParseQueryString(source.Query);
+        var links = Services.GetRequiredService<WordLinks>();
+        var expires = long.Parse(query["exp"]!, CultureInfo.InvariantCulture);
+        Assert.True(links.IsValidTextDocxLink(Sample, expires, query["sig"]));
+        Assert.False(links.IsValidTextDocxLink("DOC-2026-000104", expires, query["sig"]));
+        Assert.False(links.IsValidFileLink(Sample, 0, expires, query["sig"]));
+        Assert.Equal("PDF", Assert.Single(Services.GetRequiredService<AuditLog>().Latest(), e => e.Action == AuditAction.Downloaded).Detail);
+    }
+
+    [Fact]
+    public async Task A_pdf_that_the_document_server_cannot_make_is_an_error_and_not_a_download()
+    {
+        Services.GetRequiredService<DocumentStore>().ChangeStatus(Sample, DocumentStatus.Archived, "admin");
+        var files = Services.GetRequiredService<OppOcr.Web.Features.Mockups.Approved.ApprovedDocumentFiles>();
+        _server.File = "<html>not a pdf</html>"u8.ToArray();
+
+        var result = await files.FinalAsync(Sample, OppOcr.Web.Features.Mockups.Approved.FinalFileFormat.Pdf, "admin", Ct);
+
+        Assert.Equal(OppOcr.Web.Features.Mockups.Approved.ApprovedErrors.PdfFailedCode, result.Error?.Code);
+        Assert.DoesNotContain(Services.GetRequiredService<AuditLog>().Latest(), e => e.Action == AuditAction.Downloaded);
+    }
+
+    [Fact]
+    public void With_a_document_server_the_archive_offers_docx_pdf_and_txt()
+    {
+        var cut = Render<ApprovedPage>();
+        cut.WaitForElement("tbody tr");
+
+        Assert.Equal(["DOCX", "PDF", "TXT"], cut.Find("tbody tr .download-panel").QuerySelectorAll("a").Select(a => a.TextContent));
+        Assert.Equal("/documents/DOC-2026-000112/final?format=pdf", cut.Find("tbody tr .download-pdf").GetAttribute("href"));
+    }
     private sealed class FakeDocumentServer : HttpMessageHandler
     {
         public const string Converted = """{"endConvert":true,"fileType":"zip","fileUrl":"http://documentserver/cache/files/output.zip","percent":100}""";

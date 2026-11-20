@@ -47,14 +47,14 @@
 }
 
     .status-key:hover {
-        border-color: var(--ae-gold-600);
+        border-color: var(--app-primary);
         color: var(--app-ink);
     }
 
     .status-key[aria-pressed="true"] {
-        border-color: var(--ae-gold-600);
+        border-color: var(--app-primary);
         background-color: var(--ae-gold-50);
-        box-shadow: inset 0 0 0 1px var(--ae-gold-600);
+        box-shadow: inset 0 0 0 1px var(--app-primary);
     }
 
         .status-key[aria-pressed="true"] .status-name {

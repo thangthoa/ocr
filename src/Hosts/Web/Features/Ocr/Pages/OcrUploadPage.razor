@@ -4,15 +4,18 @@
 @rendermode InteractiveServer
 @using Modules.Ocr.Domain.Jobs
 @using OppOcr.Web.Features.Ocr.Components
+@using OppOcr.Web.Features.Mockups.Components
 
 <PageTitle>@Text["UploadTitle"]</PageTitle>
 
-<div class="page-head mb-4">
-    <div class="min-w-0">
-        <h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
-        <p class="text-muted mb-0">@Text["UploadIntro"]</p>
-    </div>
-    <a class="btn btn-outline-primary" href="documents">@Text["GoToJobs"]</a>
+@* The flow starts here: Scan is the current step; the document page carries on from Recognizing. *@
+<DocumentProgress Uploading="_uploading" />
+
+@* The form in one column, centred under the progress band. *@
+<div class="scan-main">
+<div class="mb-4">
+    <h1 class="h3 mb-1">@Text["UploadTitle"]</h1>
+    <p class="text-muted mb-0">@Text["UploadIntro"]</p>
 </div>
 
 <section class="scan-card">
@@ -20,6 +23,30 @@
 <fieldset class="capture-options mb-3" disabled="@_uploading">
     <legend class="visually-hidden">@Text["Options.Legend"]</legend>
     <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <label for="file-name" class="form-label">@Text["FileName.Label"] <span class="text-danger" aria-hidden="true">*</span></label>
+            <input id="file-name" class="form-control @(ShowNameError ? "is-invalid" : null)" dir="auto" autocomplete="off"
+                   maxlength="@OcrRules.MaxFileNameLength" aria-required="true" aria-invalid="@(ShowNameError ? "true" : null)"
+                   aria-describedby="file-name-help" @bind="_fileName" @bind:event="oninput" />
+            @if (ShowNameError)
+            {
+                <div id="file-name-help" class="invalid-feedback">@Text["ocr.file_name_required"]</div>
+            }
+            else
+            {
+                <div id="file-name-help" class="form-text text-truncate">
+                    @if (SavedName is { } saved)
+                    {
+                        <text>@Text["FileName.SavedAs"] <bdi>@saved</bdi></text>
+                    }
+                    else
+                    {
+                        <text>@Text["FileName.Hint"]</text>
+                    }
+                </div>
+            }
+        </div>
+
         <div class="col-12 col-md-4">
             <label for="doc-type" class="form-label">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></label>
             <select id="doc-type" class="form-select" aria-required="true" @bind="_documentType">
@@ -46,29 +73,6 @@
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
-            <label for="file-name" class="form-label">@Text["FileName.Label"] <span class="text-danger" aria-hidden="true">*</span></label>
-            <input id="file-name" class="form-control @(ShowNameError ? "is-invalid" : null)" dir="auto" autocomplete="off"
-                   maxlength="@OcrRules.MaxFileNameLength" aria-required="true" aria-invalid="@(ShowNameError ? "true" : null)"
-                   aria-describedby="file-name-help" @bind="_fileName" @bind:event="oninput" />
-            @if (ShowNameError)
-            {
-                <div id="file-name-help" class="invalid-feedback">@Text["ocr.file_name_required"]</div>
-            }
-            else
-            {
-                <div id="file-name-help" class="form-text text-truncate">
-                    @if (SavedName is { } saved)
-                    {
-                        <text>@Text["FileName.SavedAs"] <bdi>@saved</bdi></text>
-                    }
-                    else
-                    {
-                        <text>@Text["FileName.Hint"]</text>
-                    }
-                </div>
-            }
-        </div>
     </div>
 </fieldset>
 
@@ -143,3 +147,4 @@
     }
 </div>
 </section>
+</div>

@@ -135,7 +135,8 @@ public sealed class DocumentsPagesTests : BunitContext
             Assert.Equal("لما كان القانون", text.TextContent);
             Assert.Contains("تكرّر النص عند قراءة الصفحة كاملة", cut.Markup, StringComparison.Ordinal);
             Assert.Equal("ltr", cut.Find("code").GetAttribute("dir"));
-            Assert.Equal(4, cut.FindAll("a[download]").Count);
+            // One download: the current version, in the format picked next to the page numbers.
+            Assert.Equal("/documents/job_0000000000000002/file?format=docx", Assert.Single(cut.FindAll("a[download]")).GetAttribute("href"));
             Assert.NotNull(cut.Find("img.page-image[src='/ocr/jobs/job_0000000000000002/pages/1/image']"));
         });
     }
@@ -161,7 +162,7 @@ public sealed class DocumentsPagesTests : BunitContext
     }
 
     [Fact]
-    public void Finished_job_can_be_corrected_as_a_new_version_and_archived()
+    public void Finished_job_details_can_be_corrected_as_a_new_version_and_archived()
     {
         // A warning from the OCR service makes the automatic check send the document to review.
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص خطا", 10, "A v2", ["line detection (Kraken) failed"], Cached: false);
@@ -170,8 +171,9 @@ public sealed class DocumentsPagesTests : BunitContext
         var cut = RenderDocument("job_0000000000000004");
         Assert.Contains("Reviewing", cut.Find(".badge").TextContent, StringComparison.Ordinal);
 
-        cut.Find("#action-edit").Click();
-        cut.Find("#edit-text").Change("نص صحيح");
+        // The text is corrected in Word (see WordEditorTests); the details here, from the Metadata tab.
+        cut.Find("#edit-metadata").Click();
+        Assert.Empty(cut.FindAll(".doc-band-actions button, #edit-text"));
         cut.Find("#edit-reference").Change("MEMO/2026/1");
         cut.Find("#save-edit").Click();
         cut.Find("#action-approve").Click();
@@ -180,9 +182,8 @@ public sealed class DocumentsPagesTests : BunitContext
         Assert.Contains("Status changed to Archived.", cut.Markup, StringComparison.Ordinal);
         Assert.Equal(DocumentStatus.Archived, document.Status);
         Assert.Equal(["1.0", "1.1"], document.Versions.Select(v => v.Number));
-        Assert.Equal(["نص صحيح"], document.PageTexts);
         Assert.Equal("MEMO/2026/1", document.Metadata.Reference);
-        Assert.Equal(["نص خطا"], document.Versions[0].PageTexts);
+        Assert.Equal(["نص خطا"], document.PageTexts);
     }
 
     [Fact]

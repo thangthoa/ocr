@@ -1,0 +1,15 @@
+/* Roles as columns, permissions as rows: the role headers carry the AD group and how many accounts have it. */
+.roles-table thead th {
+    vertical-align: bottom;
+    min-width: 8.5rem;
+}
+
+.roles-table tbody th {
+    min-width: 14rem;
+}
+
+.roles-table .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+}

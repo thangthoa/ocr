@@ -3,8 +3,10 @@
 @inject IStringLocalizer<OcrText> OcrText
 
 @* The flow Scan → Recognizing → Reviewing → Archived, drawn like the UAE Design System timeline:
-   completed, current and pending steps. The timeline has no error state, so a failed or cancelled
-   document stays on its current step and says why in the step text (the page also shows a callout). *@
+   completed, current and pending steps, centred in a band at the top of the page that stays in view
+   while scrolling. The timeline has no error state, so a failed or cancelled document stays on its
+   current step and says why in the step text (the page also shows a callout). *@
+<div class="doc-band">
 <ol class="doc-steps" aria-label="@Text["Steps.Label"]">
     @foreach (var step in Steps())
     {
@@ -35,9 +37,22 @@
         </li>
     }
 </ol>
+@if (Actions is not null)
+{
+    @* The document's actions sit on the same row, so they stay in view with the progress. *@
+    <div class="doc-band-actions">@Actions</div>
+}
+</div>
 
 @code {
-    [Parameter, EditorRequired] public DocumentRecord Document { get; set; } = default!;
+    /// <summary>The document; none yet on the Scan page, where the flow starts.</summary>
+    [Parameter] public DocumentRecord? Document { get; set; }
+
+    /// <summary>The Scan page is sending the file: the first step shows it is under way.</summary>
+    [Parameter] public bool Uploading { get; set; }
+
+    /// <summary>Buttons shown at the end of the band (the document page: approve, edit, delete).</summary>
+    [Parameter] public RenderFragment? Actions { get; set; }
 
     private enum StepState
     {
@@ -57,7 +72,17 @@
 
     private IEnumerable<Step> Steps()
     {
-        var document = Document;
+        if (Document is not { } document)
+        {
+            yield return Uploading
+                ? new Step(1, Text["Steps.Scan"], StepState.Current, OcrText["Uploading"], Live: true)
+                : new Step(1, Text["Steps.Scan"], StepState.Current, Text["Steps.ChooseFile"]);
+            yield return new Step(2, Text["Steps.Recognizing"], StepState.Todo, null);
+            yield return new Step(3, Text["Steps.Reviewing"], StepState.Todo, null);
+            yield return new Step(4, Text["Steps.Archived"], StepState.Todo, null);
+            yield break;
+        }
+
         var job = document.Job;
         var status = document.Status;
 

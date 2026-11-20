@@ -1,0 +1,80 @@
+/* KPI card: the status (colours in app.css) shown by a soft badge, the border and the meter colour. */
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 0;
+    padding: 1.25rem;
+    border: 2px solid var(--kpi-border);
+    border-radius: var(--app-radius-card);
+    background-color: #fff;
+}
+
+.kpi-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.kpi-card-label {
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+.kpi-status {
+    flex: none;
+}
+
+.kpi-card-value {
+    font-family: var(--app-font-heading);
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-card-meter {
+    position: relative;
+    display: block;
+    height: .5rem;
+    margin-block: .25rem;
+    border-radius: 999px;
+    background-color: var(--ae-black-100);
+}
+
+.kpi-card-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--kpi-fill);
+}
+
+/* The target: a dark tick across the meter. */
+.kpi-card-target {
+    position: absolute;
+    top: -.25rem;
+    bottom: -.25rem;
+    width: 2px;
+    margin-inline-start: -1px;
+    background-color: var(--ae-black-800);
+}
+
+.kpi-card-goal,
+.kpi-card-note {
+    font-size: .8125rem;
+    color: var(--app-ink-muted);
+}
+
+.kpi-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem 1rem;
+    margin-top: auto;
+    padding-top: .25rem;
+}
+
+    .kpi-card-actions:empty {
+        display: none;
+    }

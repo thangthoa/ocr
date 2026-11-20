@@ -27,14 +27,15 @@ public sealed class DocumentFlowUiTests : BunitContext
     private DocumentStore Store => Services.GetRequiredService<DocumentStore>();
 
     [Fact]
-    public void The_menu_follows_the_document_flow_and_ends_with_settings()
+    public void The_menu_follows_the_document_flow_then_reports_and_ends_with_settings()
     {
         var cut = Render<NavMenu>();
 
         var links = cut.FindAll("nav a.nav-link").Select(a => (a.GetAttribute("href"), a.TextContent.Trim())).ToList();
         Assert.Equal(
             [("", "Dashboard"), ("scan", "Scan"), ("review", "Review Queue"), ("documents", "All Documents"),
-                ("archive", "Document Archive"), ("admin", "Settings")],
+                ("archive", "Document Archive"), ("reports", "Reports"), ("users", "Users"), ("users/roles", "Roles & access"),
+                ("users/activity", "Activity logs"), ("admin", "Settings")],
             links);
     }
 
@@ -43,6 +44,28 @@ public sealed class DocumentFlowUiTests : BunitContext
     {
         Assert.Equal(["/archive", "/approved"], Routes<ApprovedPage>());
         Assert.Equal(["/scan", "/capture", "/ocr"], Routes<OcrUploadPage>());
+    }
+
+    [Fact]
+    public void Before_an_upload_the_flow_is_on_its_first_step()
+    {
+        var cut = Render<DocumentProgress>();
+
+        Assert.Equal(["is-current", "is-todo", "is-todo", "is-todo"], States(cut));
+        var current = cut.Find("li[aria-current=step]");
+        Assert.Contains("Scan", current.TextContent, StringComparison.Ordinal);
+        Assert.Contains("Choose the file and upload it", current.TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("is-live", current.ClassName, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void While_the_file_is_sent_the_scan_step_shows_it_is_under_way()
+    {
+        var cut = Render<DocumentProgress>(p => p.Add(x => x.Uploading, true));
+
+        var current = cut.Find("li[aria-current=step]");
+        Assert.Contains("Sending to the OCR service", current.TextContent, StringComparison.Ordinal);
+        Assert.Contains("is-live", current.ClassName, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -119,6 +142,38 @@ public sealed class DocumentFlowUiTests : BunitContext
         cut.Find("#action-approve").Click();
 
         Assert.Equal(["is-done", "is-done", "is-done", "is-done"], cut.FindAll(".doc-band .doc-step").Select(StateOf));
+    }
+
+    [Fact]
+    public void The_scan_page_shows_the_flow_at_the_top()
+    {
+        var cut = Render<OcrUploadPage>();
+
+        Assert.Equal(["is-current", "is-todo", "is-todo", "is-todo"], cut.FindAll(".doc-band .doc-step").Select(StateOf));
+    }
+
+    [Fact]
+    public void The_scan_form_asks_for_the_file_name_first_and_has_no_link_away()
+    {
+        var cut = Render<OcrUploadPage>();
+
+        var firstField = cut.Find(".capture-options input, .capture-options select");
+        Assert.Equal("file-name", firstField.Id);
+        Assert.Empty(cut.FindAll(".scan-main a[href='documents']"));
+    }
+
+    [Fact]
+    public void All_documents_shows_version_and_last_update_in_their_own_columns_and_no_upload_button()
+    {
+        var cut = Render<DocumentsPage>();
+        cut.WaitForElement("tbody tr");
+
+        var headers = cut.FindAll("thead th").Select(th => th.TextContent.Trim()).ToList();
+        Assert.Equal("Last updated", headers[headers.IndexOf("Version") + 1]);
+        Assert.Empty(cut.FindAll("a[href='scan']"));
+        var archived = cut.FindAll("tbody tr").First(row => row.TextContent.Contains("ADM-2022-0310.pdf", StringComparison.Ordinal));
+        Assert.Equal("1.1", archived.QuerySelector(".doc-version")!.TextContent.Trim());
+        Assert.Matches(@"\d{4}", archived.QuerySelector(".doc-updated")!.TextContent);
     }
 
     [Fact]

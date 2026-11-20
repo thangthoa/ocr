@@ -2,33 +2,84 @@
 @layout OppOcr.Web.Components.Layout.AuthLayout
 @rendermode InteractiveServer
 
-<PageTitle>@Text["Login.Title"]</PageTitle>
+<PageTitle>@(_step == Step.Code ? Text["Otp.Title"] : Text["Login.Title"])</PageTitle>
 
-<section class="login-panel" aria-labelledby="login-title">
-    <h1 id="login-title" class="login-title">@Text["Login.Title"]</h1>
-    <p class="text-muted mb-4">@Text["Login.Intro"]</p>
+@if (_step == Step.Password)
+{
+    <section class="login-panel" aria-labelledby="login-title">
+        <h1 id="login-title" class="login-title">@Text["Login.Title"]</h1>
+        <p class="text-muted mb-4">@Text["Login.Intro"]</p>
 
-    <form @onsubmit="SignIn" @onsubmit:preventDefault novalidate>
-        <div class="mb-3">
-            <label for="login-user" class="form-label">@Text["Login.UserName"]</label>
-            <input id="login-user" class="form-control" autocomplete="username" spellcheck="false" dir="ltr"
-                   @bind="_userName" aria-describedby="@(_error is null ? null : "login-error")" />
-        </div>
-        <div class="mb-3">
-            <label for="login-password" class="form-label">@Text["Login.Password"]</label>
-            <input id="login-password" type="password" class="form-control" autocomplete="current-password" dir="ltr"
-                   @bind="_password" aria-describedby="@(_error is null ? null : "login-error")" />
-        </div>
-        <div class="form-check mb-4">
-            <input id="login-remember" type="checkbox" class="form-check-input" @bind="_rememberMe" />
-            <label for="login-remember" class="form-check-label">@Text["Login.RememberMe"]</label>
-        </div>
+        <form id="login-form" @onsubmit="SignIn" @onsubmit:preventDefault novalidate>
+            <div class="mb-3">
+                <label for="login-user" class="form-label">@Text["Login.UserName"]</label>
+                <input id="login-user" class="form-control" autocomplete="username" spellcheck="false" dir="ltr"
+                       @bind="_userName" aria-describedby="@(_error is null ? null : "login-error")" />
+            </div>
+            <div class="mb-3">
+                <label for="login-password" class="form-label">@Text["Login.Password"]</label>
+                <input id="login-password" type="password" class="form-control" autocomplete="current-password" dir="ltr"
+                       @bind="_password" aria-describedby="@(_error is null ? null : "login-error")" />
+            </div>
+            <div class="form-check mb-4">
+                <input id="login-remember" type="checkbox" class="form-check-input" @bind="_rememberMe" />
+                <label for="login-remember" class="form-check-label">@Text["Login.RememberMe"]</label>
+            </div>
 
-        @if (_error is not null)
-        {
-            <div id="login-error" class="alert alert-danger py-2" role="alert">@_error</div>
-        }
+            @if (_error is not null)
+            {
+                <div id="login-error" class="alert alert-danger py-2" role="alert">@_error</div>
+            }
 
-        <button type="submit" class="btn btn-primary w-100 login-submit">@Text["Login.Submit"]</button>
-    </form>
-</section>
+            <button type="submit" class="btn btn-primary w-100 login-submit">@Text["Login.Submit"]</button>
+        </form>
+    </section>
+}
+else
+{
+    @* Second step: a one-time code. The mockup accepts a fixed code; the real one comes by e-mail or from an
+       authenticator app. *@
+    <section class="login-panel" aria-labelledby="otp-title">
+        <h1 id="otp-title" class="login-title">@Text["Otp.Title"]</h1>
+        <p class="text-muted mb-4">@Text["Otp.Intro"]</p>
+
+        <form id="otp-form" @onsubmit="VerifyAsync" @onsubmit:preventDefault novalidate>
+            <div class="mb-3">
+                <span id="otp-label" class="form-label d-block">@Text["Otp.Code"]</span>
+                @* One box per digit, always left to right. js/otp-input.js moves between the boxes, spreads a pasted
+                   code and copies the digits into the hidden field below, which is what the page reads. The key
+                   changes after a wrong code or a new one, so the boxes come back empty. *@
+                <div @key="_codeVersion" class="otp-boxes" role="group" dir="ltr" data-target="login-otp"
+                     aria-labelledby="otp-label" aria-describedby="@(_error is null ? "otp-hint" : "otp-hint login-error")">
+                    @for (var i = 0; i < CodeLength; i++)
+                    {
+                        var index = i;
+                        <input id="@($"otp-digit-{index + 1}")" class="form-control otp-digit @(_error is null ? null : "is-invalid")"
+                               inputmode="numeric" autocomplete="@(index == 0 ? "one-time-code" : "off")" spellcheck="false"
+                               aria-label="@Text["Otp.Digit", index + 1, CodeLength]" @ref="_digitBoxes[index]" />
+                    }
+                </div>
+                <input id="login-otp" type="hidden" @bind="_code" />
+                <div id="otp-hint" class="form-text">@Text["Otp.Hint", CodeLength]</div>
+            </div>
+
+            @if (_error is not null)
+            {
+                <div id="login-error" class="alert alert-danger py-2" role="alert">@_error</div>
+            }
+            else if (_resent)
+            {
+                <div id="otp-resent" class="alert alert-success py-2" role="status">@Text["Otp.Resent"]</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100 login-submit">@Text["Otp.Submit"]</button>
+            <div class="d-flex flex-wrap justify-content-between gap-2 mt-3">
+                @{ var wait = ResendSecondsLeft; }
+                <button type="button" id="otp-resend" class="btn btn-link p-0 otp-resend" disabled="@(wait > 0)" @onclick="Resend">
+                    @(wait > 0 ? Text["Otp.ResendIn", wait] : Text["Otp.Resend"])
+                </button>
+                <button type="button" id="otp-back" class="btn btn-link p-0" @onclick="Back">@Text["Otp.Back"]</button>
+            </div>
+        </form>
+    </section>
+}

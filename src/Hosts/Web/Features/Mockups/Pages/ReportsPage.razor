@@ -1,0 +1,139 @@
+@page "/reports"
+@rendermode InteractiveServer
+
+<PageTitle>@Text["Reports.Title"]</PageTitle>
+
+<div class="mb-4 no-print">
+    <h1 class="h3 mb-1">@Text["Reports.Title"]</h1>
+    <p class="text-muted mb-0">@Text["Reports.Intro"]</p>
+</div>
+
+<div class="report-layout">
+    <nav class="report-catalog no-print" aria-label="@Text["Reports.Catalog"]">
+        @foreach (var kind in Enum.GetValues<ReportKind>())
+        {
+            var selected = kind == _kind;
+            <button type="button" id="@($"report-{kind}")" class="report-choice @(selected ? "active" : null)"
+                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => Select(kind)">
+                <span class="report-choice-title">@Text[$"Report.{kind}.Title"]</span>
+                <span class="report-choice-text">@Text[$"Report.{kind}.Description"]</span>
+            </button>
+        }
+    </nav>
+
+    <div class="report-main">
+        <form id="report-form" class="report-params no-print" novalidate @onsubmit="View">
+            <div class="report-presets" role="group" aria-label="@Text["Reports.Presets"]">
+                @foreach (var preset in Enum.GetValues<RangePreset>())
+                {
+                    <button type="button" id="@($"preset-{preset}")" class="btn btn-sm btn-outline-secondary"
+                            @onclick="() => ApplyPreset(preset)">@Text[$"Reports.Preset.{preset}"]</button>
+                }
+            </div>
+            <div class="report-dates">
+                <div>
+                    <label for="report-from" class="form-label">@Text["Reports.From"]</label>
+                    <input id="report-from" type="date" class="form-control @(_error is null ? null : "is-invalid")"
+                           @bind="_from" aria-describedby="@(_error is null ? null : "report-range-error")" />
+                </div>
+                <div>
+                    <label for="report-to" class="form-label">@Text["Reports.To"]</label>
+                    <input id="report-to" type="date" class="form-control @(_error is null ? null : "is-invalid")"
+                           @bind="_to" aria-describedby="@(_error is null ? null : "report-range-error")" />
+                </div>
+                <button type="submit" id="report-view" class="btn btn-primary">@Text["Reports.View"]</button>
+            </div>
+            @if (_error is { } error)
+            {
+                <div id="report-range-error" class="small text-danger" role="alert">@Text[$"Reports.Error.{error}", ReportRange.MaxDays]</div>
+            }
+        </form>
+
+        @if (_table is { } table)
+        {
+            var title = Text[$"Report.{table.Kind}.Title"];
+            <section class="report-result" aria-labelledby="report-title">
+                <div class="report-head">
+                    <div class="me-auto">
+                        <h2 id="report-title" class="h4 mb-1">@title</h2>
+                        <p class="text-muted small mb-0">
+                            <span id="report-period">@Period(table)</span>
+                            · @Text["Reports.Generated", FormatDateTime(_generatedUtc)]
+                            @if (table.IsSample)
+                            {
+                                <span class="badge tag-gray ms-1">@Text["SampleData"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge tag-green ms-1">@Text["Reports.LiveData"]</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="report-actions no-print">
+                        <a id="report-export" class="btn btn-sm btn-outline-primary" download
+                           href="@ReportEndpoints.ExportUrl(table.Kind, table.From, table.To)">@Text["Reports.Export"]</a>
+                        @* Printing only needs the browser; the print styles in app.css drop the menu and the controls. *@
+                        <button type="button" id="report-print" class="btn btn-sm btn-outline-secondary" onclick="window.print()">@Text["Reports.Print"]</button>
+                    </div>
+                </div>
+
+                @if (table.Rows.Count == 0)
+                {
+                    <div class="empty-state" role="status">@Text["Reports.Empty"]</div>
+                }
+                else
+                {
+                    <div class="table-responsive position-relative">
+                        <table id="report-table" class="table table-sm align-middle report-table mb-0">
+                            <caption class="visually-hidden">@title, @Period(table)</caption>
+                            <thead>
+                                <tr>
+                                    @foreach (var column in table.Columns)
+                                    {
+                                        <th scope="col" class="@(column.Numeric ? "text-end" : null)">@column.Header</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in table.Rows)
+                                {
+                                    <tr>
+                                        @for (var i = 0; i < row.Count; i++)
+                                        {
+                                            @Cell(table, row, i)
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                            @if (table.Total is { } total)
+                            {
+                                <tfoot>
+                                    <tr id="report-total" class="report-total">
+                                        @for (var i = 0; i < total.Count; i++)
+                                        {
+                                            @Cell(table, total, i)
+                                        }
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+                    </div>
+                }
+                <p class="report-note">@Text[$"Report.{table.Kind}.Note"]</p>
+            </section>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>The first cell names the row; numbers line up on the end edge.</summary>
+    private static RenderFragment Cell(ReportTable table, IReadOnlyList<ReportCell> row, int index)
+    {
+        var value = row[index].Display();
+        if (index == 0)
+            return @<th scope="row" class="fw-normal" dir="auto">@value</th>;
+        if (table.Columns[index].Numeric)
+            return @<td class="text-end">@value</td>;
+        return @<td dir="auto">@value</td>;
+    }
+}

@@ -11,7 +11,8 @@ App đang dùng phong cách lấy cảm hứng từ IBM Carbon. Khách hàng mu�
 - Menu dọc: Dashboard, Scan, Review Queue, All Documents, Document Archive, rồi Settings (tách riêng).
 - Header một hàng: logo, nút đổi ngôn ngữ (thay chỗ ô search), menu tài khoản.
 - Upload xong thì mở ngay trang chi tiết của tài liệu.
-- Trên trang chi tiết có thanh tiến trình theo bước: **Scan › Recognizing › Reviewing › Archived**.
+- Trên trang chi tiết có thanh tiến trình theo bước: **Scan › Recognizing › Reviewing › Archived**, căn giữa.
+  Trang Scan cũng có thanh này, đang ở bước Scan.
 - Trạng thái tài liệu hiện thành một thanh ngang trên Dashboard và trang All Documents.
 
 UAE Design System được phát hành dưới dạng gói `@aegov/designsystem` 4.0.4. Gói này gồm các web component
@@ -23,6 +24,10 @@ UAE Design System được phát hành dưới dạng gói `@aegov/designsystem`
    `*.razor.css`).
    - Màu: thang 50–950 lấy từ `dist/styles/tailwind.css` của gói, chuyển từ OKLCH sang hex để các biến
      `-rgb` của Bootstrap vẫn dùng được. AE Gold 600 ra đúng `#90702a` như tài liệu công bố.
+   - Theo yêu cầu của khách, màu chính nhạt hơn Gold 600, và vẫn đạt WCAG AA:
+     - Nút chính và các nền có chữ: vàng nhạt (Gold 300) với chữ nâu đậm (Gold 950), tương phản 7.3:1.
+     - Đồ hoạ và viền: `#9b7a33`, nhạt hơn Gold 600 nửa bậc, đạt 4.0:1 trên nền trắng (đồ hoạ cần 3:1).
+     - Không đặt chữ trắng trên màu vàng.
    - Font, bo góc, kích thước nút và ô nhập theo tài liệu và CSS component của gói.
    - Không thêm Tailwind, không thêm gói `@aegov`, không dùng web component của họ.
 2. **Font tự host** (app chạy on-prem có thể không có internet): Roboto và Inter cho chữ Latin, Noto Kufi

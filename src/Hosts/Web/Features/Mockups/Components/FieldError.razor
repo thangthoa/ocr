@@ -1,0 +1,12 @@
+@* The validation message of one form field, if it has one; the field points at it with aria-describedby. *@
+@if (Errors.TryGetValue(Id, out var message))
+{
+    <div id="@($"{Id}-error")" class="invalid-feedback">@message</div>
+}
+
+@code {
+    /// <summary>The id of the field; the message gets the same id with <c>-error</c> added.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = default!;
+
+    [Parameter, EditorRequired] public IReadOnlyDictionary<string, string> Errors { get; set; } = default!;
+}

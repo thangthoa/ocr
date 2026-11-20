@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Modules.Ocr.Application;
 using Modules.Ocr.Application.Ports;
 using OppOcr.Web.Features.Mockups;
+using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 
@@ -36,13 +37,21 @@ internal static class TestServices
         return (ocr, notifications);
     }
 
-    /// <summary>The mockup's services with a temporary content root (for Word files) and the given settings.</summary>
+    /// <summary>
+    /// The mockup's services with a temporary content root (for Word files) and the given settings. The
+    /// sample documents are the fixtures of most tests, so they are on unless the settings turn them off.
+    /// </summary>
     public static IServiceCollection AddDocumentsMockup(this IServiceCollection services, IDictionary<string, string?>? settings = null)
     {
         services.AddSingleton<IHostEnvironment>(new TestHostEnvironment(
             Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ocr-component-tests", Guid.NewGuid().ToString("N"))).FullName));
-        return services.AddMockups(new ConfigurationBuilder().AddInMemoryCollection(settings ?? new Dictionary<string, string?>()).Build());
+        var values = new Dictionary<string, string?> { [SamplesEnabled] = "true" };
+        foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
+            values[key] = value;
+        return services.AddMockups(new ConfigurationBuilder().AddInMemoryCollection(values).Build());
     }
+
+    public const string SamplesEnabled = DocumentSampleOptions.SectionName + ":Enabled";
 
     public static void SetCulture(string name) =>
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = LocalizationSetup.CreateCulture(name);

@@ -25,7 +25,7 @@
 }
 
 .ocr-toast-running {
-    --ocr-toast-color: var(--ae-gold-600);
+    --ocr-toast-color: var(--app-primary);
 }
 
 .ocr-toast-done {

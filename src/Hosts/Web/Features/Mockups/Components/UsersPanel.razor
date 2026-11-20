@@ -1,0 +1,218 @@
+@* Users › Users: the accounts, a page at a time, and the form to add or change one. *@
+@if (_form is null)
+{
+    <p class="small text-muted"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Users.Note"]</p>
+    <div class="users-toolbar">
+        <div class="users-filters">
+            <div class="users-search">
+                <label for="user-search" class="form-label">@Text["Users.Search"]</label>
+                <input id="user-search" type="search" class="form-control" placeholder="@Text["Users.SearchHint"]"
+                       @bind="_search" @bind:event="oninput" @bind:after="_paging.Reset" />
+            </div>
+            <div>
+                <label for="user-role-filter" class="form-label">@Text["Users.Column.Role"]</label>
+                <select id="user-role-filter" class="form-select" @bind="_roleFilter" @bind:after="_paging.Reset">
+                    <option value="">@Text["Users.AllRoles"]</option>
+                    @foreach (var role in Enum.GetValues<UserRole>())
+                    {
+                        <option value="@role">@Text.RoleName(role)</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="user-status-filter" class="form-label">@Text["Users.Column.Status"]</label>
+                <select id="user-status-filter" class="form-select" @bind="_statusFilter" @bind:after="_paging.Reset">
+                    <option value="">@Text["Users.AllStatuses"]</option>
+                    @foreach (var status in Enum.GetValues<UserStatus>())
+                    {
+                        <option value="@status">@Text[$"UserStatus.{status}"]</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button type="button" id="user-add" class="btn btn-primary" @onclick="Add">@Text["Users.Add"]</button>
+    </div>
+
+    var all = Accounts.Users;
+    var rows = Matching(all);
+    <p id="users-summary" class="small text-muted mb-2">
+        @Text["Users.Summary", FormatNumber(all.Count), FormatNumber(all.Count(u => u.IsActive)), FormatNumber(all.Count(u => !u.IsActive))]
+    </p>
+    @if (_message is not null)
+    {
+        <div id="users-message" class="small mb-2" role="status">@_message</div>
+    }
+
+    @if (rows.Count == 0)
+    {
+        <div class="users-empty" role="status">@Text["Users.Empty"]</div>
+    }
+    else
+    {
+        <div class="table-responsive position-relative">
+            <table class="table align-middle users-table">
+                <caption class="visually-hidden">@Text["Users.Title"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Text["Users.Column.Name"]</th>
+                        <th scope="col">@Text["Users.Column.Role"]</th>
+                        <th scope="col">@Text["Users.Column.Departments"]</th>
+                        <th scope="col">@Text["Users.Column.Clearance"]</th>
+                        <th scope="col">@Text["Users.Column.Mfa"]</th>
+                        <th scope="col">@Text["Users.Column.Source"]</th>
+                        <th scope="col">@Text["Users.Column.Status"]</th>
+                        <th scope="col">@Text["Users.Column.LastSignIn"]</th>
+                        <th scope="col"><span class="visually-hidden">@Text["Users.Column.Actions"]</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in _paging.Slice(rows))
+                    {
+                        <tr id="@($"user-{user.UserName}")">
+                            <th scope="row" class="fw-normal">
+                                <span class="d-block fw-semibold" dir="auto">@user.DisplayName</span>
+                                <span class="d-block small text-muted" dir="ltr">@user.UserName</span>
+                            </th>
+                            <td>@Text.RoleName(user.Role)</td>
+                            <td>@Departments(user)</td>
+                            <td>@Text.Confidentiality(user.Clearance)</td>
+                            <td>@(user.MfaRequired ? Text["Users.Yes"] : Missing)</td>
+                            <td>@Text[$"UserSource.{user.Source}"]</td>
+                            <td><span class="badge @(user.IsActive ? "tag-green" : "tag-gray")">@Text[$"UserStatus.{user.Status}"]</span></td>
+                            <td class="small text-nowrap">@(user.LastSignInUtc is { } at ? FormatDateTime(at) : Text["Users.Never"])</td>
+                            <td class="text-end">
+                                <button type="button" id="@($"user-edit-{user.UserName}")" class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => Edit(user)" aria-label="@Text["Users.EditFor", user.DisplayName]">@Text["Users.Edit"]</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <TablePager Paging="_paging" Total="rows.Count" Id="users-pager" OnChange="StateHasChanged" />
+    }
+}
+else
+{
+    var form = _form;
+    var fromDirectory = form.Source == UserSource.ActiveDirectory;
+    <form id="user-form" class="user-form" novalidate @onsubmit="Save">
+        <h2 class="h5 mb-3">@(form.IsNew ? Text["Users.AddTitle"] : Text["Users.EditTitle", form.DisplayName])</h2>
+        <div class="user-form-grid">
+            <div>
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["Users.Account"]</legend>
+                    @if (fromDirectory)
+                    {
+                        <p class="small text-muted">@Text["Users.FromDirectory"]</p>
+                    }
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="user-name" class="form-label">@Text["Users.Column.Name"]</label>
+                            <input id="user-name" class="form-control @Invalid("user-name")" @bind="form.DisplayName" disabled="@fromDirectory"
+                                   aria-describedby="@ErrorId("user-name")" />
+                            <FieldError Id="user-name" Errors="_errors" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="user-username" class="form-label">@Text["Users.UserName"]</label>
+                            <input id="user-username" class="form-control @Invalid("user-username")" dir="ltr" autocomplete="off"
+                                   @bind="form.UserName" disabled="@(!form.IsNew)" aria-describedby="@ErrorId("user-username")" />
+                            <FieldError Id="user-username" Errors="_errors" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="user-email" class="form-label">@Text["Users.Email"]</label>
+                            <input id="user-email" type="email" class="form-control @Invalid("user-email")" dir="ltr"
+                                   @bind="form.Email" disabled="@fromDirectory" aria-describedby="@ErrorId("user-email")" />
+                            <FieldError Id="user-email" Errors="_errors" />
+                        </div>
+                        <div class="col-md-6 d-flex flex-column justify-content-end gap-1">
+                            <div class="form-check">
+                                <input id="user-active" type="checkbox" class="form-check-input" @bind="form.Active" />
+                                <label for="user-active" class="form-check-label">@Text["Users.Active"]</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="user-mfa" type="checkbox" class="form-check-input" @bind="form.MfaRequired" />
+                                <label for="user-mfa" class="form-check-label">@Text["Users.Mfa"]</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mb-4">
+                    <legend class="h6">@Text["Users.Access"]</legend>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="user-role" class="form-label">@Text["Users.Column.Role"]</label>
+                            <select id="user-role" class="form-select @Invalid("user-role")" @bind="form.Role" aria-describedby="@ErrorId("user-role")">
+                                @foreach (var role in Enum.GetValues<UserRole>())
+                                {
+                                    <option value="@role">@Text.RoleName(role)</option>
+                                }
+                            </select>
+                            <FieldError Id="user-role" Errors="_errors" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="user-clearance" class="form-label">@Text["Users.Column.Clearance"]</label>
+                            <select id="user-clearance" class="form-select" @bind="form.Clearance" aria-describedby="user-clearance-hint">
+                                @foreach (var level in Enum.GetValues<DocumentConfidentiality>())
+                                {
+                                    <option value="@level">@Text.Confidentiality(level)</option>
+                                }
+                            </select>
+                            <div id="user-clearance-hint" class="form-text">@Text["Users.ClearanceHint"]</div>
+                        </div>
+                    </div>
+                    <fieldset class="mt-3" aria-describedby="@ErrorId("user-departments")">
+                        <legend class="form-label fs-6 mb-1">@Text["Users.Column.Departments"]</legend>
+                        <div class="form-check">
+                            <input id="user-dept-all" type="checkbox" class="form-check-input" @bind="form.AllDepartments" />
+                            <label for="user-dept-all" class="form-check-label">@Text["Users.AllDepartments"]</label>
+                        </div>
+                        @foreach (var department in Enum.GetValues<DocumentDepartment>())
+                        {
+                            var id = $"user-dept-{department}";
+                            <div class="form-check form-check-inline">
+                                <input id="@id" type="checkbox" class="form-check-input @Invalid("user-departments")" disabled="@form.AllDepartments"
+                                       checked="@form.Departments.Contains(department)" @onchange="e => SetDepartment(department, e.Value is true)" />
+                                <label for="@id" class="form-check-label">@Text.Department(department)</label>
+                            </div>
+                        }
+                        @if (_errors.TryGetValue("user-departments", out var departmentError))
+                        {
+                            <div id="user-departments-error" class="small text-danger">@departmentError</div>
+                        }
+                    </fieldset>
+                </fieldset>
+            </div>
+
+            @* What the choices above add up to, so an administrator sees the effect before saving. *@
+            <aside class="user-access" aria-labelledby="user-access-title">
+                <h3 id="user-access-title" class="h6">@Text["Users.Effective"]</h3>
+                @if (!form.Active)
+                {
+                    <p id="user-access-disabled" class="small mb-2">@Text["Users.EffectiveDisabled"]</p>
+                }
+                <ul id="user-permissions" class="user-permissions">
+                    @foreach (var permission in Enum.GetValues<AccessRight>())
+                    {
+                        var granted = form.Active && Accounts.PermissionsOf(form.Role).Contains(permission);
+                        <li class="@(granted ? "granted" : "denied")">
+                            <span class="visually-hidden">@(granted ? Text["Users.Allowed"] : Text["Users.NotAllowed"])</span>
+                            @Text.PermissionName(permission)
+                        </li>
+                    }
+                </ul>
+                <p id="user-visible" class="small mb-0">@VisibleDocuments</p>
+            </aside>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="submit" id="user-save" class="btn btn-primary">@Text["Users.Save"]</button>
+            <button type="button" id="user-cancel" class="btn btn-outline-secondary" @onclick="Cancel">@Text["Users.Cancel"]</button>
+            @if (_errors.Count > 0)
+            {
+                <span class="small text-danger" role="alert">@Text["Edit.FixErrors"]</span>
+            }
+        </div>
+    </form>
+}

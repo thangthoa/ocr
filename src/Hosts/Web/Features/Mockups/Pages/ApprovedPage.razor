@@ -4,15 +4,7 @@
 
 <PageTitle>@Text["Approved.Title"]</PageTitle>
 
-<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-    <h1 class="h3 mb-0 me-auto">@Text["Approved.Title"]</h1>
-    @if (_list is { JobsError: null } && _results.Count > 0)
-    {
-        <a id="export-csv" class="btn btn-primary" href="@ApprovedDocumentEndpoints.ExportUrl(Query)" download>
-            @Text["Approved.Export", _results.Count]
-        </a>
-    }
-</div>
+<h1 class="h3 mb-3">@Text["Approved.Title"]</h1>
 
 @if (_list?.JobsError is { } jobsError)
 {
@@ -136,7 +128,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var document in PageItems)
+                    @foreach (var document in _paging.Slice(_results))
                     {
                         var metadata = document.Metadata;
                         <tr @key="document.Id">
@@ -169,15 +161,25 @@ else
                                 }
                             </td>
                             <td class="text-nowrap">
-                                <div class="d-flex gap-1">
-                                    @foreach (var format in Enum.GetValues<FinalFileFormat>())
-                                    {
-                                        var label = format.ToString().ToUpperInvariant();
-                                        <a class="btn btn-sm btn-outline-primary download-@format.ToString().ToLowerInvariant()"
-                                           href="@ApprovedDocumentEndpoints.FinalFileUrl(document.Id, format)" download
-                                           aria-label="@Text["Approved.DownloadLabel", document.FileName, label]">@label</a>
-                                    }
-                                </div>
+                                @* Floating: the panel is placed in the window, so the table's scroll box does not cut it off. *@
+                                <details class="popup-menu is-floating download-menu">
+                                    <summary class="btn btn-sm btn-outline-primary download-toggle" title="@Text["Approved.DownloadMenu", document.FileName]">
+                                        <span aria-hidden="true">@Text["Column.Download"]</span>
+                                        <span class="visually-hidden">@Text["Approved.DownloadMenu", document.FileName]</span>
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                    </summary>
+                                    <ul class="popup-panel download-panel">
+                                        @foreach (var format in Files.Formats)
+                                        {
+                                            var label = format.ToString().ToUpperInvariant();
+                                            <li>
+                                                <a class="download-item download-@format.ToString().ToLowerInvariant()"
+                                                   href="@ApprovedDocumentEndpoints.FinalFileUrl(document.Id, format)" download
+                                                   aria-label="@Text["Approved.DownloadLabel", document.FileName, label]">@label</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </details>
                                 <div class="small text-muted mt-1">@Text["Approved.Version", document.CurrentVersion?.Number ?? Missing]</div>
                             </td>
                         </tr>
@@ -185,15 +187,6 @@ else
                 </tbody>
             </table>
         </div>
-        <p class="small text-muted">@Text["Approved.DownloadNote"]</p>
-
-        @if (TotalPages > 1)
-        {
-            <nav class="d-flex align-items-center gap-2" aria-label="@Text["Pager.Label"]">
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page <= 1)" @onclick="() => _page--">@Text["Pager.Previous"]</button>
-                <span class="small">@Text["Pager.PageOf", _page, TotalPages]</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@(_page >= TotalPages)" @onclick="() => _page++">@Text["Pager.Next"]</button>
-            </nav>
-        }
+        <TablePager Paging="_paging" Total="_results.Count" Id="approved-pager" OnChange="StateHasChanged" />
     }
 }

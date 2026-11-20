@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
+using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Ocr;
@@ -9,23 +10,24 @@ namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
 /// Review round 2: documents the automatic check flagged (or that were not checked yet) wait here until
-/// a person approves them. Real documents come first, then the oldest. Reviewing itself happens on the
-/// document page.
+/// a person approves them. Real documents come first, then the oldest. The queue can be filtered like
+/// All Documents and is shown a page at a time. Reviewing itself happens on the document page.
 /// </summary>
 public sealed partial class ReviewPage : IDisposable
 {
     private readonly CancellationTokenSource _disposed = new();
+    private readonly DocumentFilterState _filter = new();
+    private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
     private DocumentList? _list;
     private IReadOnlyList<DocumentRecord> _queue = [];
+    private List<DocumentRecord> _results = [];
     private int _autoApproved;
     private string? _loadError;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
 
     [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
-
-    [Inject] private TimeProvider Time { get; set; } = default!;
 
     [Inject] private IStringLocalizer<MockupText> Text { get; set; } = default!;
 
@@ -68,17 +70,25 @@ public sealed partial class ReviewPage : IDisposable
             LogUnexpected(Logger, ex);
             _loadError = OcrText["LoadFailed"];
         }
+
+        Apply(keepPage: true);
     }
 
-    private string WaitingFor(DocumentRecord document)
+    /// <summary>Filters the queue and keeps its order (the shared filter sorts by last update instead).</summary>
+    private void Apply(bool keepPage = false)
     {
-        if (document.UploadedAtUtc is not { } uploaded)
-            return MockupTextExtensions.Missing;
+        var matching = DocumentStore.Filter(_queue, _filter.ToQuery()).Select(d => d.Id).ToHashSet(StringComparer.Ordinal);
+        _results = _queue.Where(d => matching.Contains(d.Id)).ToList();
+        if (keepPage)
+            _paging.Clamp(_results.Count);
+        else
+            _paging.Reset();
+    }
 
-        var waited = Time.GetUtcNow().UtcDateTime - uploaded;
-        return waited.TotalDays >= 1
-            ? Text["Review.Days", (int)waited.TotalDays]
-            : Text["Review.Hours", Math.Max(0, (int)waited.TotalHours)];
+    private void ClearFilters()
+    {
+        _filter.Clear();
+        Apply();
     }
 
     /// <summary>Highlighted against the threshold the document was checked with.</summary>

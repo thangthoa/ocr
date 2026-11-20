@@ -1,7 +1,11 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OppOcr.Web.Features.Mockups.Access;
+using OppOcr.Web.Features.Mockups.Activity;
 using OppOcr.Web.Features.Mockups.Approved;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Kpi;
 using OppOcr.Web.Features.Mockups.Quality;
+using OppOcr.Web.Features.Mockups.Reports;
 using OppOcr.Web.Features.Mockups.Word;
 
 namespace OppOcr.Web.Features.Mockups;
@@ -10,8 +14,8 @@ public static class MockupsServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the documents mockup: the in-memory store (one per app, like the OCR job list), the
-    /// catalog that joins it with OCR jobs, the automatic quality check, and the Word editor and preview
-    /// (ADR 0004). Needs the OCR module's application services and <c>OcrJobNotifications</c>.
+    /// catalog that joins it with OCR jobs, the automatic quality check, KPI targets and reports, users and roles, the activity log, and the Word
+    /// editor and preview (ADR 0004). Needs the OCR module's application services and <c>OcrJobNotifications</c>.
     /// </summary>
     public static IServiceCollection AddMockups(this IServiceCollection services, IConfiguration configuration)
     {
@@ -20,6 +24,12 @@ public static class MockupsServiceCollectionExtensions
         services.AddSingleton<AuditLog>();
         services.AddSingleton<CaptureBatchStore>();
         services.AddSingleton<QualitySettingsStore>();
+        services.AddSingleton<KpiSettingsStore>();
+        services.AddSingleton<UserDirectory>();
+        services.AddSingleton<SampleActivity>();
+        services.AddScoped<ActivityTrail>();
+        services.AddScoped<ReportBuilder>();
+        services.AddOptions<DocumentSampleOptions>().Bind(configuration.GetSection(DocumentSampleOptions.SectionName));
         services.AddSingleton<DocumentStore>();
         services.AddScoped<DocumentCatalog>();
         services.AddHostedService<QualityCheckTrigger>();

@@ -68,7 +68,21 @@ public sealed class ApprovedDocumentsTests : BunitContext
         Assert.All(cut.FindAll(".approved-by span[dir=ltr]"), approver => Assert.Equal("m.khalid", approver.TextContent));
         Assert.Equal("/documents/DOC-2026-000112/final?format=docx", cut.Find("tbody tr .download-docx").GetAttribute("href"));
         Assert.Equal("/documents/DOC-2026-000112/final?format=txt", cut.Find("tbody tr .download-txt").GetAttribute("href"));
-        Assert.Equal("/approved/export.csv", cut.Find("#export-csv").GetAttribute("href"));
+        Assert.Empty(cut.FindAll("#export-csv"));
+        Assert.DoesNotContain("Final version = the reviewed text", cut.Markup, StringComparison.Ordinal);
+        Assert.Equal("1–7 of 7", cut.Find("#approved-pager-range").TextContent);
+    }
+
+    [Fact]
+    public void Each_row_offers_its_formats_in_one_dropdown()
+    {
+        var cut = Render<ApprovedPage>();
+        cut.WaitForElement("tbody tr");
+
+        var menu = cut.Find("tbody tr details.popup-menu.is-floating");
+        Assert.Contains("Download ADM-2022-0310.pdf", menu.QuerySelector("summary")!.TextContent, StringComparison.Ordinal);
+        // PDF needs the document server, which these tests do not configure (see WordEditorTests).
+        Assert.Equal(["DOCX", "TXT"], menu.QuerySelectorAll(".download-panel a").Select(a => a.TextContent));
     }
 
     [Fact]
@@ -86,14 +100,13 @@ public sealed class ApprovedDocumentsTests : BunitContext
     }
 
     [Fact]
-    public void Filters_narrow_the_list_and_the_export_link_carries_them()
+    public void Filters_narrow_the_list()
     {
         var cut = Render<ApprovedPage>();
         cut.WaitForElement("tbody tr");
 
         cut.Find("#approved-department").Change(nameof(DocumentDepartment.Finance));
         Assert.Equal(["PV-2020-0021.pdf", "PV-2019-0413.pdf"], Names(cut));
-        Assert.Equal("/approved/export.csv?department=Finance", cut.Find("#export-csv").GetAttribute("href"));
 
         cut.Find("button.btn-outline-secondary").Click(); // Clear filters
         cut.Find("#approved-confidentiality").Change(nameof(DocumentConfidentiality.Confidential));
@@ -102,7 +115,6 @@ public sealed class ApprovedDocumentsTests : BunitContext
         cut.Find("button.btn-outline-secondary").Click();
         cut.Find("#approved-from").Change("2026-11-16");
         Assert.Equal(["ADM-2022-0310.pdf", "HR-2018-0044.pdf"], Names(cut));
-        Assert.Equal("/approved/export.csv?from=2026-11-16", cut.Find("#export-csv").GetAttribute("href"));
 
         cut.Find("#approved-search").Input("no such document");
         Assert.Contains("No documents match these filters.", cut.Markup, StringComparison.Ordinal);
@@ -118,18 +130,6 @@ public sealed class ApprovedDocumentsTests : BunitContext
 
         cut.WaitForAssertion(() => Assert.Contains("No archived documents yet.", cut.Markup, StringComparison.Ordinal));
         Assert.NotNull(cut.Find(".empty-state a[href='review']"));
-        Assert.Empty(cut.FindAll("#export-csv"));
-    }
-
-    [Fact]
-    public void Export_is_not_offered_when_the_ocr_jobs_cannot_be_loaded()
-    {
-        _ocr.Unavailable = true;
-
-        var cut = Render<ApprovedPage>();
-
-        cut.WaitForAssertion(() => Assert.Contains("OCR jobs could not be loaded", cut.Markup, StringComparison.Ordinal));
-        Assert.Empty(cut.FindAll("#export-csv"));
     }
 
     [Fact]
@@ -253,17 +253,48 @@ public sealed class ApprovedDocumentsTests : BunitContext
     }
 
     [Fact]
-    public void Document_page_shows_the_approver_and_offers_the_final_version()
+    public void Document_page_shows_the_approver_and_downloads_the_current_version()
     {
         var waiting = RenderDocument("DOC-2026-000105");
-        Assert.Empty(waiting.FindAll("#final-download, #approved-by"));
+        Assert.Empty(waiting.FindAll("#approved-by"));
+        Assert.Equal("/documents/DOC-2026-000105/file?format=docx", waiting.Find("#download-file").GetAttribute("href"));
+        Assert.Equal(["DOCX", "TXT"], waiting.FindAll("#download-format option").Select(o => o.TextContent));
+
+        waiting.Find("#download-format").Change(nameof(FinalFileFormat.Txt));
+        Assert.Equal("/documents/DOC-2026-000105/file?format=txt", waiting.Find("#download-file").GetAttribute("href"));
 
         waiting.Find("#action-approve").Click();
 
         Assert.Equal("admin", waiting.Find("#approved-by").TextContent);
-        Assert.Equal(
-            ["/documents/DOC-2026-000105/final?format=docx", "/documents/DOC-2026-000105/final?format=txt"],
-            waiting.FindAll("#final-download a").Select(a => a.GetAttribute("href")));
+        Assert.NotNull(waiting.Find("#download-file"));
+    }
+
+    [Fact]
+    public async Task A_document_in_review_downloads_its_current_text_and_one_still_recognized_has_none()
+    {
+        var current = await Files.CurrentAsync("DOC-2026-000105", FinalFileFormat.Txt, "admin", Ct);
+        Assert.True(current.IsSuccess);
+        Assert.EndsWith(".txt", current.Value.FileName, StringComparison.Ordinal);
+
+        Assert.Equal(ApprovedErrors.NotFinalCode, (await Files.FinalAsync("DOC-2026-000105", FinalFileFormat.Txt, "admin", Ct)).Error?.Code);
+        Assert.Equal(ApprovedErrors.NoTextCode, (await Files.CurrentAsync("DOC-2026-000113", FinalFileFormat.Txt, "admin", Ct)).Error?.Code);
+    }
+
+    [Fact]
+    public async Task Editing_only_the_details_keeps_the_word_file_as_the_docx()
+    {
+        const string Id = "DOC-2026-000112";
+        Store.ChangeStatus(Id, DocumentStatus.NeedsReview, "admin");
+        var wordFiles = Services.GetRequiredService<IWordFileStore>();
+        var edited = DocxText.Create(["edited in Word"]);
+        var (word, _) = await wordFiles.SaveAsync(Id, new MemoryStream(edited), "admin", WordVersionSource.Edited, Ct);
+        Store.RecordWordEdit(Id, ["edited in Word"], "admin", word.Number);
+
+        var document = Store.FindSample(Id)!;
+        Store.SaveEdit(Id, document.PageTexts, document.Metadata with { Reference = "ADM/2022/310-A" }, "admin", null);
+
+        var docx = (await Files.CurrentAsync(Id, FinalFileFormat.Docx, "admin", Ct)).Value;
+        Assert.Equal(edited, docx.Content);
     }
 
     [Fact]
@@ -271,13 +302,13 @@ public sealed class ApprovedDocumentsTests : BunitContext
     {
         await Files.FinalAsync("DOC-2026-000104", FinalFileFormat.Docx, "admin", Ct);
         await Files.ExportAsync(new DocumentQuery(), "admin", Ct);
-        Services.GetRequiredService<NavigationManager>().NavigateTo("admin?tab=Audit");
+        Services.GetRequiredService<NavigationManager>().NavigateTo("users/activity?user=admin");
 
-        var cut = Render<AdminPage>();
+        var cut = Render<ActivityLogPage>();
 
         cut.WaitForAssertion(() =>
         {
-            var rows = cut.FindAll(".audit-table tbody tr").Select(r => r.TextContent).ToList();
+            var rows = cut.FindAll(".activity-table tbody tr").Select(r => r.TextContent).ToList();
             Assert.Contains("Exported the approved list (7 documents)", rows[0], StringComparison.Ordinal);
             Assert.Contains("Downloaded final version 1.1 as DOCX", rows[1], StringComparison.Ordinal);
         });

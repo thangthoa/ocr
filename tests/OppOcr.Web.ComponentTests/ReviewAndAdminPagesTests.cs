@@ -38,7 +38,42 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
         cut.WaitForAssertion(() => Assert.Equal("5", cut.Find("#review-count").TextContent));
         var files = cut.FindAll("tbody tr td:first-child a").Select(a => a.TextContent).ToList();
         Assert.Equal(["fresh.png", "CT-2020-0017.pdf", "PO-2020-0102.pdf", "HR-2016-0190.pdf", "PV-2024-0150.pdf"], files);
-        Assert.Equal("documents/job_0000000000000001", cut.Find("#review-start").GetAttribute("href"));
+        Assert.Empty(cut.FindAll("#review-start"));
+    }
+
+    [Fact]
+    public void Review_queue_shows_why_a_document_waits_and_when_it_last_changed()
+    {
+        var cut = Render<ReviewPage>();
+        cut.WaitForElement("tbody tr");
+
+        var headers = cut.FindAll("thead th").Select(th => th.TextContent.Trim()).ToList();
+        Assert.Equal(["File", "Title", "Pages", "OCR confidence", "Why it is here", "Uploaded", "Last updated", "Actions"], headers);
+        Assert.DoesNotContain("Waiting", cut.Find("thead").TextContent, StringComparison.Ordinal);
+        Assert.DoesNotContain("Oldest waiting since", cut.Markup, StringComparison.Ordinal);
+
+        // A document the check has not flagged has no reason to show: just a dash.
+        Assert.All(cut.FindAll("td.issues"), cell => Assert.True(cell.QuerySelector(".issue-list") is not null || cell.TextContent.Trim() == "—"));
+        Assert.All(cut.FindAll("td.review-updated"), cell => Assert.NotEqual("—", cell.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Review_queue_can_be_filtered_and_keeps_its_order()
+    {
+        var cut = Render<ReviewPage>();
+        cut.WaitForElement("tbody tr");
+
+        cut.Find("#review-department").Change(nameof(DocumentDepartment.Finance));
+        Assert.Equal(["PV-2024-0150.pdf"], cut.FindAll("tbody tr td:first-child a").Select(a => a.TextContent));
+        Assert.Contains("1 document(s)", cut.Find("#review-results").TextContent, StringComparison.Ordinal);
+
+        cut.Find("#review-search").Input("no such document");
+        Assert.Contains("No documents match these filters.", cut.Markup, StringComparison.Ordinal);
+
+        cut.Find(".empty-state button").Click(); // Clear filters
+        Assert.Equal(["CT-2020-0017.pdf", "PO-2020-0102.pdf", "HR-2016-0190.pdf", "PV-2024-0150.pdf"],
+            cut.FindAll("tbody tr td:first-child a").Select(a => a.TextContent));
+        Assert.Equal("1–4 of 4", cut.Find("#review-pager-range").TextContent);
     }
 
     [Fact]
@@ -58,22 +93,26 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
     {
         Navigation.NavigateTo("login");
         var login = Render<LoginPage>();
+        JSInterop.SetupVoid("ocrSession.start", _ => true).SetVoidResult();
         login.Find("#login-user").Change("admin");
         login.Find("#login-password").Change("admin");
         login.Find("form").Submit();
+        login.Find("#login-otp").Change("123456");
+        login.Find("#otp-form").Submit();
         Store.ChangeStatus("DOC-2026-000105", DocumentStatus.Archived, "admin");
 
-        Navigation.NavigateTo("admin?tab=Audit");
-        var cut = Render<AdminPage>();
+        // The sample history has no entry by the demo account, so only this test's actions are left.
+        Navigation.NavigateTo("users/activity?user=admin");
+        var cut = Render<ActivityLogPage>();
 
         cut.WaitForAssertion(() =>
         {
-            var rows = cut.FindAll(".audit-table tbody tr").Select(r => r.TextContent).ToList();
+            var rows = cut.FindAll(".activity-table tbody tr").Select(r => r.TextContent).ToList();
             Assert.Equal(2, rows.Count);
             Assert.Contains("Changed the status to Archived", rows[0], StringComparison.Ordinal);
             Assert.Contains("Signed in", rows[1], StringComparison.Ordinal);
         });
-        Assert.NotEmpty(cut.FindAll(".audit-table a[href='documents/DOC-2026-000105']"));
+        Assert.NotEmpty(cut.FindAll(".activity-table a[href='documents/DOC-2026-000105']"));
     }
 
     [Fact]
@@ -107,10 +146,10 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
     [Fact]
     public void Retention_rules_link_to_the_documents_they_cover()
     {
+        // Retention is the tab Settings opens on: the counts are there without clicking it.
         var cut = Render<AdminPage>();
 
-        cut.Find("#tab-Retention").Click();
-
+        Assert.Equal("true", cut.Find("#tab-Retention").GetAttribute("aria-selected"));
         cut.WaitForAssertion(() => Assert.Equal("4", cut.Find("a[href='documents?department=Finance&kind=PaymentVoucher']").TextContent));
     }
 }

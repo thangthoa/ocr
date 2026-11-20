@@ -1,0 +1,11 @@
+.doc-filters {
+    padding: 1rem 1.25rem;
+    border-radius: var(--app-radius-card);
+    background-color: var(--ae-whitely-300);
+}
+
+.doc-field {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 45%;
+}

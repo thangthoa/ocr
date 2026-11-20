@@ -1,7 +1,10 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
+using OppOcr.Web.Features.Mockups.Access;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.Kpi;
 using OppOcr.Web.Features.Mockups.Quality;
+using OppOcr.Web.Features.Mockups.Reports;
 
 namespace OppOcr.Web.Features.Mockups;
 
@@ -20,6 +23,71 @@ internal static class MockupTextExtensions
     public static string Period(this IStringLocalizer<MockupText> text, ReportPeriod period) => text[$"Period.{period}"];
 
     public static string Required(this IStringLocalizer<MockupText> text, RequiredMetadata field) => text[$"Meta.{field}"];
+
+    public static string RoleName(this IStringLocalizer<MockupText> text, UserRole role) => text[$"Role.{role}"];
+
+    public static string PermissionName(this IStringLocalizer<MockupText> text, AccessRight permission) => text[$"Permission.{permission}"];
+
+    public static string KpiName(this IStringLocalizer<MockupText> text, KpiKind kind) => text[$"KpiDef.{kind}"];
+
+    public static string KpiStatusName(this IStringLocalizer<MockupText> text, KpiStatus status) => text[$"KpiStatus.{status}"];
+
+    /// <summary>A KPI figure (actual, target or alert level) in the KPI's unit.</summary>
+    public static string KpiValue(this IStringLocalizer<MockupText> text, KpiKind kind, double value) => KpiRules.Unit(kind) switch
+    {
+        KpiUnit.Percent => FormatPercent(value),
+        KpiUnit.Hours => text["Kpi.Hours", value.ToString("N1", CultureInfo.CurrentCulture)],
+        _ => FormatNumber((int)Math.Round(value)),
+    };
+
+    /// <summary>Colour class per KPI status (green, camel, red); the status is always written next to it.</summary>
+    public static string KpiStatusClass(KpiStatus status) => status switch
+    {
+        KpiStatus.OnTrack => "kpi-on-track",
+        KpiStatus.AtRisk => "kpi-at-risk",
+        _ => "kpi-off-track",
+    };
+
+    /// <summary>What an activity log entry says was done, in the UI language.</summary>
+    public static string DescribeActivity(this IStringLocalizer<MockupText> text, AuditEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+        return entry.Action switch
+        {
+            AuditAction.SignedIn => text["Audit.SignedIn"],
+            AuditAction.SignedOut => text["Audit.SignedOut"],
+            AuditAction.SignInFailed => text["Audit.SignInFailed"],
+            AuditAction.OtpFailed => text["Audit.OtpFailed"],
+            AuditAction.AccountLocked => text["Audit.AccountLocked"],
+            AuditAction.AccessDenied => text[entry.Detail == "Department" ? "Audit.AccessDenied.Department" : "Audit.AccessDenied.Clearance"],
+            AuditAction.Viewed => text["Audit.Viewed"],
+            AuditAction.Searched => text["Audit.Searched", entry.Detail ?? "?"],
+            AuditAction.Printed => text["Audit.Printed", entry.Version ?? "?"],
+            AuditAction.Uploaded => text["Audit.Uploaded", entry.BatchId ?? Missing],
+            AuditAction.Edited => text["Audit.Edited", entry.Version ?? "?"],
+            AuditAction.MetadataChanged => text["Audit.MetadataChanged", entry.Version ?? "?"],
+            AuditAction.Restored => text["Audit.Restored", entry.Version ?? "?"],
+            AuditAction.StatusChanged => text["Audit.StatusChanged", entry.Status is { } status ? text.Status(status) : "?"],
+            AuditAction.Deleted => text["Audit.Deleted"],
+            AuditAction.EditedInWord => text["Audit.EditedInWord", entry.Version ?? "?"],
+            AuditAction.Downloaded => text["Audit.Downloaded", entry.Detail ?? "?", entry.Version ?? "?"],
+            AuditAction.Exported => text["Audit.Exported", entry.Detail ?? "?"],
+            AuditAction.QualityChecked when entry.Status == DocumentStatus.Archived => text["Audit.QualityApproved"],
+            AuditAction.QualityChecked when entry.Detail == "0" => text["Audit.QualityPassed"],
+            AuditAction.QualityChecked => text["Audit.QualityFlagged", entry.Detail ?? "?"],
+            AuditAction.OcrFailed => text["Audit.OcrFailed", entry.Detail ?? "?"],
+            AuditAction.OcrRetried => text["Audit.OcrRetried"],
+            AuditAction.QualitySettingsChanged => text["Audit.QualitySettingsChanged"],
+            AuditAction.KpiSettingsChanged => text["Audit.KpiSettingsChanged"],
+            AuditAction.UserAdded => text["Audit.UserAdded", entry.Detail ?? "?"],
+            AuditAction.UserChanged => text["Audit.UserChanged", entry.Detail ?? "?"],
+            AuditAction.RolesChanged => text["Audit.RolesChanged"],
+            AuditAction.ReportExported => text["Audit.ReportExported",
+                ReportEndpoints.ParseKind(entry.Detail) is { } report ? text[$"Report.{report}.Title"] : entry.Detail ?? "?"],
+            AuditAction.ActivityExported => text["Audit.ActivityExported", entry.Detail ?? "?"],
+            _ => entry.Action.ToString(),
+        };
+    }
 
     /// <summary>One issue of the automatic check, in full (document page).</summary>
     public static string Issue(this IStringLocalizer<MockupText> text, QualityIssue issue)

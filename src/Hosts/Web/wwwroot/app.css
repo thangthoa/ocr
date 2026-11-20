@@ -183,9 +183,18 @@
     --ae-slate-400: #94a3b8;
 
     /* App roles. The --app-* names predate this theme and are used by component stylesheets. */
-    --app-primary: var(--ae-gold-600);
-    --app-primary-hover: var(--ae-gold-700);
-    --app-primary-active: var(--ae-gold-800);
+    /* Primary accent for graphics and borders (bars, step dots, progress, checkboxes, the brand mark):
+       half a step lighter than AE Gold 600, as the client asked (OKLab midpoint of gold 500 and 600).
+       4.0:1 on white, above the 3:1 WCAG asks of graphics; no text is set on it, since white text would
+       stay under the 4.5:1 AA asks of normal text. */
+    --app-primary: #9b7a33;
+    --app-primary-hover: var(--ae-gold-600);
+    --app-primary-active: var(--ae-gold-700);
+    /* Filled primary surfaces that carry text (primary buttons, the selected page, list selection):
+       light gold with dark brown text, 7.3:1 (5.7:1 on hover), the client's choice. */
+    --app-primary-fill: var(--ae-gold-300);
+    --app-primary-fill-hover: var(--ae-gold-400);
+    --app-on-primary-fill: var(--ae-gold-950);
     --app-link-hover: var(--ae-gold-800);
     --app-ink: var(--ae-black-800);
     --app-ink-muted: var(--ae-black-600);
@@ -226,8 +235,8 @@
     --bs-border-radius-lg: .75rem;
     --bs-border-radius-xl: 1rem;
     --bs-border-radius-xxl: 1rem;
-    --bs-primary: #90702a;
-    --bs-primary-rgb: 144, 112, 42;
+    --bs-primary: #9b7a33;
+    --bs-primary-rgb: 155, 122, 51;
     --bs-primary-text-emphasis: var(--ae-gold-800);
     --bs-primary-bg-subtle: var(--ae-gold-50);
     --bs-primary-border-subtle: var(--ae-gold-200);
@@ -335,15 +344,15 @@ summary:focus-visible {
 }
 
 .btn-primary {
-    --bs-btn-color: var(--ae-white);
-    --bs-btn-bg: var(--ae-gold-600);
-    --bs-btn-border-color: var(--ae-gold-600);
-    --bs-btn-hover-color: var(--ae-white);
-    --bs-btn-hover-bg: var(--ae-gold-700);
-    --bs-btn-hover-border-color: var(--ae-gold-700);
-    --bs-btn-active-color: var(--ae-white);
-    --bs-btn-active-bg: var(--ae-gold-800);
-    --bs-btn-active-border-color: var(--ae-gold-800);
+    --bs-btn-color: var(--app-on-primary-fill);
+    --bs-btn-bg: var(--app-primary-fill);
+    --bs-btn-border-color: var(--app-primary-fill);
+    --bs-btn-hover-color: var(--app-on-primary-fill);
+    --bs-btn-hover-bg: var(--app-primary-fill-hover);
+    --bs-btn-hover-border-color: var(--app-primary-fill-hover);
+    --bs-btn-active-color: var(--app-on-primary-fill);
+    --bs-btn-active-bg: var(--app-primary-fill-hover);
+    --bs-btn-active-border-color: var(--app-primary-hover);
     --bs-btn-disabled-color: var(--ae-black-400);
     --bs-btn-disabled-bg: var(--ae-whitely-400);
     --bs-btn-disabled-border-color: var(--ae-black-100);
@@ -354,10 +363,10 @@ summary:focus-visible {
 .btn-outline-secondary {
     --bs-btn-color: var(--ae-gold-700);
     --bs-btn-bg: var(--ae-white);
-    --bs-btn-border-color: var(--ae-gold-600);
+    --bs-btn-border-color: var(--app-primary);
     --bs-btn-hover-color: var(--ae-gold-800);
     --bs-btn-hover-bg: var(--ae-gold-50);
-    --bs-btn-hover-border-color: var(--ae-gold-600);
+    --bs-btn-hover-border-color: var(--app-primary);
     --bs-btn-active-color: var(--ae-gold-800);
     --bs-btn-active-bg: var(--ae-gold-100);
     --bs-btn-active-border-color: var(--ae-gold-700);
@@ -427,7 +436,7 @@ summary:focus-visible {
 .form-select {
     min-height: 44px;
     background-color: var(--ae-white);
-    border: 1px solid var(--ae-gold-600);
+    border: 1px solid var(--app-primary);
     border-radius: var(--app-radius);
     color: var(--ae-gold-900);
     font-weight: 500;
@@ -441,7 +450,7 @@ summary:focus-visible {
 .form-control:focus,
 .form-select:focus {
     background-color: var(--ae-white);
-    border-color: var(--ae-gold-600);
+    border-color: var(--app-primary);
     box-shadow: 0 0 0 2px var(--app-focus);
     color: var(--ae-gold-900);
     outline: none;
@@ -467,7 +476,7 @@ summary:focus-visible {
 
 .input-group-text {
     background-color: var(--ae-whitely-300);
-    border-color: var(--ae-gold-600);
+    border-color: var(--app-primary);
     color: var(--ae-black-800);
 }
 
@@ -488,12 +497,12 @@ summary:focus-visible {
 }
 
     .form-check-input:checked {
-        background-color: var(--ae-gold-600);
-        border-color: var(--ae-gold-600);
+        background-color: var(--app-primary);
+        border-color: var(--app-primary);
     }
 
     .form-check-input:focus {
-        border-color: var(--ae-gold-600);
+        border-color: var(--app-primary);
         box-shadow: 0 0 0 2px var(--app-focus);
     }
 
@@ -541,6 +550,16 @@ summary:focus-visible {
 .status-failed { --status-bg: var(--ae-red-100); --status-fg: var(--ae-red-800); --status-fill: var(--ae-red-500); }
 .status-cancelled { --status-bg: var(--ae-black-100); --status-fg: var(--ae-black-800); --status-fill: var(--ae-black-300); }
 
+/* KPI status (dashboard cards, project progress): soft badge colours, always next to the status in words. */
+.kpi-on-track { --kpi-fill: var(--ae-green-600); --kpi-bg: var(--ae-green-100); --kpi-fg: var(--ae-green-800); --kpi-border: var(--app-border-subtle); }
+.kpi-at-risk { --kpi-fill: var(--ae-camel-500); --kpi-bg: var(--ae-camel-100); --kpi-fg: var(--ae-camel-800); --kpi-border: var(--ae-camel-200); }
+.kpi-off-track { --kpi-fill: var(--ae-red-600); --kpi-bg: var(--ae-red-100); --kpi-fg: var(--ae-red-800); --kpi-border: var(--ae-red-200); }
+
+.badge.kpi-status {
+    background-color: var(--kpi-bg);
+    color: var(--kpi-fg);
+}
+
 .badge.status-tag {
     background-color: var(--status-bg);
     color: var(--status-fg);
@@ -576,14 +595,15 @@ summary:focus-visible {
     --bs-progress-height: .5rem;
     --bs-progress-bg: var(--ae-black-100);
     --bs-progress-border-radius: 999px;
-    --bs-progress-bar-bg: var(--ae-gold-600);
+    --bs-progress-bar-bg: var(--app-primary);
 }
 
 .list-group {
     --bs-list-group-border-color: var(--ae-black-100);
     --bs-list-group-border-radius: var(--app-radius);
-    --bs-list-group-active-bg: var(--ae-gold-600);
-    --bs-list-group-active-border-color: var(--ae-gold-600);
+    --bs-list-group-active-color: var(--app-on-primary-fill);
+    --bs-list-group-active-bg: var(--app-primary-fill);
+    --bs-list-group-active-border-color: var(--app-primary-fill);
     --bs-list-group-action-hover-bg: var(--ae-gold-50);
 }
 
@@ -638,4 +658,35 @@ summary:focus-visible {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+/* The progress band is sticky, which confines a dialog opened from its buttons (Delete) to the band's
+   layer, under the app header. While one is open the band is lifted above the header ("body" outranks
+   the band's own scoped rule, which loads later). */
+body .doc-band:has(.confirm-dialog) {
+    z-index: 1050;
+}
+
+/* Printing (reports): only the page content, without the header, the menu or the page's own controls. */
+@media print {
+    .app-header,
+    .sidebar,
+    .no-print,
+    #blazor-error-ui,
+    #components-reconnect-modal {
+        display: none !important;
+    }
+
+    .app-body,
+    main,
+    .content {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
 }

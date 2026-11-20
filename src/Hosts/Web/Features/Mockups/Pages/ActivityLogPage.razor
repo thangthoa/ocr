@@ -1,0 +1,194 @@
+@page "/users/activity"
+@rendermode InteractiveServer
+
+<PageTitle>@Text["Activity.Title"]</PageTitle>
+
+<div class="d-flex flex-wrap align-items-start gap-3 mb-3">
+    <div class="me-auto">
+        <h1 class="h3 mb-1">@Text["Activity.Title"]</h1>
+        <p class="text-muted mb-0">@Text["Activity.Intro"]</p>
+    </div>
+    <a id="activity-export" class="btn btn-outline-primary" download href="@ActivityEndpoints.ExportUrl(Query)">@Text["Activity.Export"]</a>
+</div>
+
+@* How the log is protected (customer questions 60 and 70): a hash chain checked here, retention, SIEM forwarding. *@
+<section class="integrity @(_brokenAt is null ? "is-ok" : "is-broken")" aria-labelledby="integrity-title">
+    <div class="integrity-main">
+        <h2 id="integrity-title" class="visually-hidden">@Text["Activity.IntegrityTitle"]</h2>
+        <p id="integrity-status" class="mb-1 fw-semibold" role="status">
+            @if (_brokenAt is { } broken)
+            {
+                @Text["Activity.IntegrityBroken", FormatNumber((int)broken)]
+            }
+            else
+            {
+                @Text["Activity.Integrity", FormatNumber(_rows.Count), FormatDateTime(_checkedAtUtc)]
+            }
+        </p>
+        <p class="small mb-0">@Text["Activity.Protection", ActivityRules.RetentionYears]</p>
+    </div>
+    <button type="button" id="activity-verify" class="btn btn-sm btn-outline-secondary" @onclick="Load">@Text["Activity.Verify"]</button>
+</section>
+
+<p class="small text-muted mt-2 mb-3"><span class="badge tag-gray me-1">@Text["SampleData"]</span> @Text["Activity.SampleNote"]</p>
+
+@{ var rows = Filtered; }
+<section class="activity-stats mb-3" aria-label="@Text["Activity.Stats"]">
+    <div class="activity-stat">
+        <span class="activity-stat-label">@Text["Activity.Stat.Entries"]</span>
+        <span id="stat-entries" class="activity-stat-value">@FormatNumber(rows.Count)</span>
+    </div>
+    <div class="activity-stat">
+        <span class="activity-stat-label">@Text["Activity.Stat.SignIns"]</span>
+        <span class="activity-stat-value">@FormatNumber(rows.Count(r => r.Entry.Action == AuditAction.SignedIn))</span>
+    </div>
+    <button type="button" id="stat-failed" class="activity-stat is-alert" @onclick="() => Show(ActivityCategory.Security, ActivityResult.Failed)">
+        <span class="activity-stat-label">@Text["Activity.Stat.Failed"]</span>
+        <span class="activity-stat-value">@FormatNumber(rows.Count(r => r.Category == ActivityCategory.Security && r.Result == ActivityResult.Failed))</span>
+    </button>
+    <button type="button" id="stat-denied" class="activity-stat is-alert" @onclick="() => Show(null, ActivityResult.Denied)">
+        <span class="activity-stat-label">@Text["Activity.Stat.Denied"]</span>
+        <span class="activity-stat-value">@FormatNumber(rows.Count(r => r.Result == ActivityResult.Denied))</span>
+    </button>
+    <button type="button" id="stat-downloads" class="activity-stat" @onclick="() => Show(ActivityCategory.DocumentAccess, null)">
+        <span class="activity-stat-label">@Text["Activity.Stat.Downloads"]</span>
+        <span class="activity-stat-value">@FormatNumber(rows.Count(r => r.Entry.Action is AuditAction.Downloaded or AuditAction.Printed
+            or AuditAction.Exported or AuditAction.ReportExported or AuditAction.ActivityExported))</span>
+    </button>
+</section>
+
+<div class="activity-filters mb-3">
+    <div class="activity-search">
+        <label for="activity-search" class="form-label">@Text["Activity.Search"]</label>
+        <input id="activity-search" type="search" class="form-control" placeholder="@Text["Activity.SearchHint"]"
+               @bind="_text" @bind:event="oninput" @bind:after="_paging.Reset" />
+    </div>
+    <div>
+        <label for="activity-user" class="form-label">@Text["Audit.Column.User"]</label>
+        <select id="activity-user" class="form-select" @bind="_user" @bind:after="_paging.Reset">
+            <option value="">@Text["Activity.AllUsers"]</option>
+            @foreach (var user in _users)
+            {
+                <option value="@user">@user</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="activity-category" class="form-label">@Text["Activity.Column.Category"]</label>
+        <select id="activity-category" class="form-select" @bind="_category" @bind:after="_paging.Reset">
+            <option value="">@Text["Activity.AllCategories"]</option>
+            @foreach (var category in Enum.GetValues<ActivityCategory>())
+            {
+                <option value="@category">@Text[$"ActivityCategory.{category}"]</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="activity-result" class="form-label">@Text["Activity.Column.Result"]</label>
+        <select id="activity-result" class="form-select" @bind="_result" @bind:after="_paging.Reset">
+            <option value="">@Text["Activity.AllResults"]</option>
+            @foreach (var result in Enum.GetValues<ActivityResult>())
+            {
+                <option value="@result">@Text[$"ActivityResult.{result}"]</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="activity-from" class="form-label">@Text["Reports.From"]</label>
+        <input id="activity-from" type="date" class="form-control" @bind="_from" @bind:after="_paging.Reset" />
+    </div>
+    <div>
+        <label for="activity-to" class="form-label">@Text["Reports.To"]</label>
+        <input id="activity-to" type="date" class="form-control" @bind="_to" @bind:after="_paging.Reset" />
+    </div>
+    <button type="button" id="activity-clear" class="btn btn-outline-secondary" @onclick="Clear">@Text["Activity.Clear"]</button>
+</div>
+
+@if (rows.Count == 0)
+{
+    <div class="activity-empty" role="status">@Text["Activity.Empty"]</div>
+}
+else
+{
+    <div class="table-responsive position-relative">
+        <table class="table align-middle activity-table">
+            <caption class="visually-hidden">@Text["Activity.Title"]</caption>
+            <thead>
+                <tr>
+                    <th scope="col">@Text["Audit.Column.Time"]</th>
+                    <th scope="col">@Text["Audit.Column.User"]</th>
+                    <th scope="col">@Text["Audit.Column.Action"]</th>
+                    <th scope="col">@Text["Audit.Column.Document"]</th>
+                    <th scope="col">@Text["Activity.Column.Ip"]</th>
+                    <th scope="col">@Text["Activity.Column.Result"]</th>
+                    <th scope="col"><span class="visually-hidden">@Text["Activity.Column.Details"]</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in _paging.Slice(rows))
+                {
+                    var entry = row.Entry;
+                    var open = _expanded.Contains(row.Sequence);
+                    var detailsId = $"activity-details-{row.Sequence}";
+                    <tr id="@($"activity-{row.Sequence}")" class="@(row.IsSample ? null : "is-live")">
+                        <td class="text-nowrap small">
+                            @FormatDateTime(entry.AtUtc)
+                            @if (!row.IsSample)
+                            {
+                                <span class="badge tag-green ms-1">@Text["Activity.Live"]</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="d-block" dir="ltr">@entry.User</span>
+                            @if (DisplayName(entry.User) is { } name)
+                            {
+                                <span class="d-block small text-muted" dir="auto">@name</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="activity-category">@Text[$"ActivityCategory.{row.Category}"]</span>
+                            <span class="d-block" dir="auto">@Text.DescribeActivity(entry)</span>
+                        </td>
+                        <td>
+                            @if (entry.DocumentId is null)
+                            {
+                                <span class="text-muted">@Missing</span>
+                            }
+                            else if (CanOpen(row))
+                            {
+                                <a href="@OcrEndpoints.JobUrl(entry.DocumentId)" dir="auto">@(entry.DocumentName ?? entry.DocumentId)</a>
+                            }
+                            else
+                            {
+                                <span dir="auto">@(entry.DocumentName ?? entry.DocumentId)</span>
+                            }
+                        </td>
+                        <td class="text-nowrap small" dir="ltr">@(entry.IpAddress ?? Missing)</td>
+                        <td><span class="badge @ResultClass(row.Result)">@Text[$"ActivityResult.{row.Result}"]</span></td>
+                        <td class="text-end">
+                            <button type="button" id="@($"activity-toggle-{row.Sequence}")" class="btn btn-sm btn-link p-0"
+                                    aria-expanded="@(open ? "true" : "false")" aria-controls="@detailsId"
+                                    @onclick="() => Toggle(row.Sequence)">@(open ? Text["Activity.HideDetails"] : Text["Activity.ShowDetails"])</button>
+                        </td>
+                    </tr>
+                    @if (open)
+                    {
+                        <tr id="@detailsId" class="activity-details">
+                            <td colspan="7">
+                                <dl>
+                                    <div><dt>@Text["Activity.Detail.Entry"]</dt><dd dir="ltr">#@row.Sequence.ToString(System.Globalization.CultureInfo.InvariantCulture)</dd></div>
+                                    <div><dt>@Text["Activity.Siem"]</dt><dd dir="ltr">@row.SiemEventId</dd></div>
+                                    <div><dt>@Text["Activity.Column.Client"]</dt><dd dir="ltr">@(entry.Client ?? Missing)</dd></div>
+                                    <div><dt>@Text["Activity.Detail.Source"]</dt><dd>@(row.IsSample ? Text["Activity.Source.Sample"] : Text["Activity.Source.Live"])</dd></div>
+                                    <div class="wide"><dt>@Text["Activity.Hash"]</dt><dd dir="ltr"><code>@row.Hash</code></dd></div>
+                                    <div class="wide"><dt>@Text["Activity.PreviousHash"]</dt><dd dir="ltr"><code>@row.PreviousHash</code></dd></div>
+                                </dl>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <TablePager Paging="_paging" Total="rows.Count" Id="activity-pager" OnChange="StateHasChanged" />
+}

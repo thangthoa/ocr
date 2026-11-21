@@ -48,13 +48,15 @@ public sealed class ReviewAndAdminPagesTests : BunitContext
         cut.WaitForElement("tbody tr");
 
         var headers = cut.FindAll("thead th").Select(th => th.TextContent.Trim()).ToList();
-        Assert.Equal(["File", "Title", "Pages", "OCR confidence", "Why it is here", "Uploaded", "Last updated", "Actions"], headers);
+        Assert.Equal(
+            ["File", "Title", "OCR confidence", "Why it is here", "Pages", "Uploaded by", "Uploaded at", "Approved by", "Approved date", "Version", "Last updated at", "Actions"],
+            headers);
         Assert.DoesNotContain("Waiting", cut.Find("thead").TextContent, StringComparison.Ordinal);
         Assert.DoesNotContain("Oldest waiting since", cut.Markup, StringComparison.Ordinal);
 
         // A document the check has not flagged has no reason to show: just a dash.
         Assert.All(cut.FindAll("td.issues"), cell => Assert.True(cell.QuerySelector(".issue-list") is not null || cell.TextContent.Trim() == "—"));
-        Assert.All(cut.FindAll("td.review-updated"), cell => Assert.NotEqual("—", cell.TextContent.Trim()));
+        Assert.All(cut.FindAll("td.doc-updated"), cell => Assert.NotEqual("—", cell.TextContent.Trim()));
     }
 
     [Fact]

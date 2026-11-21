@@ -10,9 +10,9 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 | `/login` | Đăng nhập 2 bước (layout riêng, không có menu): mật khẩu rồi mã OTP. Mọi trang khác chuyển về đây khi chưa đăng nhập | Giả: `admin` / `admin`, mã `123456`; phiên lưu trong localStorage |
 | `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng. Trên cùng là **tiến độ dự án** so với kế hoạch, rồi trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó), rồi các **thẻ KPI** so với mục tiêu đặt ở Settings | Cộng từ mọi document: lịch sử giả lập + job thật (ADR 0008); mục tiêu KPI lấy từ Settings |
 | `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: một cột giữa trang; nhập tên (bắt buộc) trước, rồi chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh), xem / sắp xếp trang rồi Upload. Trên cùng là thanh tiến trình đang ở bước **Scan** (khi đang gửi file thì bước này hiện "Sending to the OCR service…"). Upload xong thì **mở trang của document**, thanh tiến trình chạy tiếp từ Recognizing | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
-| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và thời điểm cập nhật cuối; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Lịch sử giả lập + job thật |
-| `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; cột Version và Last updated tách riêng | Lịch sử giả lập + job thật + phần lưu trong bộ nhớ |
-| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Lịch sử giả lập + job thật |
+| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và các cột theo dõi chung; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Lịch sử giả lập + job thật |
+| `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; các cột theo dõi chung | Lịch sử giả lập + job thật + phần lưu trong bộ nhớ |
+| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ) với các cột theo dõi chung, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Lịch sử giả lập + job thật |
 | `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn), cùng hàng là các nút **Approve and archive** (hoặc *Send back to review*), **Edit** (mở Word) và **Delete**; preview ảnh gốc cạnh trang Word (từng trang), bên phải số trang là ô chọn **DOCX / PDF / TXT** và nút **Download** (bản hiện tại; bản cuối khi đã lưu trữ); dưới số trang là cảnh báo **trang trùng** và các nút **Insert pages / Replace page n / Delete page n** (mục *Sửa trang* bên dưới); bên dưới là metadata (nút *Edit details* để sửa, lưu thành phiên bản mới) và lịch sử phiên bản | Job thật + phần lưu trong bộ nhớ |
 | `/reports` (`?report=…&from=yyyy-MM-dd&to=yyyy-MM-dd`) | **Reports**: chọn một trong 6 báo cáo và khoảng ngày, xem dạng bảng, xuất CSV, in | Cùng số liệu với Dashboard; báo cáo hoạt động người dùng đọc nhật ký thật |
 | `/users` | **Users › Users**: danh sách người dùng, thêm / sửa | Dùng thật, trong bộ nhớ; tài khoản ban đầu là mẫu |
@@ -20,6 +20,11 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 | `/users/activity` (`?user=&category=&result=&from=&to=&q=`) | **Users › Activity logs**: nhật ký hoạt động, kiểm tra toàn vẹn, lọc, xuất CSV | 30 ngày sinh từ lịch sử giả lập + nhật ký thật của app |
 | `/admin` (`?tab=Retention\|Quality\|Kpi\|Integrations`) | **Settings** (mục cuối của menu): phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, mục tiêu KPI, hệ thống kết nối. Link cũ `?tab=Users\|Roles\|Audit` chuyển sang trang mới | Lưu giữ: mẫu. Cài đặt kiểm tra, mục tiêu KPI: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật |
 | `/ocr/jobs`, `/ocr/jobs/{id}` | Không còn trang riêng: chuyển hướng sang `/documents`, `/documents/{id}` | — |
+
+Mọi bảng danh sách document (All Documents, Review Queue, Document Archive) bắt buộc có cùng các **cột theo dõi**, theo thứ tự:
+**Pages**, **Uploaded by**, **Uploaded at**, **Approved by**, **Approved date**, **Version**, **Last updated at**. Chưa có dữ liệu
+(chưa đếm được trang, không rõ người upload, chưa duyệt, chưa có phiên bản…) thì hiện —. Hai component
+`DocumentTrackingHeaders` / `DocumentTrackingCells` vẽ các cột này; bảng danh sách document mới cũng dùng chúng.
 
 ## Document = job OCR
 

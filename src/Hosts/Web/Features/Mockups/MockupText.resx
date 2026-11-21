@@ -185,8 +185,11 @@
   <data name="Review.ActionLabel" xml:space="preserve"><value>Review {0}</value></data>
   <data name="Review.NoConfidence" xml:space="preserve"><value>Known once the document has been checked</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>Pages</value></data>
+  <data name="Column.UploadedBy" xml:space="preserve"><value>Uploaded by</value></data>
+  <data name="Column.UploadedAt" xml:space="preserve"><value>Uploaded at</value></data>
+  <data name="Column.ApprovedBy" xml:space="preserve"><value>Approved by</value></data>
+  <data name="Column.ApprovedAt" xml:space="preserve"><value>Approved date</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>OCR confidence</value></data>
-  <data name="Column.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>Back to the review queue</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>Batch</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>Settings</value></data>
@@ -271,7 +274,6 @@
   <data name="Approved.Empty" xml:space="preserve"><value>No archived documents yet. Documents appear here once they are approved in the review queue or pass the automatic check.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>Go to the review queue</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>Download {0} as {1}</value></data>
-  <data name="Column.Approved" xml:space="preserve"><value>Approved</value></data>
   <data name="Column.Download" xml:space="preserve"><value>Download</value></data>
   <data name="Filter.AllConfidentiality" xml:space="preserve"><value>All levels</value></data>
   <data name="Filter.ApprovedFrom" xml:space="preserve"><value>Approved from</value></data>
@@ -280,7 +282,6 @@
   <data name="Meta.Approved" xml:space="preserve"><value>Approved</value></data>
   <data name="Audit.Downloaded" xml:space="preserve"><value>Downloaded final version {1} as {0}</value></data>
   <data name="Audit.Exported" xml:space="preserve"><value>Exported the approved list ({0} documents)</value></data>
-  <data name="Approved.Version" xml:space="preserve"><value>Version {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>Flagged by the automatic check</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>Approved automatically</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>Why it is here</value></data>
@@ -357,7 +358,7 @@
   <data name="Steps.StateCurrent" xml:space="preserve"><value>in progress</value></data>
   <data name="Steps.StateTodo" xml:space="preserve"><value>not started</value></data>
   <data name="Steps.ChooseFile" xml:space="preserve"><value>Choose the file and upload it</value></data>
-  <data name="Column.LastUpdated" xml:space="preserve"><value>Last updated</value></data>
+  <data name="Column.LastUpdated" xml:space="preserve"><value>Last updated at</value></data>
   <data name="Pager.RowsPerPage" xml:space="preserve"><value>Rows per page</value></data>
   <data name="Pager.Range" xml:space="preserve"><value>{0}–{1} of {2}</value></data>
   <data name="Pager.Page" xml:space="preserve"><value>Page {0}</value></data>

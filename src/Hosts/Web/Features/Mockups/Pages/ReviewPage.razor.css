@@ -37,11 +37,6 @@
     min-width: 12rem;
 }
 
-/* Date and time may wrap between the two, so the whole table, with its Review button, fits the page. */
-.date-cell {
-    min-width: 6.5rem;
-}
-
 .issue-list {
     margin: 0;
     padding-inline-start: 1rem;

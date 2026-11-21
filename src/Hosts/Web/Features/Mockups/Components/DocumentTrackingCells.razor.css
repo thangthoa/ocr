@@ -1,0 +1,4 @@
+/* Date and time may wrap between the two, which keeps a list with all these columns narrower. */
+.date-cell {
+    min-width: 6.5rem;
+}

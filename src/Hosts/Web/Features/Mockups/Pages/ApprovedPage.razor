@@ -127,7 +127,7 @@ else
                         <th scope="col">@Text["Column.Reference"]</th>
                         <th scope="col">@Text["Column.Department"] / @Text["Column.Kind"]</th>
                         <th scope="col">@Text["Meta.Confidentiality"]</th>
-                        <th scope="col">@Text["Column.Approved"]</th>
+                        <DocumentTrackingHeaders />
                         <th scope="col">@Text["Column.Download"]</th>
                     </tr>
                 </thead>
@@ -153,17 +153,7 @@ else
                                 <div class="small text-muted">@(metadata.Kind is { } kind ? Text.Kind(kind) : Missing)</div>
                             </td>
                             <td class="text-nowrap">@Text.Confidentiality(metadata.Confidentiality)</td>
-                            <td class="text-nowrap approved-by">
-                                @if (document.Approval is { } approval)
-                                {
-                                    <span dir="ltr">@approval.By</span>
-                                    <div class="small text-muted" title="@FormatDateTime(approval.AtUtc)">@FormatShortDate(approval.AtUtc)</div>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">@Missing</span>
-                                }
-                            </td>
+                            <DocumentTrackingCells Document="document" />
                             <td class="text-nowrap">
                                 @* Floating: the panel is placed in the window, so the table's scroll box does not cut it off. *@
                                 <details class="popup-menu is-floating download-menu">
@@ -184,7 +174,6 @@ else
                                         }
                                     </ul>
                                 </details>
-                                <div class="small text-muted mt-1">@Text["Approved.Version", document.CurrentVersion?.Number ?? Missing]</div>
                             </td>
                         </tr>
                     }

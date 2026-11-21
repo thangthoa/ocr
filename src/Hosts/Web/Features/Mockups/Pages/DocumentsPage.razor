@@ -80,8 +80,7 @@ else
                         <th scope="col">@Text["Column.Department"] / @Text["Column.Kind"]</th>
                         <th scope="col">@Text["Column.DocumentDate"]</th>
                         <th scope="col">@Text["Column.Status"]</th>
-                        <th scope="col">@Text["Column.Version"]</th>
-                        <th scope="col">@Text["Column.LastUpdated"]</th>
+                        <DocumentTrackingHeaders />
                         <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
                     </tr>
                 </thead>
@@ -125,8 +124,7 @@ else
                                     <div class="small text-danger mt-1">@OcrText.JobError(failed.ErrorCode)</div>
                                 }
                             </td>
-                            <td class="text-nowrap doc-version" dir="ltr">@(document.CurrentVersion?.Number ?? Missing)</td>
-                            <td class="small text-nowrap doc-updated">@FormatDateTime(document.UpdatedAtUtc)</td>
+                            <DocumentTrackingCells Document="document" />
                             <td class="text-end text-nowrap" @onclick:stopPropagation="true">
                                 @if (!document.IsSample)
                                 {

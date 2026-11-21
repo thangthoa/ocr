@@ -1,0 +1,10 @@
+@inject IStringLocalizer<MockupText> Text
+
+@* The columns every document list shows, in this order; DocumentTrackingCells fills them for a row. *@
+<th scope="col" class="text-end">@Text["Column.Pages"]</th>
+<th scope="col">@Text["Column.UploadedBy"]</th>
+<th scope="col">@Text["Column.UploadedAt"]</th>
+<th scope="col">@Text["Column.ApprovedBy"]</th>
+<th scope="col">@Text["Column.ApprovedAt"]</th>
+<th scope="col">@Text["Column.Version"]</th>
+<th scope="col">@Text["Column.LastUpdated"]</th>

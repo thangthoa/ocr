@@ -74,11 +74,9 @@ else
                     <tr>
                         <th scope="col">@Text["Column.File"]</th>
                         <th scope="col">@Text["Column.Title"]</th>
-                        <th scope="col" class="text-end">@Text["Column.Pages"]</th>
                         <th scope="col" class="text-end">@Text["Column.Confidence"]</th>
                         <th scope="col">@Text["Column.Issues"]</th>
-                        <th scope="col">@Text["Column.Uploaded"]</th>
-                        <th scope="col">@Text["Column.LastUpdated"]</th>
+                        <DocumentTrackingHeaders />
                         <th scope="col"><span class="visually-hidden">@Text["Column.Actions"]</span></th>
                     </tr>
                 </thead>
@@ -97,7 +95,6 @@ else
                                 </div>
                             </td>
                             <td class="doc-title" lang="ar" dir="auto">@document.Metadata.Title</td>
-                            <td class="text-end">@(document.Pages > 0 ? FormatNumber(document.Pages) : Missing)</td>
                             <td class="text-end">
                                 @if (document.Confidence is { } confidence)
                                 {
@@ -123,8 +120,7 @@ else
                                     <span class="text-muted">@Missing</span>
                                 }
                             </td>
-                            <td class="small date-cell">@FormatDateTime(document.UploadedAtUtc)</td>
-                            <td class="small date-cell review-updated">@FormatDateTime(document.UpdatedAtUtc)</td>
+                            <DocumentTrackingCells Document="document" />
                             <td class="text-end">
                                 <a class="btn btn-sm btn-outline-primary" href="@DetailUrl(document.Id)"
                                    aria-label="@Text["Review.ActionLabel", document.FileName]">@Text["Review.Action"]</a>

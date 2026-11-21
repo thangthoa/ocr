@@ -169,7 +169,7 @@ public sealed class DocumentFlowUiTests : BunitContext
         cut.WaitForElement("tbody tr");
 
         var headers = cut.FindAll("thead th").Select(th => th.TextContent.Trim()).ToList();
-        Assert.Equal("Last updated", headers[headers.IndexOf("Version") + 1]);
+        Assert.Equal("Last updated at", headers[headers.IndexOf("Version") + 1]);
         Assert.Empty(cut.FindAll("a[href='scan']"));
         var archived = cut.FindAll("tbody tr").First(row => row.TextContent.Contains("ADM-2022-0310.pdf", StringComparison.Ordinal));
         Assert.Equal("1.1", archived.QuerySelector(".doc-version")!.TextContent.Trim());

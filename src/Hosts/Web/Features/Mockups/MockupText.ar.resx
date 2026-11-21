@@ -185,8 +185,11 @@
   <data name="Review.ActionLabel" xml:space="preserve"><value>مراجعة {0}</value></data>
   <data name="Review.NoConfidence" xml:space="preserve"><value>تُعرف بعد فحص المستند</value></data>
   <data name="Column.Pages" xml:space="preserve"><value>الصفحات</value></data>
+  <data name="Column.UploadedBy" xml:space="preserve"><value>رُفع بواسطة</value></data>
+  <data name="Column.UploadedAt" xml:space="preserve"><value>تاريخ الرفع</value></data>
+  <data name="Column.ApprovedBy" xml:space="preserve"><value>اعتمده</value></data>
+  <data name="Column.ApprovedAt" xml:space="preserve"><value>تاريخ الاعتماد</value></data>
   <data name="Column.Confidence" xml:space="preserve"><value>دقة التعرّف</value></data>
-  <data name="Column.Uploaded" xml:space="preserve"><value>تاريخ الرفع</value></data>
   <data name="Detail.BackToReview" xml:space="preserve"><value>العودة إلى قائمة المراجعة</value></data>
   <data name="Meta.Batch" xml:space="preserve"><value>الدفعة</value></data>
   <data name="Admin.Title" xml:space="preserve"><value>الإعدادات</value></data>
@@ -271,7 +274,6 @@
   <data name="Approved.Empty" xml:space="preserve"><value>لا توجد مستندات مؤرشفة بعد. تظهر المستندات هنا بعد اعتمادها في قائمة المراجعة أو اجتيازها الفحص التلقائي.</value></data>
   <data name="Approved.GoToReview" xml:space="preserve"><value>الانتقال إلى قائمة المراجعة</value></data>
   <data name="Approved.DownloadLabel" xml:space="preserve"><value>تنزيل {0} بصيغة {1}</value></data>
-  <data name="Column.Approved" xml:space="preserve"><value>الاعتماد</value></data>
   <data name="Column.Download" xml:space="preserve"><value>تنزيل</value></data>
   <data name="Filter.AllConfidentiality" xml:space="preserve"><value>كل المستويات</value></data>
   <data name="Filter.ApprovedFrom" xml:space="preserve"><value>معتمد من تاريخ</value></data>
@@ -280,7 +282,6 @@
   <data name="Meta.Approved" xml:space="preserve"><value>تاريخ الاعتماد</value></data>
   <data name="Audit.Downloaded" xml:space="preserve"><value>نزّل النسخة النهائية {1} بصيغة {0}</value></data>
   <data name="Audit.Exported" xml:space="preserve"><value>صدّر قائمة المستندات المعتمدة ({0} مستند)</value></data>
-  <data name="Approved.Version" xml:space="preserve"><value>الإصدار {0}</value></data>
   <data name="Review.Flagged" xml:space="preserve"><value>أشار إليها الفحص الآلي</value></data>
   <data name="Review.AutoApproved" xml:space="preserve"><value>اعتُمدت آليًا</value></data>
   <data name="Column.Issues" xml:space="preserve"><value>سبب وجوده هنا</value></data>

@@ -60,6 +60,7 @@
   <data name="Chart.Pages" xml:space="preserve"><value>الصفحات</value></data>
   <data name="Status.Heading" xml:space="preserve"><value>المستندات حسب الحالة</value></data>
   <data name="Dept.Heading" xml:space="preserve"><value>حسب الإدارة</value></data>
+  <data name="Dept.Unassigned" xml:space="preserve"><value>الإدارة غير محددة</value></data>
   <data name="Dept.Department" xml:space="preserve"><value>الإدارة</value></data>
   <data name="Dept.Documents" xml:space="preserve"><value>المستندات</value></data>
   <data name="Dept.Pages" xml:space="preserve"><value>الصفحات</value></data>
@@ -81,6 +82,7 @@
   <data name="Search.Label" xml:space="preserve"><value>البحث في البيانات الوصفية</value></data>
   <data name="Search.Field" xml:space="preserve"><value>البحث في</value></data>
   <data name="Search.Placeholder" xml:space="preserve"><value>اسم الملف، العنوان، الرقم المرجعي، كلمة مفتاحية…</value></data>
+  <data name="Search.HistoryContent" xml:space="preserve"><value>يتم البحث في مستندات السجل المحاكى حسب بياناتها فقط، وليس حسب نصها.</value></data>
   <data name="Column.File" xml:space="preserve"><value>الملف</value></data>
   <data name="Column.Title" xml:space="preserve"><value>العنوان</value></data>
   <data name="Column.Reference" xml:space="preserve"><value>الرقم المرجعي</value></data>
@@ -240,6 +242,7 @@
   <data name="Audit.SignedIn" xml:space="preserve"><value>سجّل الدخول</value></data>
   <data name="Audit.SignInFailed" xml:space="preserve"><value>فشل تسجيل الدخول</value></data>
   <data name="Audit.Uploaded" xml:space="preserve"><value>رفع ملفًا (الدفعة {0})</value></data>
+  <data name="Audit.UploadedBatch" xml:space="preserve"><value>رفع {1} مستند (الدفعة {0})</value></data>
   <data name="Audit.Edited" xml:space="preserve"><value>حفظ الإصدار {0}</value></data>
   <data name="Audit.Restored" xml:space="preserve"><value>استعاد كإصدار {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>غيّر الحالة إلى {0}</value></data>
@@ -379,6 +382,7 @@
   <data name="KpiStatus.OnTrack" xml:space="preserve"><value>على المسار</value></data>
   <data name="KpiStatus.AtRisk" xml:space="preserve"><value>معرّض للخطر</value></data>
   <data name="KpiStatus.OffTrack" xml:space="preserve"><value>خارج المسار</value></data>
+  <data name="KpiStatus.NoData" xml:space="preserve"><value>لا توجد بيانات بعد</value></data>
   <data name="KpiUnit.Pages" xml:space="preserve"><value>صفحة</value></data>
   <data name="KpiUnit.Documents" xml:space="preserve"><value>مستند</value></data>
   <data name="KpiUnit.Percent" xml:space="preserve"><value>٪</value></data>
@@ -394,6 +398,7 @@
   <data name="Project.Heading" xml:space="preserve"><value>تقدّم المشروع</value></data>
   <data name="Project.Report" xml:space="preserve"><value>عرض تقرير التقدّم</value></data>
   <data name="Project.OfTotal" xml:space="preserve"><value>من {0} صفحة ({1})</value></data>
+  <data name="Project.Documents" xml:space="preserve"><value>مستند</value></data>
   <data name="Project.Summary" xml:space="preserve"><value>تم مسح {0} من {1} صفحة؛ تتوقع الخطة {2} حتى اليوم.</value></data>
   <data name="Project.PlanToDate" xml:space="preserve"><value>المخطط حتى اليوم: {0} ({1})</value></data>
   <data name="Project.Ahead" xml:space="preserve"><value>متقدّم على الخطة بـ {0} صفحة</value></data>

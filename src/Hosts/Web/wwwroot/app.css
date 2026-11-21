@@ -554,6 +554,8 @@ summary:focus-visible {
 .kpi-on-track { --kpi-fill: var(--ae-green-600); --kpi-bg: var(--ae-green-100); --kpi-fg: var(--ae-green-800); --kpi-border: var(--app-border-subtle); }
 .kpi-at-risk { --kpi-fill: var(--ae-camel-500); --kpi-bg: var(--ae-camel-100); --kpi-fg: var(--ae-camel-800); --kpi-border: var(--ae-camel-200); }
 .kpi-off-track { --kpi-fill: var(--ae-red-600); --kpi-bg: var(--ae-red-100); --kpi-fg: var(--ae-red-800); --kpi-border: var(--ae-red-200); }
+/* A KPI with nothing to measure in the period (no document checked or reviewed yet). */
+.kpi-none { --kpi-fill: var(--ae-black-300); --kpi-bg: var(--ae-black-50); --kpi-fg: var(--ae-black-600); --kpi-border: var(--app-border-subtle); }
 
 .badge.kpi-status {
     background-color: var(--kpi-bg);

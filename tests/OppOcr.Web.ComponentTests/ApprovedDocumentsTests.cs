@@ -65,7 +65,7 @@ public sealed class ApprovedDocumentsTests : BunitContext
             ["ADM-2022-0310.pdf", "HR-2018-0044.pdf", "PV-2020-0021.pdf", "LG-2011-0032.pdf", "HR-2016-0187.pdf", "PO-2019-0388.pdf", "PV-2019-0413.pdf"],
             Names(cut)));
         Assert.Contains("7 document(s)", cut.Find("#approved-count").TextContent, StringComparison.Ordinal);
-        Assert.All(cut.FindAll(".approved-by span[dir=ltr]"), approver => Assert.Equal("m.khalid", approver.TextContent));
+        Assert.All(cut.FindAll(".approved-by span[dir=ltr]"), approver => Assert.Equal("review01", approver.TextContent));
         Assert.Equal("/documents/DOC-2026-000112/final?format=docx", cut.Find("tbody tr .download-docx").GetAttribute("href"));
         Assert.Equal("/documents/DOC-2026-000112/final?format=txt", cut.Find("tbody tr .download-txt").GetAttribute("href"));
         Assert.Empty(cut.FindAll("#export-csv"));
@@ -201,7 +201,7 @@ public sealed class ApprovedDocumentsTests : BunitContext
         Assert.Equal(3, lines.Length);
         Assert.Equal("Document ID,File name,Title,Reference no.,Document date,Department,Document type,Confidentiality,Keywords,Pages,Version,Uploaded by,Uploaded,Approved by,Approved", lines[0]);
         Assert.StartsWith("DOC-2026-000109,PV-2020-0021.pdf,", lines[1], StringComparison.Ordinal);
-        Assert.EndsWith(",2020-01-22,Finance,Payment voucher,Internal,تدريب; دفعة,5,1.1,s.karim,2026-11-15T09:00:00Z,m.khalid,2026-11-15T11:10:00Z", lines[1], StringComparison.Ordinal);
+        Assert.EndsWith(",2020-01-22,Finance,Payment voucher,Internal,تدريب; دفعة,5,1.1,capture02,2026-11-15T09:00:00Z,review01,2026-11-15T11:10:00Z", lines[1], StringComparison.Ordinal);
         Assert.Equal("2", Assert.Single(Audit.Latest(), e => e.Action == AuditAction.Exported).Detail);
     }
 

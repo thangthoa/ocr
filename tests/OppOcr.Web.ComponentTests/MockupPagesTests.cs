@@ -187,25 +187,28 @@ public sealed class MockupPagesTests : BunitContext
     }
 
     [Fact]
-    public void Dashboard_switches_between_day_week_and_month()
+    public async Task Dashboard_switches_between_day_week_and_month()
     {
+        var facts = (await Services.GetRequiredService<DocumentCatalog>().SnapshotAsync(CancellationToken.None)).Facts;
         var cut = Render<DashboardPage>();
+        cut.WaitForElement("#kpi-summary");
 
-        // Pages per day is the daily average of the period: 25,510 today, 180,610 over 7 days, 759,510 over 30.
+        // Pages per day is the daily average of the period; the day chart has a bar per working hour.
         Assert.Equal(16, cut.FindAll(".bar").Count);
-        Assert.Equal("25,510", PagesPerDay());
+        Assert.Equal(PagesPerDay(ReportPeriod.Day), cut.Find("#kpi-PagesPerDay .kpi-card-value").TextContent);
         Assert.Equal("true", cut.Find("#period-Day").GetAttribute("aria-pressed"));
 
         cut.Find("#period-Week").Click();
         Assert.Equal(7, cut.FindAll(".bar").Count);
-        Assert.Equal("25,801", PagesPerDay());
+        Assert.Equal(PagesPerDay(ReportPeriod.Week), cut.Find("#kpi-PagesPerDay .kpi-card-value").TextContent);
         Assert.Equal("true", cut.Find("#period-Week").GetAttribute("aria-pressed"));
 
         cut.Find("#period-Month").Click();
         Assert.Equal(30, cut.FindAll(".bar").Count);
-        Assert.Equal("25,317", PagesPerDay());
+        Assert.Equal(PagesPerDay(ReportPeriod.Month), cut.Find("#kpi-PagesPerDay .kpi-card-value").TextContent);
 
-        string PagesPerDay() => cut.Find("#kpi-PagesPerDay .kpi-card-value").TextContent;
+        string PagesPerDay(ReportPeriod period) =>
+            ((int)Math.Round(ProjectReports.For(facts, period).PagesPerDay)).ToString("N0", System.Globalization.CultureInfo.CurrentCulture);
     }
 
     [Fact]

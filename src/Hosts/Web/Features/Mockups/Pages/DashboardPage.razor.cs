@@ -1,31 +1,50 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Kpi;
+using OppOcr.Web.Features.Ocr;
 using static OppOcr.Web.Features.Mockups.MockupTextExtensions;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
-/// Report mockup: fixed sample figures per day, week and month (see <see cref="SampleReports"/>), measured against
-/// the KPI targets and the project plan set in Settings (<see cref="KpiSettingsStore"/>).
+/// The project dashboard per day, week and 30 days, added up from every document (<see cref="DocumentSnapshot"/>: the
+/// simulated history, the samples and the files uploaded in this app), measured against the KPI targets and the project
+/// plan set in Settings (<see cref="KpiSettingsStore"/>). It reloads when an OCR job changes, so an upload shows at once.
 /// </summary>
-public sealed partial class DashboardPage
+public sealed partial class DashboardPage : IDisposable
 {
     private static readonly double[] NiceSteps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
 
+    private readonly CancellationTokenSource _disposed = new();
+    private IDisposable? _subscription;
     private ReportPeriod _period = ReportPeriod.Day;
+    private DocumentSnapshot? _snapshot;
+    private ReportSnapshot? _report;
+    private string? _loadError;
+
+    [Inject] private DocumentCatalog Catalog { get; set; } = default!;
+
+    [Inject] private ProjectHistory History { get; set; } = default!;
+
+    [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
 
     [Inject] private IStringLocalizer<MockupText> Text { get; set; } = default!;
 
-    [Inject] private TimeProvider Time { get; set; } = default!;
+    [Inject] private IStringLocalizer<OcrText> OcrText { get; set; } = default!;
 
     [Inject] private KpiSettingsStore Kpis { get; set; } = default!;
 
-    private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+    [Inject] private ILogger<DashboardPage> Logger { get; set; } = default!;
 
-    private ReportSnapshot Report => SampleReports.For(_period, Today);
+    private ReportSnapshot Report => _report!;
+
+    private ProjectFacts Facts => _snapshot!.Facts;
+
+    private DateOnly Today => Facts.Today;
 
     private KpiSettings Settings => Kpis.Current;
 
@@ -33,11 +52,56 @@ public sealed partial class DashboardPage
 
     private List<KpiTarget> VisibleKpis => Settings.Targets.Where(t => t.ShowOnDashboard).ToList();
 
+    /// <summary>Simulated documents (the history or the samples) are part of the figures.</summary>
+    private bool HasSimulatedData => History.Enabled || _snapshot!.Stored.Any(d => d.IsSample);
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+        _disposed.Cancel();
+        _disposed.Dispose();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _subscription = Notifications.Subscribe(_ => InvokeAsync(async () =>
+        {
+            await LoadAsync();
+            StateHasChanged();
+        }));
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            _snapshot = await Catalog.SnapshotAsync(_disposed.Token);
+            _report = ProjectReports.For(_snapshot.Facts, _period);
+            _loadError = null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LogUnexpected(Logger, ex);
+            _loadError = OcrText["LoadFailed"];
+        }
+    }
+
+    private void SelectPeriod(ReportPeriod period)
+    {
+        _period = period;
+        if (_snapshot is not null)
+            _report = ProjectReports.For(_snapshot.Facts, period);
+    }
+
     private string KpiSummary
     {
         get
         {
-            var statuses = VisibleKpis.Select(t => KpiRules.Evaluate(Report.Actual(t.Kind), t)).ToList();
+            var statuses = VisibleKpis
+                .Select(t => Report.Actual(t.Kind) is { } actual ? KpiRules.Evaluate(actual, t) : (KpiStatus?)null)
+                .OfType<KpiStatus>()
+                .ToList();
             return Text["KpiBoard.Summary",
                 FormatNumber(statuses.Count(s => s == KpiStatus.OnTrack)),
                 FormatNumber(statuses.Count(s => s == KpiStatus.AtRisk)),
@@ -45,27 +109,22 @@ public sealed partial class DashboardPage
         }
     }
 
-    /// <summary>The chart's target line: the daily pages target, spread over the hours of a day report.</summary>
+    /// <summary>The chart's target line: the daily pages target, spread over the working hours of a day report.</summary>
     private int BarTarget
     {
         get
         {
             var daily = Settings.For(KpiKind.PagesPerDay).Target;
-            return (int)Math.Round(_period == ReportPeriod.Day ? daily / Report.Bars.Count : daily);
+            return (int)Math.Round(_period == ReportPeriod.Day ? daily / HistoryProfile.HourWeights.Length : daily);
         }
     }
 
-    /// <summary>Pages scanned since the project started, up to today (the period buttons do not change it).</summary>
-    private int ProjectPages
-    {
-        get
-        {
-            var pages = 0;
-            for (var day = Plan.Start; day <= Today; day = day.AddDays(1))
-                pages += SampleReports.PagesOn(day, Today);
-            return pages;
-        }
-    }
+    /// <summary>Everything since the project started, up to today (the period buttons do not change it).</summary>
+    private DayFacts ProjectTotals => Plan.Start <= Today ? Facts.Sum(Plan.Start, Today) : new DayFacts();
+
+    private int ProjectPages => ProjectTotals.Pages;
+
+    private int ProjectDocuments => ProjectTotals.Documents;
 
     private int PlannedPages => Plan.PlannedBy(Today);
 
@@ -105,10 +164,10 @@ public sealed partial class DashboardPage
     /// <summary>A line under some KPIs: the change against the previous period, or what the figure counts.</summary>
     private string? KpiNote(KpiKind kind) => kind switch
     {
-        KpiKind.PagesPerDay => Text["Kpi.VsPrevious", FormatSigned(Report.PagesChangePercent, "0.0") + "%"].Value,
-        KpiKind.OcrAccuracy => Text["Kpi.PointsChange", FormatSigned(Report.ConfidenceChangePoints, "0.0")].Value,
+        KpiKind.PagesPerDay when Report.PagesChangePercent is { } change => Text["Kpi.VsPrevious", FormatSigned(change, "0.0") + "%"].Value,
+        KpiKind.OcrAccuracy when Report.ConfidenceChangePoints is { } points => Text["Kpi.PointsChange", FormatSigned(points, "0.0")].Value,
         KpiKind.ReviewBacklog => Text["Kpi.ReviewNow"].Value,
-        KpiKind.PagesPerOperator => Text["Kpi.Operators", FormatNumber(SampleReports.CaptureOperators)].Value,
+        KpiKind.PagesPerOperator => Text["Kpi.Operators", FormatNumber(Report.Operators)].Value,
         _ => null,
     };
 
@@ -117,7 +176,7 @@ public sealed partial class DashboardPage
     {
         get
         {
-            var top = Math.Max(Report.Bars.Max(b => b.Pages), BarTarget) * 1.08;
+            var top = Math.Max(Math.Max(Report.Bars.Max(b => b.Pages), BarTarget), 1) * 1.08;
             var magnitude = Math.Pow(10, Math.Floor(Math.Log10(top)));
             var step = NiceSteps.First(s => s * magnitude >= top);
             return (int)(step * magnitude);
@@ -125,15 +184,15 @@ public sealed partial class DashboardPage
     }
 
     private string RangeLabel => Report.From == Report.To
-        ? MockupTextExtensions.FormatDate(Report.From)
-        : Text["Dashboard.Range", MockupTextExtensions.FormatDate(Report.From), MockupTextExtensions.FormatDate(Report.To)];
+        ? FormatDate(Report.From)
+        : Text["Dashboard.Range", FormatDate(Report.From), FormatDate(Report.To)];
 
     private string ChartTitle => _period == ReportPeriod.Day ? Text["Chart.PagesByHour"] : Text["Chart.PagesByDay"];
 
     private string ChartSummary => Text["Chart.Summary", ChartTitle,
-        MockupTextExtensions.FormatNumber(Report.Bars.Min(b => b.Pages)),
-        MockupTextExtensions.FormatNumber(Report.Bars.Max(b => b.Pages)),
-        MockupTextExtensions.FormatNumber(BarTarget)];
+        FormatNumber(Report.Bars.Min(b => b.Pages)),
+        FormatNumber(Report.Bars.Max(b => b.Pages)),
+        FormatNumber(BarTarget)];
 
     private string BarLabel(ReportBar bar, bool full) => _period switch
     {
@@ -156,7 +215,13 @@ public sealed partial class DashboardPage
     /// <summary>A status in the legend opens All Documents filtered to it.</summary>
     private static string StatusUrl(DocumentStatus status) => $"documents?status={status}";
 
+    private string DepartmentName(DocumentDepartment? department) =>
+        department is { } value ? Text.Department(value) : Text["Dept.Unassigned"];
+
     /// <summary>CSS lengths must use the invariant culture whatever the UI language is.</summary>
     private static string CssPercent(double value) =>
         Math.Clamp(value, 0, 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Dashboard UI: failed to load the figures")]
+    private static partial void LogUnexpected(ILogger logger, Exception exception);
 }

@@ -5,7 +5,7 @@
 
 <h1 class="h3 mb-3">@Text["Review.Title"]</h1>
 
-@if (_list?.JobsError is { } jobsError)
+@if (_snapshot?.List.JobsError is { } jobsError)
 {
     <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
         <span class="me-auto">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</span>
@@ -20,11 +20,11 @@ else if (_loadError is not null)
     </div>
 }
 
-@if (_list is null && _loadError is null)
+@if (_snapshot is null && _loadError is null)
 {
     <p class="text-muted" role="status">@OcrText["Loading"]</p>
 }
-else if (_queue.Count == 0)
+else if (QueueCount == 0)
 {
     <div class="empty-state" role="status">@Text["Review.Empty"]</div>
 }
@@ -33,15 +33,15 @@ else
     <dl class="review-summary mb-3">
         <div>
             <dt>@Text["Kpi.Review"]</dt>
-            <dd id="review-count">@_queue.Count</dd>
+            <dd id="review-count">@FormatNumber(QueueCount)</dd>
         </div>
         <div>
             <dt>@Text["Review.Flagged"]</dt>
-            <dd id="review-flagged">@_queue.Count(d => d.Quality is { Passed: false })</dd>
+            <dd id="review-flagged">@FormatNumber(FlaggedCount)</dd>
         </div>
         <div>
             <dt>@Text["Review.AutoApproved"]</dt>
-            <dd id="review-auto-approved">@_autoApproved</dd>
+            <dd id="review-auto-approved">@FormatNumber(AutoApprovedCount)</dd>
         </div>
     </dl>
 
@@ -50,14 +50,14 @@ else
     </div>
 
     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <p id="review-results" class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", _results.Count]</p>
+        <p id="review-results" class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", FormatNumber(_results.Total)]</p>
         @if (_filter.HasValues)
         {
             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
         }
     </div>
 
-    @if (_results.Count == 0)
+    @if (_results.Total == 0)
     {
         <div class="empty-state">
             <p class="mb-2">@Text["Documents.None"]</p>
@@ -83,7 +83,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var document in _paging.Slice(_results))
+                    @foreach (var document in _results.Items)
                     {
                         <tr @key="document.Id">
                             <td class="text-nowrap">
@@ -135,6 +135,6 @@ else
             </table>
         </div>
 
-        <TablePager Paging="_paging" Total="_results.Count" Id="review-pager" OnChange="StateHasChanged" />
+        <TablePager Paging="_paging" Total="_results.Total" Id="review-pager" OnChange="ShowPage" />
     }
 }

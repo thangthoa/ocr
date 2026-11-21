@@ -3,6 +3,7 @@ using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Ocr;
 
@@ -10,8 +11,8 @@ namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
 /// Review round 2: documents the automatic check flagged (or that were not checked yet) wait here until
-/// a person approves them. Real documents come first, then the oldest. The queue can be filtered like
-/// All Documents and is shown a page at a time. Reviewing itself happens on the document page.
+/// a person approves them, the simulated history's included. Real documents come first, then the oldest. The queue
+/// can be filtered like All Documents and is shown a page at a time. Reviewing itself happens on the document page.
 /// </summary>
 public sealed partial class ReviewPage : IDisposable
 {
@@ -19,10 +20,8 @@ public sealed partial class ReviewPage : IDisposable
     private readonly DocumentFilterState _filter = new();
     private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
-    private DocumentList? _list;
-    private IReadOnlyList<DocumentRecord> _queue = [];
-    private List<DocumentRecord> _results = [];
-    private int _autoApproved;
+    private DocumentSnapshot? _snapshot;
+    private DocumentPage _results = new([], 0);
     private string? _loadError;
 
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
@@ -57,13 +56,7 @@ public sealed partial class ReviewPage : IDisposable
         _loadError = null;
         try
         {
-            _list = await Catalog.ListAsync(_disposed.Token);
-            _queue = _list.Documents
-                .Where(d => d.Status == DocumentStatus.NeedsReview)
-                .OrderBy(d => d.IsSample)
-                .ThenBy(d => d.UploadedAtUtc ?? DateTime.MaxValue)
-                .ToList();
-            _autoApproved = _list.Documents.Count(d => d.Approval?.By == DocumentStore.QualityCheckAuthor);
+            _snapshot = await Catalog.SnapshotAsync(_disposed.Token);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -74,15 +67,34 @@ public sealed partial class ReviewPage : IDisposable
         Apply(keepPage: true);
     }
 
-    /// <summary>Filters the queue and keeps its order (the shared filter sorts by last update instead).</summary>
+    /// <summary>The whole queue now (every document waiting, whatever the filters).</summary>
+    private int QueueCount => _snapshot?.Facts.WaitingReview ?? 0;
+
+    /// <summary>Waiting because the automatic check flagged them (the others were not checked yet).</summary>
+    private int FlaggedCount => _snapshot?.Facts.WaitingFlagged ?? 0;
+
+    /// <summary>Documents the automatic check approved without a person.</summary>
+    private int AutoApprovedCount => _snapshot?.Facts.AllTime.AutoArchived ?? 0;
+
     private void Apply(bool keepPage = false)
     {
-        var matching = DocumentStore.Filter(_queue, _filter.ToQuery()).Select(d => d.Id).ToHashSet(StringComparer.Ordinal);
-        _results = _queue.Where(d => matching.Contains(d.Id)).ToList();
-        if (keepPage)
-            _paging.Clamp(_results.Count);
-        else
+        if (!keepPage)
             _paging.Reset();
+        ShowPage();
+    }
+
+    /// <summary>Reads the current page of the filtered queue, oldest first; a queue that got shorter moves back to its last page.</summary>
+    private void ShowPage()
+    {
+        if (_snapshot is null)
+            return;
+        var query = _filter.ToQuery(DocumentStatus.NeedsReview);
+        _results = Catalog.Query(_snapshot, query, DocumentOrder.OldestUpload, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        if (_paging.Page > _paging.PageCount(_results.Total))
+        {
+            _paging.Clamp(_results.Total);
+            _results = Catalog.Query(_snapshot, query, DocumentOrder.OldestUpload, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        }
     }
 
     private void ClearFilters()

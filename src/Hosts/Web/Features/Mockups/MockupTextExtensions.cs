@@ -63,6 +63,7 @@ internal static class MockupTextExtensions
             AuditAction.Viewed => text["Audit.Viewed"],
             AuditAction.Searched => text["Audit.Searched", entry.Detail ?? "?"],
             AuditAction.Printed => text["Audit.Printed", entry.Version ?? "?"],
+            AuditAction.Uploaded when entry.DocumentId is null && entry.Detail is not null => text["Audit.UploadedBatch", entry.BatchId ?? Missing, entry.Detail],
             AuditAction.Uploaded => text["Audit.Uploaded", entry.BatchId ?? Missing],
             AuditAction.Edited => text["Audit.Edited", entry.Version ?? "?"],
             AuditAction.MetadataChanged => text["Audit.MetadataChanged", entry.Version ?? "?"],
@@ -163,6 +164,12 @@ internal static class MockupTextExtensions
 
     public static string FormatPercent(double value) => (value / 100).ToString("P1", CultureInfo.CurrentCulture);
 
-    public static string FormatSigned(double value, string format) =>
-        (value > 0 ? "+" : string.Empty) + value.ToString(format, CultureInfo.CurrentCulture);
+    /// <summary>A change with its sign; one that rounds to zero is shown as zero (not "-0.0").</summary>
+    public static string FormatSigned(double value, string format)
+    {
+        var text = value.ToString(format, CultureInfo.CurrentCulture);
+        if (double.Parse(text, NumberStyles.Number, CultureInfo.CurrentCulture) == 0)
+            return 0d.ToString(format, CultureInfo.CurrentCulture);
+        return (value > 0 ? "+" : string.Empty) + text;
+    }
 }

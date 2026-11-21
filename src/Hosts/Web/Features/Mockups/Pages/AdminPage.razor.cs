@@ -41,7 +41,7 @@ public sealed partial class AdminPage : IDisposable
     private AdminTab _tab = AdminTab.Retention;
     private HealthStatus? _ocrHealth;
     private bool _checking;
-    private DocumentList? _documents;
+    private ProjectFacts? _documents;
     private QualityForm _quality = new();
     private bool _qualitySaved;
     private readonly Dictionary<string, string> _kpiErrors = [];
@@ -129,7 +129,7 @@ public sealed partial class AdminPage : IDisposable
     {
         try
         {
-            _documents = await Catalog.ListAsync(_disposed.Token);
+            _documents = (await Catalog.SnapshotAsync(_disposed.Token)).Facts;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -245,7 +245,7 @@ public sealed partial class AdminPage : IDisposable
     private string DocumentsUnder(RetentionRule rule) =>
         _documents is null
             ? MockupTextExtensions.Missing
-            : MockupTextExtensions.FormatNumber(_documents.Documents.Count(d => d.Metadata.Department == rule.Department && d.Metadata.Kind == rule.Kind));
+            : MockupTextExtensions.FormatNumber(_documents.Count((department, kind, _) => department == rule.Department && kind == rule.Kind));
 
     private static string? MovedTab(string? tab) => tab?.ToUpperInvariant() switch
     {

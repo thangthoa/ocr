@@ -1,83 +1,63 @@
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Localization;
+using OppOcr.Web.Features.Mockups.Access;
 using OppOcr.Web.Features.Mockups.Approved;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Kpi;
 
 namespace OppOcr.Web.Features.Mockups.Reports;
 
 /// <summary>
 /// Builds the reports of the Reports page and their CSV files. Every report but the activity report adds up the
-/// sample figures of <see cref="SampleReportFacts"/>; the activity report counts the entries of the activity log.
-/// Headers and labels are in the UI language of the request.
+/// figures of every document (<see cref="DocumentSnapshot.Facts"/>: the simulated history, the samples and the files
+/// uploaded in this app), the same figures as the dashboard; the activity report counts the entries of the activity
+/// log. Headers and labels are in the UI language of the request.
 /// </summary>
-public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettingsStore kpis, AuditLog audit, TimeProvider time)
+public sealed class ReportBuilder(
+    IStringLocalizer<MockupText> text,
+    KpiSettingsStore kpis,
+    AuditLog audit,
+    UserDirectory users,
+    DocumentCatalog catalog,
+    ProjectHistory history,
+    TimeProvider time)
 {
-    /// <summary>A working day of a capture operator, for the pages per hour.</summary>
+    /// <summary>A working shift of a capture operator, for the pages per hour.</summary>
     private const double ShiftHours = 8;
 
     /// <summary>Image, searchable PDF and DOCX of one page, in MB.</summary>
     private const double MegabytesPerPage = 0.42;
 
-    private static readonly double[] OperatorShares = [1.12, 1.05, 1.0, 0.97, 1.08, 0.92, 1.03, 0.95, 1.1, 0.89, 0.98, 0.91];
-
-    private static readonly double[] ReviewerShares = [1.1, 0.95, 1.2, 0.85, 1.0, 0.9];
-
-    private static readonly double[] ReviewerMinutes = [6.5, 7.2, 5.9, 8.1, 6.8, 7.5];
-
-    private static readonly (ExceptionReason Reason, double Share, double Hours)[] Reasons =
-    [
-        (ExceptionReason.LowPageConfidence, 0.36, 20),
-        (ExceptionReason.LowDocumentConfidence, 0.2, 16),
-        (ExceptionReason.PageWarnings, 0.2, 12),
-        (ExceptionReason.EmptyPage, 0.1, 6),
-        (ExceptionReason.MissingMetadata, 0.14, 9),
-    ];
-
-    /// <summary>Share of internal and confidential documents per department; the rest is secret.</summary>
-    private static readonly Dictionary<DocumentDepartment, (double Internal, double Confidential)> Confidentiality = new()
-    {
-        [DocumentDepartment.Finance] = (0.7, 0.25),
-        [DocumentDepartment.HumanResources] = (0.4, 0.5),
-        [DocumentDepartment.Legal] = (0.3, 0.5),
-        [DocumentDepartment.Procurement] = (0.75, 0.22),
-        [DocumentDepartment.Administration] = (0.85, 0.13),
-    };
-
-    private enum ExceptionReason
-    {
-        LowPageConfidence,
-        LowDocumentConfidence,
-        PageWarnings,
-        EmptyPage,
-        MissingMetadata,
-        OcrFailed,
-    }
-
     public DateOnly Today => DateOnly.FromDateTime(time.GetLocalNow().DateTime);
 
-    public ReportTable Build(ReportKind kind, DateOnly from, DateOnly to)
+    public async Task<ReportTable> BuildAsync(ReportKind kind, DateOnly from, DateOnly to, CancellationToken cancellationToken)
     {
         if (ReportRange.Check(from, to, Today) is { } error)
             throw new ArgumentOutOfRangeException(nameof(to), error, "The report period is not valid.");
+        if (kind == ReportKind.Activity)
+            return Activity(from, to);
 
-        return kind switch
+        var snapshot = await catalog.SnapshotAsync(cancellationToken);
+        var facts = snapshot.Facts;
+        var simulated = history.Enabled || snapshot.Stored.Any(d => d.IsSample);
+        var (columns, rows, total) = kind switch
         {
-            ReportKind.Progress => Progress(from, to),
-            ReportKind.Quality => Quality(from, to),
-            ReportKind.Productivity => Productivity(from, to),
-            ReportKind.Exceptions => Exceptions(from, to),
-            ReportKind.Archive => Archive(from, to),
-            ReportKind.Activity => Activity(from, to),
+            ReportKind.Progress => Progress(facts, from, to),
+            ReportKind.Quality => Quality(facts, from, to),
+            ReportKind.Productivity => Productivity(facts, from, to),
+            ReportKind.Exceptions => Exceptions(facts, from, to),
+            ReportKind.Archive => Archive(facts, from, to),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
         };
+        return new ReportTable(kind, from, to, simulated, columns, rows, total);
     }
 
     /// <summary>The report as CSV (UTF-8 with a BOM so Excel reads Arabic); the export is written to the activity log.</summary>
-    internal DownloadFile Export(ReportKind kind, DateOnly from, DateOnly to, string user)
+    internal async Task<DownloadFile> ExportAsync(ReportKind kind, DateOnly from, DateOnly to, string user, CancellationToken cancellationToken)
     {
-        var table = Build(kind, from, to);
+        var table = await BuildAsync(kind, from, to, cancellationToken);
         var csv = new StringBuilder();
         AppendRow(csv, table.Columns.Select(c => c.Header));
         foreach (var row in table.Rows)
@@ -91,44 +71,38 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
         return new DownloadFile([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(csv.ToString())], "text/csv; charset=utf-8", fileName);
     }
 
-    private ReportTable Progress(DateOnly from, DateOnly to)
+    private Report Progress(ProjectFacts facts, DateOnly from, DateOnly to)
     {
-        var today = Today;
         var settings = kpis.Current;
         var target = settings.For(KpiKind.PagesPerDay).Target;
         var project = settings.Project;
-
-        var cumulative = 0;
-        for (var day = project.Start; day < from; day = day.AddDays(1))
-            cumulative += SampleReports.PagesOn(day, today);
+        var cumulative = project.Start < from ? facts.Sum(project.Start, from.AddDays(-1)).Pages : 0;
 
         var rows = new List<IReadOnlyList<ReportCell>>();
         int pagesTotal = 0, documentsTotal = 0;
         for (var day = from; day <= to; day = day.AddDays(1))
         {
-            var facts = SampleReportFacts.For(day, today);
-            var pages = facts.Sum(f => f.Pages);
-            var documents = facts.Sum(f => f.Documents);
-            pagesTotal += pages;
-            documentsTotal += documents;
+            var figures = facts.Sum(day, day);
+            pagesTotal += figures.Pages;
+            documentsTotal += figures.Documents;
             var inProject = day >= project.Start;
             if (inProject)
-                cumulative += pages;
+                cumulative += figures.Pages;
 
             rows.Add(
             [
                 ReportCell.Day(day),
-                ReportCell.Count(pages),
-                ReportCell.Count(documents),
+                ReportCell.Count(figures.Pages),
+                ReportCell.Count(figures.Documents),
                 ReportCell.Count(target),
-                PercentOf(pages, target),
+                PercentOf(figures.Pages, target),
                 inProject ? ReportCell.Count(cumulative) : ReportCell.Empty,
                 inProject ? ReportCell.Count(project.PlannedBy(day)) : ReportCell.Empty,
             ]);
         }
 
         var targetTotal = target * rows.Count;
-        return Table(ReportKind.Progress, from, to,
+        return new Report(
             [
                 new(text["Report.Column.Date"], Numeric: false),
                 new(text["Report.Column.PagesScanned"]),
@@ -143,31 +117,22 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
                 PercentOf(pagesTotal, targetTotal), ReportCell.Empty, ReportCell.Empty]);
     }
 
-    private ReportTable Quality(DateOnly from, DateOnly to)
+    private Report Quality(ProjectFacts facts, DateOnly from, DateOnly to)
     {
-        var facts = SampleReportFacts.For(from, to, Today);
-        IReadOnlyList<ReportCell> Row(ReportCell label, IReadOnlyCollection<DepartmentDay> days)
-        {
-            var auto = Weighted(days, d => d.AutoArchivePercent, d => d.Documents);
-            var failed = Weighted(days, d => d.FailedPercent, d => d.Documents);
-            return
-            [
-                label,
-                ReportCell.Count(days.Sum(d => d.Documents)),
-                ReportCell.Count(days.Sum(d => d.Pages)),
-                ReportCell.Percent(Weighted(days, d => d.Confidence, d => d.Pages)),
-                ReportCell.Percent(Weighted(days, d => d.LowPagesPercent, d => d.Pages)),
-                ReportCell.Percent(auto),
-                ReportCell.Percent(Math.Max(0, 100 - auto - failed)),
-                ReportCell.Percent(failed),
-            ];
-        }
+        static IReadOnlyList<ReportCell> Row(ReportCell label, DayFacts figures) =>
+        [
+            label,
+            ReportCell.Count(figures.Documents),
+            ReportCell.Count(figures.Pages),
+            figures.Confidence is { } confidence ? ReportCell.Percent(confidence) : ReportCell.Empty,
+            Share(figures.LowPages, figures.ConfidencePages),
+            Share(figures.AutoArchived, figures.Documents),
+            Share(figures.Flagged, figures.Documents),
+            Share(figures.Status(DocumentStatus.Failed), figures.Documents),
+        ];
 
-        var rows = facts.GroupBy(f => f.Department)
-            .Select(group => Row(ReportCell.Of(text.Department(group.Key)), group.ToList()))
-            .ToList();
-
-        return Table(ReportKind.Quality, from, to,
+        var rows = facts.ByDepartment(from, to).Select(d => Row(DepartmentLabel(d.Department), d.Facts)).ToList();
+        return new Report(
             [
                 new(text["Report.Column.Department"], Numeric: false),
                 new(text["Report.Column.Documents"]),
@@ -179,63 +144,42 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
                 new(text["Report.Column.Failed"]),
             ],
             rows,
-            Row(TotalLabel, facts));
+            Row(TotalLabel, facts.Sum(from, to)));
     }
 
-    private ReportTable Productivity(DateOnly from, DateOnly to)
+    /// <summary>The people who scanned and reviewed in the period, from the documents themselves: operators first, then reviewers.</summary>
+    private Report Productivity(ProjectFacts facts, DateOnly from, DateOnly to)
     {
-        var facts = SampleReportFacts.For(from, to, Today);
-        var pages = facts.Sum(f => f.Pages);
-        var documents = facts.Sum(f => f.Documents);
-        var reviewed = facts.Sum(f => f.Documents * Math.Max(0, 100 - f.AutoArchivePercent - f.FailedPercent) / 100);
-        var hours = (to.DayNumber - from.DayNumber + 1) * ShiftHours;
-        var operatorWeight = OperatorShares.Sum();
-        var reviewerWeight = ReviewerShares.Sum();
+        var people = facts.ByUser(from, to)
+            .OrderBy(p => p.Facts.Uploaded > 0 ? 0 : 1)
+            .ThenBy(p => p.User, StringComparer.Ordinal)
+            .ToList();
 
         var rows = new List<IReadOnlyList<ReportCell>>();
-        int scannedDocuments = 0, scannedPages = 0, reviewedDocuments = 0;
-        double reviewMinutes = 0;
-        // The last operator and the last reviewer take what rounding left over, so the totals match the other reports.
-        for (var i = 0; i < OperatorShares.Length; i++)
+        int documents = 0, pages = 0, uploadDays = 0, reviewed = 0, timed = 0;
+        double reviewSeconds = 0;
+        foreach (var (user, figures) in people)
         {
-            var last = i == OperatorShares.Length - 1;
-            var operatorPages = last ? pages - scannedPages : (int)Math.Round(pages * OperatorShares[i] / operatorWeight);
-            var operatorDocuments = last ? documents - scannedDocuments : (int)Math.Round(documents * OperatorShares[i] / operatorWeight);
-            scannedPages += operatorPages;
-            scannedDocuments += operatorDocuments;
+            documents += figures.Uploaded;
+            pages += figures.UploadedPages;
+            uploadDays += figures.UploadDays;
+            reviewed += figures.Reviewed;
+            timed += figures.TimedReviews;
+            reviewSeconds += figures.ReviewSeconds;
+            var scanned = figures.Uploaded > 0;
             rows.Add(
             [
-                ReportCell.Of(string.Create(CultureInfo.InvariantCulture, $"capture{i + 1:00}")),
-                ReportCell.Of(text["Role.CaptureOperator"]),
-                ReportCell.Count(operatorDocuments),
-                ReportCell.Count(operatorPages),
-                ReportCell.Amount(operatorPages / hours),
-                ReportCell.Empty,
-                ReportCell.Empty,
+                ReportCell.Of(user),
+                users.Find(user) is { } account ? ReportCell.Of(text.RoleName(account.Role)) : ReportCell.Empty,
+                scanned ? ReportCell.Count(figures.Uploaded) : ReportCell.Empty,
+                scanned ? ReportCell.Count(figures.UploadedPages) : ReportCell.Empty,
+                scanned ? ReportCell.Amount(figures.UploadedPages / (figures.UploadDays * ShiftHours)) : ReportCell.Empty,
+                figures.Reviewed > 0 ? ReportCell.Count(figures.Reviewed) : ReportCell.Empty,
+                figures.TimedReviews > 0 ? ReportCell.Amount(figures.ReviewSeconds / figures.TimedReviews / 60) : ReportCell.Empty,
             ]);
         }
 
-        for (var i = 0; i < ReviewerShares.Length; i++)
-        {
-            var reviewerDocuments = i == ReviewerShares.Length - 1
-                ? (int)Math.Round(reviewed) - reviewedDocuments
-                : (int)Math.Round(reviewed * ReviewerShares[i] / reviewerWeight);
-            var minutes = ReviewerMinutes[i] + SampleReportFacts.Wobble(to, i) * 0.5;
-            reviewedDocuments += reviewerDocuments;
-            reviewMinutes += reviewerDocuments * minutes;
-            rows.Add(
-            [
-                ReportCell.Of(string.Create(CultureInfo.InvariantCulture, $"review{i + 1:00}")),
-                ReportCell.Of(text["Role.Reviewer"]),
-                ReportCell.Empty,
-                ReportCell.Empty,
-                ReportCell.Empty,
-                ReportCell.Count(reviewerDocuments),
-                ReportCell.Amount(minutes),
-            ]);
-        }
-
-        return Table(ReportKind.Productivity, from, to,
+        return new Report(
             [
                 new(text["Report.Column.User"], Numeric: false),
                 new(text["Report.Column.Role"], Numeric: false),
@@ -246,58 +190,35 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
                 new(text["Report.Column.MinutesPerReview"]),
             ],
             rows,
-            [TotalLabel, ReportCell.Empty, ReportCell.Count(scannedDocuments), ReportCell.Count(scannedPages),
-                ReportCell.Amount(scannedPages / (hours * OperatorShares.Length)), ReportCell.Count(reviewedDocuments),
-                reviewedDocuments == 0 ? ReportCell.Empty : ReportCell.Amount(reviewMinutes / reviewedDocuments)]);
+            [TotalLabel, ReportCell.Empty, ReportCell.Count(documents), ReportCell.Count(pages),
+                uploadDays == 0 ? ReportCell.Empty : ReportCell.Amount(pages / (uploadDays * ShiftHours)), ReportCell.Count(reviewed),
+                timed == 0 ? ReportCell.Empty : ReportCell.Amount(reviewSeconds / timed / 60)]);
     }
 
-    private ReportTable Exceptions(DateOnly from, DateOnly to)
+    /// <summary>Documents that needed a person, by the first issue the automatic check found (or a failed OCR job).</summary>
+    private Report Exceptions(ProjectFacts facts, DateOnly from, DateOnly to)
     {
-        var today = Today;
-        var flagged = new double[Reasons.Length + 1];
-        var open = new double[Reasons.Length + 1];
-        for (var day = from; day <= to; day = day.AddDays(1))
-        {
-            var facts = SampleReportFacts.For(day, today);
-            var sentToReview = facts.Sum(f => f.Documents * Math.Max(0, 100 - f.AutoArchivePercent - f.FailedPercent) / 100);
-            var failed = facts.Sum(f => f.Documents * f.FailedPercent / 100);
-            // Most documents are dealt with within two days; what is still open comes from the last days.
-            var stillOpen = (today.DayNumber - day.DayNumber) switch { 0 => 0.5, 1 => 0.25, 2 => 0.06, _ => 0 };
-            for (var i = 0; i < Reasons.Length; i++)
-            {
-                flagged[i] += sentToReview * Reasons[i].Share;
-                open[i] += sentToReview * Reasons[i].Share * stillOpen;
-            }
-
-            flagged[^1] += failed;
-            open[^1] += failed * stillOpen;
-        }
-
+        var figures = facts.Sum(from, to);
         var rows = new List<IReadOnlyList<ReportCell>>();
-        int flaggedTotal = 0, openTotal = 0;
-        double hoursTotal = 0;
-        for (var i = 0; i <= Reasons.Length; i++)
+        int raised = 0, resolved = 0, open = 0;
+        double hours = 0;
+        foreach (var reason in Enum.GetValues<ExceptionReason>())
         {
-            var reason = i < Reasons.Length ? Reasons[i].Reason : ExceptionReason.OcrFailed;
-            var baseHours = i < Reasons.Length ? Reasons[i].Hours : 30;
-            var count = (int)Math.Round(flagged[i]);
-            var stillOpen = Math.Min(count, (int)Math.Round(open[i]));
-            var hours = baseHours + SampleReportFacts.Wobble(to, i) * 2;
-            flaggedTotal += count;
-            openTotal += stillOpen;
-            hoursTotal += hours * (count - stillOpen);
+            raised += figures.Raised(reason);
+            resolved += figures.Resolved(reason);
+            open += figures.Open(reason);
+            hours += figures.ResolveHours(reason);
             rows.Add(
             [
                 ReportCell.Of(text[$"Report.Reason.{reason}"]),
-                ReportCell.Count(count),
-                ReportCell.Count(count - stillOpen),
-                ReportCell.Count(stillOpen),
-                count == stillOpen ? ReportCell.Empty : ReportCell.Amount(hours),
+                ReportCell.Count(figures.Raised(reason)),
+                ReportCell.Count(figures.Resolved(reason)),
+                ReportCell.Count(figures.Open(reason)),
+                figures.Resolved(reason) == 0 ? ReportCell.Empty : ReportCell.Amount(figures.ResolveHours(reason) / figures.Resolved(reason)),
             ]);
         }
 
-        var resolved = flaggedTotal - openTotal;
-        return Table(ReportKind.Exceptions, from, to,
+        return new Report(
             [
                 new(text["Report.Column.Reason"], Numeric: false),
                 new(text["Report.Column.Flagged"]),
@@ -306,42 +227,25 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
                 new(text["Report.Column.HoursToResolve"]),
             ],
             rows,
-            [TotalLabel, ReportCell.Count(flaggedTotal), ReportCell.Count(resolved), ReportCell.Count(openTotal),
-                resolved == 0 ? ReportCell.Empty : ReportCell.Amount(hoursTotal / resolved)]);
+            [TotalLabel, ReportCell.Count(raised), ReportCell.Count(resolved), ReportCell.Count(open),
+                resolved == 0 ? ReportCell.Empty : ReportCell.Amount(hours / resolved)]);
     }
 
-    private ReportTable Archive(DateOnly from, DateOnly to)
+    private Report Archive(ProjectFacts facts, DateOnly from, DateOnly to)
     {
-        var facts = SampleReportFacts.For(from, to, Today);
-        var rows = new List<IReadOnlyList<ReportCell>>();
-        var totals = new double[6];
-        foreach (var group in facts.GroupBy(f => f.Department))
-        {
-            // Archived: what did not fail and is no longer in the review queue.
-            var documents = (int)Math.Round(group.Sum(f => f.Documents) * 0.96);
-            var pages = (int)Math.Round(group.Sum(f => f.Pages) * 0.96);
-            var (internalShare, confidentialShare) = Confidentiality[group.Key];
-            var internalDocuments = (int)Math.Round(documents * internalShare);
-            var confidential = (int)Math.Round(documents * confidentialShare);
-            var secret = documents - internalDocuments - confidential;
-            var gigabytes = pages * MegabytesPerPage / 1024;
-            double[] values = [documents, pages, internalDocuments, confidential, secret, gigabytes];
-            for (var i = 0; i < values.Length; i++)
-                totals[i] += values[i];
+        static IReadOnlyList<ReportCell> Row(ReportCell label, DayFacts figures) =>
+        [
+            label,
+            ReportCell.Count(figures.Status(DocumentStatus.Archived)),
+            ReportCell.Count(figures.ArchivedPages),
+            ReportCell.Count(figures.Archived(DocumentConfidentiality.Internal)),
+            ReportCell.Count(figures.Archived(DocumentConfidentiality.Confidential)),
+            ReportCell.Count(figures.Archived(DocumentConfidentiality.Secret)),
+            ReportCell.Amount(figures.ArchivedPages * MegabytesPerPage / 1024),
+        ];
 
-            rows.Add(
-            [
-                ReportCell.Of(text.Department(group.Key)),
-                ReportCell.Count(documents),
-                ReportCell.Count(pages),
-                ReportCell.Count(internalDocuments),
-                ReportCell.Count(confidential),
-                ReportCell.Count(secret),
-                ReportCell.Amount(gigabytes),
-            ]);
-        }
-
-        return Table(ReportKind.Archive, from, to,
+        var rows = facts.ByDepartment(from, to).Select(d => Row(DepartmentLabel(d.Department), d.Facts)).ToList();
+        return new Report(
             [
                 new(text["Report.Column.Department"], Numeric: false),
                 new(text["Report.Column.DocumentsArchived"]),
@@ -352,7 +256,7 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
                 new(text["Report.Column.Storage"]),
             ],
             rows,
-            [TotalLabel, .. totals[..5].Select(ReportCell.Count), ReportCell.Amount(totals[5])]);
+            Row(TotalLabel, facts.Sum(from, to)));
     }
 
     private ReportTable Activity(DateOnly from, DateOnly to)
@@ -404,24 +308,15 @@ public sealed class ReportBuilder(IStringLocalizer<MockupText> text, KpiSettings
 
     private ReportCell TotalLabel => ReportCell.Of(text["Report.Total"]);
 
-    private static ReportTable Table(ReportKind kind, DateOnly from, DateOnly to, IReadOnlyList<ReportColumn> columns,
-        IReadOnlyList<IReadOnlyList<ReportCell>> rows, IReadOnlyList<ReportCell> total) =>
-        new(kind, from, to, IsSample: true, columns, rows, total);
+    private ReportCell DepartmentLabel(DocumentDepartment? department) =>
+        ReportCell.Of(department is { } value ? text.Department(value) : text["Dept.Unassigned"]);
 
     private static ReportCell PercentOf(double value, double target) =>
         target > 0 ? ReportCell.Percent(value * 100 / target) : ReportCell.Empty;
 
-    private static double Weighted(IEnumerable<DepartmentDay> days, Func<DepartmentDay, double> value, Func<DepartmentDay, int> weight)
-    {
-        double sum = 0, weights = 0;
-        foreach (var day in days)
-        {
-            sum += value(day) * weight(day);
-            weights += weight(day);
-        }
+    private static ReportCell Share(int part, int whole) => whole > 0 ? ReportCell.Percent(part * 100d / whole) : ReportCell.Empty;
 
-        return weights == 0 ? 0 : sum / weights;
-    }
+    private sealed record Report(IReadOnlyList<ReportColumn> Columns, IReadOnlyList<IReadOnlyList<ReportCell>> Rows, IReadOnlyList<ReportCell> Total);
 
     private DateOnly LocalDay(DateTime utc) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), time.LocalTimeZone));

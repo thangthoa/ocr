@@ -1,4 +1,5 @@
 @inject IStringLocalizer<MockupText> Text
+@inject ProjectHistory History
 
 @* The filters of a document list (All Documents, Review Queue). Every change applies at once. *@
 <div class="doc-filters" role="search">
@@ -16,6 +17,10 @@
                 <input id="@($"{Id}-search")" type="search" class="form-control" dir="auto" autocomplete="off" spellcheck="false"
                        placeholder="@Text["Search.Placeholder"]" @bind="Filter.Search" @bind:event="oninput" @bind:after="ChangedAsync" />
             </div>
+            @if (History.Enabled && Filter.Field == DocumentSearchField.Content)
+            {
+                <p id="@($"{Id}-history-note")" class="small text-muted mt-1 mb-0">@Text["Search.HistoryContent"]</p>
+            }
         </div>
         <div class="col-6 col-lg-3">
             <label for="@($"{Id}-department")" class="form-label">@Text["Filter.Department"]</label>

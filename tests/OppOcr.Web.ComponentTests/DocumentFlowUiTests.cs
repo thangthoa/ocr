@@ -120,7 +120,7 @@ public sealed class DocumentFlowUiTests : BunitContext
 
         Assert.Equal(["is-done", "is-done", "is-done", "is-done"], States(cut));
         Assert.Empty(cut.FindAll("li[aria-current]"));
-        Assert.Contains("Approved by m.khalid", cut.FindAll("li")[2].TextContent, StringComparison.Ordinal);
+        Assert.Contains("Approved by review01", cut.FindAll("li")[2].TextContent, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -177,14 +177,17 @@ public sealed class DocumentFlowUiTests : BunitContext
     }
 
     [Fact]
-    public void The_dashboard_status_bar_links_each_status_to_the_filtered_list()
+    public async Task The_dashboard_status_bar_links_each_status_to_the_filtered_list()
     {
+        var facts = (await Services.GetRequiredService<DocumentCatalog>().SnapshotAsync(CancellationToken.None)).Facts;
         var cut = Render<DashboardPage>();
+        cut.WaitForElement(".status-legend");
 
         Assert.Equal(
             ["documents?status=Processing", "documents?status=NeedsReview", "documents?status=Archived", "documents?status=Failed"],
             cut.FindAll(".status-legend a.status-key").Select(a => a.GetAttribute("href")));
-        Assert.Equal(4, cut.FindAll(".status-bar .status-segment").Count);
+        // A segment for each status that has documents in the period.
+        Assert.Equal(ProjectReports.For(facts, ReportPeriod.Day).Statuses.Count(s => s.Documents > 0), cut.FindAll(".status-bar .status-segment").Count);
     }
 
     private IRenderedComponent<DocumentProgress> RenderProgress(DocumentRecord document) =>

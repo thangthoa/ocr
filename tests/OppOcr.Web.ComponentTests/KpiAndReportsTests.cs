@@ -5,18 +5,22 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Kpi;
 using OppOcr.Web.Features.Mockups.Pages;
 using OppOcr.Web.Features.Mockups.Reports;
 
 namespace OppOcr.Web.ComponentTests;
 
+/// <summary>The dashboard and the reports over the simulated history (on here, as in the app): they must agree.</summary>
 public sealed class KpiAndReportsTests : BunitContext
 {
+    private readonly InMemoryOcr _ocr;
+
     public KpiAndReportsTests()
     {
         TestServices.SetCulture("en");
-        Services.AddOcrAndDocuments();
+        (_ocr, _) = Services.AddOcrAndDocuments(new Dictionary<string, string?> { [TestServices.HistoryEnabled] = "true" });
         Services.AddHealthChecks();
     }
 
@@ -29,6 +33,8 @@ public sealed class KpiAndReportsTests : BunitContext
     private AuditLog Audit => Services.GetRequiredService<AuditLog>();
 
     private NavigationManager Navigation => Services.GetRequiredService<NavigationManager>();
+
+    private Task<DocumentSnapshot> Snapshot() => Services.GetRequiredService<DocumentCatalog>().SnapshotAsync(CancellationToken.None);
 
     [Theory]
     [InlineData(KpiKind.OcrAccuracy, 91, KpiStatus.OnTrack)]
@@ -72,21 +78,72 @@ public sealed class KpiAndReportsTests : BunitContext
     public void Dashboard_measures_the_kpis_against_the_targets_set_in_settings()
     {
         var cut = Render<DashboardPage>();
+        cut.WaitForElement("#kpi-summary");
 
-        // A day: 25,510 pages against 20,000; 312 documents waiting against at most 300 (alert at 500).
-        Assert.Equal("On track", cut.Find("#kpi-PagesPerDay .kpi-status").TextContent);
-        Assert.Equal("At risk", cut.Find("#kpi-ReviewBacklog .kpi-status").TextContent);
-        Assert.Equal("6 on track · 1 at risk · 0 off track", cut.Find("#kpi-summary").TextContent);
+        // Today counts only the files uploaded in this app (none here): no pages yet, nothing to measure accuracy on.
+        Assert.Equal("Off track", KpiStatusOf(cut, KpiKind.PagesPerDay));
+        Assert.Equal("No data yet", KpiStatusOf(cut, KpiKind.OcrAccuracy));
+        Assert.Equal("—", cut.Find("#kpi-OcrAccuracy .kpi-card-value").TextContent);
+        // What the reviewers left at the end of yesterday's day shift: above the 300 target, under the 500 alert level.
+        Assert.Equal("At risk", KpiStatusOf(cut, KpiKind.ReviewBacklog));
         Assert.Contains("Target 1,250", cut.Find(".bar-target").TextContent, StringComparison.Ordinal);
 
-        cut.Find("#period-Month").Click();
-        Assert.Equal("Off track", cut.Find("#kpi-AutoArchiveRate .kpi-status").TextContent);
+        cut.Find("#period-Week").Click();
+        Assert.Equal("On track", KpiStatusOf(cut, KpiKind.PagesPerDay));
+        Assert.Equal("On track", KpiStatusOf(cut, KpiKind.OcrAccuracy));
+        Assert.Equal("On track", KpiStatusOf(cut, KpiKind.AutoArchiveRate));
+        Assert.Equal("On track", KpiStatusOf(cut, KpiKind.ReviewTime));
 
         Save(KpiKind.PagesPerDay, 30_000, 26_000);
         var raised = Render<DashboardPage>();
-        Assert.Equal("Off track", raised.Find("#kpi-PagesPerDay .kpi-status").TextContent);
-        Assert.Equal("Target at least 30,000 · alert below 26,000", raised.Find("#kpi-PagesPerDay .kpi-card-goal").TextContent);
+        raised.WaitForElement("#kpi-summary");
         Assert.Contains("Target 1,875", raised.Find(".bar-target").TextContent, StringComparison.Ordinal);
+        raised.Find("#period-Week").Click();
+        Assert.Equal("Off track", KpiStatusOf(raised, KpiKind.PagesPerDay));
+        Assert.Equal("Target at least 30,000 · alert below 26,000", raised.Find("#kpi-PagesPerDay .kpi-card-goal").TextContent);
+    }
+
+    [Fact]
+    public async Task Dashboard_figures_are_added_up_from_the_documents()
+    {
+        var facts = (await Snapshot()).Facts;
+        var cut = Render<DashboardPage>();
+        cut.WaitForElement("#kpi-summary");
+
+        foreach (var period in Enum.GetValues<ReportPeriod>())
+        {
+            cut.Find($"#period-{period}").Click();
+            var report = ProjectReports.For(facts, period);
+            var figures = facts.Sum(report.From, report.To);
+
+            Assert.Equal(report.Pages, report.Bars.Sum(b => b.Pages));
+            Assert.Equal(report.Documents, report.Statuses.Sum(s => s.Documents));
+            Assert.Equal(report.Documents, report.Departments.Sum(d => d.Documents));
+            Assert.Equal((figures.Documents, figures.Pages), (report.Documents, report.Pages));
+            Assert.Equal(Number(report.Documents) + " documents", cut.Find("#status-total").TextContent);
+            Assert.Equal(Number(report.PagesPerDay), cut.Find("#kpi-PagesPerDay .kpi-card-value").TextContent);
+            // The review queue is the same whatever the period.
+            Assert.Equal(Number(facts.WaitingReview), cut.Find("#kpi-ReviewBacklog .kpi-card-value").TextContent);
+        }
+
+        Assert.Equal(30, cut.FindAll(".bar").Count);
+    }
+
+    [Fact]
+    public async Task A_file_uploaded_in_this_app_adds_a_document_to_the_project()
+    {
+        var before = (await Snapshot()).Total;
+        Assert.Equal(HistoryProfile.Documents, before);
+
+        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000091", "test-scan.png", Modules.Ocr.Domain.Jobs.OcrJobStatus.Queued));
+        var cut = Render<DashboardPage>();
+        cut.WaitForElement("#project-documents");
+
+        Assert.Equal(HistoryProfile.Documents + 1, (await Snapshot()).Total);
+        // Today has nothing simulated: the new file is today's only document.
+        Assert.Equal("1 documents", cut.Find("#status-total").TextContent);
+        var plan = Kpis.Current.Project;
+        Assert.Equal(Number((await Snapshot()).Facts.Sum(plan.Start, Today).Documents), cut.Find("#project-documents").TextContent);
     }
 
     [Fact]
@@ -101,21 +158,36 @@ public sealed class KpiAndReportsTests : BunitContext
     }
 
     [Fact]
-    public void Dashboard_shows_the_project_against_its_plan()
+    public void All_documents_list_the_samples_among_the_history_documents()
+    {
+        var cut = Render<DocumentsPage>();
+        cut.WaitForElement("tbody tr");
+
+        // The samples take the place of as many history documents: the project still has 1,093,911.
+        Assert.Equal("1,093,911 document(s)", cut.Find("#doc-count").TextContent);
+        cut.Find("#doc-field").Change(nameof(DocumentSearchField.Reference));
+        cut.Find("#doc-search").Input("2019/413");
+        Assert.Equal("PV-2019-0413.pdf", Assert.Single(cut.FindAll("tbody tr")).QuerySelector("td a")!.TextContent);
+    }
+
+    [Fact]
+    public async Task Dashboard_shows_the_project_against_its_plan()
     {
         var plan = Kpis.Current.Project;
-        var scanned = Enumerable.Range(0, Today.DayNumber - plan.Start.DayNumber + 1)
-            .Sum(day => SampleReports.PagesOn(plan.Start.AddDays(day), Today));
+        var project = (await Snapshot()).Facts.Sum(plan.Start, Today);
 
         var cut = Render<DashboardPage>();
+        cut.WaitForElement("#project-pages");
 
-        Assert.Equal(scanned.ToString("N0", CultureInfo.CurrentCulture), cut.Find("#project-pages").TextContent);
+        Assert.Equal(Number(project.Pages), cut.Find("#project-pages").TextContent);
+        Assert.Equal(Number(project.Documents), cut.Find("#project-documents").TextContent);
         Assert.Equal("On track", cut.Find("#project-status").TextContent);
         Assert.StartsWith("Ahead of plan by", cut.Find("#project-gap").TextContent, StringComparison.Ordinal);
 
         // A plan that ends today expects every page by now.
         Kpis.Save(Kpis.Current with { Project = plan with { End = Today } }, "admin");
         var late = Render<DashboardPage>();
+        late.WaitForElement("#project-status");
         Assert.Equal("Off track", late.Find("#project-status").TextContent);
         Assert.StartsWith("Behind plan by", late.Find("#project-gap").TextContent, StringComparison.Ordinal);
         Assert.StartsWith("End date passed", late.Find("#project-pace").TextContent, StringComparison.Ordinal);
@@ -166,28 +238,33 @@ public sealed class KpiAndReportsTests : BunitContext
     }
 
     [Fact]
-    public void Reports_open_on_the_progress_of_the_last_seven_days()
+    public async Task Reports_open_on_the_progress_of_the_last_seven_days()
     {
+        var week = ProjectReports.For((await Snapshot()).Facts, ReportPeriod.Week);
         var cut = Render<ReportsPage>();
+        cut.WaitForElement("#report-table");
 
         Assert.Equal("true", cut.Find("#report-Progress").GetAttribute("aria-pressed"));
         Assert.Equal(7, cut.FindAll("#report-table tbody tr").Count);
-        // The same pages as the dashboard's week.
-        Assert.Equal("180,610", cut.FindAll("#report-total td")[0].TextContent);
+        // The same pages and documents as the dashboard's week.
+        Assert.Equal(Number(week.Pages), cut.FindAll("#report-total td")[0].TextContent);
+        Assert.Equal(Number(week.Documents), cut.FindAll("#report-total td")[1].TextContent);
         Assert.Equal(ReportEndpoints.ExportUrl(ReportKind.Progress, Today.AddDays(-6), Today), cut.Find("#report-export").GetAttribute("href"));
     }
 
     [Fact]
-    public void Choosing_another_report_or_period_rebuilds_the_table()
+    public async Task Choosing_another_report_or_period_rebuilds_the_table()
     {
+        var day = ProjectReports.For((await Snapshot()).Facts, ReportPeriod.Day);
         var cut = Render<ReportsPage>();
+        cut.WaitForElement("#report-table");
 
         cut.Find("#report-Quality").Click();
-        Assert.Equal("OCR quality", cut.Find("#report-title").TextContent);
+        cut.WaitForAssertion(() => Assert.Equal("OCR quality", cut.Find("#report-title").TextContent));
         Assert.Equal(Enum.GetValues<DocumentDepartment>().Length, cut.FindAll("#report-table tbody tr").Count);
 
         cut.Find("#preset-Today").Click();
-        Assert.Equal("25,510", cut.FindAll("#report-total td")[1].TextContent);
+        cut.WaitForAssertion(() => Assert.Equal(Number(day.Pages), cut.FindAll("#report-total td")[1].TextContent));
     }
 
     [Fact]
@@ -215,32 +292,55 @@ public sealed class KpiAndReportsTests : BunitContext
     }
 
     [Fact]
-    public void Department_reports_add_up_to_the_pages_of_the_progress_report()
+    public async Task Every_report_adds_up_the_same_documents()
     {
-        // Older than the dashboard's 30 days too.
-        var from = Today.AddDays(-40);
+        var from = HistoryStart;
 
-        var progress = Reports.Build(ReportKind.Progress, from, Today);
-        var quality = Reports.Build(ReportKind.Quality, from, Today);
-        var archive = Reports.Build(ReportKind.Archive, from, Today);
-        var productivity = Reports.Build(ReportKind.Productivity, from, Today);
+        var progress = await Reports.BuildAsync(ReportKind.Progress, from, Today, CancellationToken.None);
+        var quality = await Reports.BuildAsync(ReportKind.Quality, from, Today, CancellationToken.None);
+        var archive = await Reports.BuildAsync(ReportKind.Archive, from, Today, CancellationToken.None);
+        var productivity = await Reports.BuildAsync(ReportKind.Productivity, from, Today, CancellationToken.None);
+        var exceptions = await Reports.BuildAsync(ReportKind.Exceptions, from, Today, CancellationToken.None);
+        var snapshot = await Snapshot();
+        var figures = snapshot.Facts.Sum(from, Today);
 
-        Assert.Equal(41, progress.Rows.Count);
-        Assert.Equal(progress.Total![1].Value, quality.Total![2].Value);
+        Assert.Equal(HistoryProfile.Days + 1, progress.Rows.Count);
+        Assert.True(progress.IsSample);
+        Assert.Equal((double)figures.Pages, progress.Total![1].Value);
+        Assert.Equal((double)figures.Documents, progress.Total[2].Value);
+        Assert.Equal(progress.Total[1].Value, quality.Total![2].Value);
+        Assert.Equal(progress.Total[2].Value, quality.Total[1].Value);
         Assert.Equal((progress.Total[2].Value, progress.Total[1].Value), (productivity.Total![2].Value, productivity.Total[3].Value));
         Assert.Equal(quality.Total[2].Value, quality.Rows.Sum(r => r[2].Value));
         Assert.Equal(archive.Total![1].Value, archive.Rows.Sum(r => r[1].Value));
+        Assert.Equal((double)figures.Status(DocumentStatus.Archived), archive.Total[1].Value);
+        Assert.Equal((double)snapshot.StatusCounts[DocumentStatus.Archived], archive.Total[1].Value);
+        // Reviewed in the productivity report = approved by a person; still open = the review queue plus the failed jobs.
+        Assert.Equal((double)figures.Reviewed, productivity.Total[5].Value);
+        Assert.Equal((double)(snapshot.Facts.WaitingFlagged + figures.Status(DocumentStatus.Failed)), exceptions.Total![3].Value);
     }
 
     [Fact]
-    public void Activity_report_counts_what_each_user_did()
+    public async Task Productivity_lists_the_operators_and_reviewers_of_the_history_with_their_roles()
+    {
+        var table = await Reports.BuildAsync(ReportKind.Productivity, Today.AddDays(-7), Today.AddDays(-1), CancellationToken.None);
+
+        var users = table.Rows.Select(r => r[0].Text).ToList();
+        Assert.Equal(HistoryProfile.Operators.Where(o => o.LastDay is null).Select(o => o.UserName), users.Take(11));
+        Assert.Equal(HistoryProfile.Reviewers.Select(r => r.UserName), users.Skip(11));
+        Assert.All(table.Rows.Take(11), r => Assert.Equal("Capture operator", r[1].Text));
+        Assert.All(table.Rows.Skip(11), r => Assert.Equal("OCR reviewer", r[1].Text));
+    }
+
+    [Fact]
+    public async Task Activity_report_counts_what_each_user_did()
     {
         Audit.Record("tester-1", AuditAction.SignedIn);
         Audit.Record("tester-1", AuditAction.Downloaded, "DOC-1");
         Audit.Record("tester-1", AuditAction.EditedInWord, "DOC-1");
         Audit.Record("tester-2", AuditAction.StatusChanged, "DOC-1", status: DocumentStatus.Archived);
 
-        var table = Reports.Build(ReportKind.Activity, Today, Today);
+        var table = await Reports.BuildAsync(ReportKind.Activity, Today, Today, CancellationToken.None);
 
         Assert.False(table.IsSample);
         var user = Assert.Single(table.Rows, r => r[0].Text == "tester-1");
@@ -262,18 +362,19 @@ public sealed class KpiAndReportsTests : BunitContext
     }
 
     [Fact]
-    public void Export_writes_the_report_as_csv_and_logs_it()
+    public async Task Export_writes_the_report_as_csv_and_logs_it()
     {
         var from = Today.AddDays(-6);
+        var week = ProjectReports.For((await Snapshot()).Facts, ReportPeriod.Week);
 
-        var file = Reports.Export(ReportKind.Progress, from, Today, "admin");
+        var file = await Reports.ExportAsync(ReportKind.Progress, from, Today, "admin", CancellationToken.None);
 
         Assert.Equal(Encoding.UTF8.GetPreamble(), file.Content[..3]);
         var lines = Encoding.UTF8.GetString(file.Content[3..]).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
         Assert.Equal(9, lines.Length);
         Assert.Equal("Date,Pages scanned,Documents,Daily target,% of target,Project to date,Plan to date", lines[0]);
-        Assert.StartsWith(Iso(Today) + ",25510,", lines[7], StringComparison.Ordinal);
-        Assert.StartsWith("Total,180610,", lines[8], StringComparison.Ordinal);
+        Assert.StartsWith(Iso(Today) + ",0,0,20000,", lines[7], StringComparison.Ordinal);
+        Assert.StartsWith(string.Create(CultureInfo.InvariantCulture, $"Total,{week.Pages},{week.Documents},"), lines[8], StringComparison.Ordinal);
         Assert.Equal($"report-progress-{from:yyyyMMdd}-{Today:yyyyMMdd}.csv", file.FileName);
         var entry = Audit.Latest()[0];
         Assert.Equal((AuditAction.ReportExported, "Progress"), (entry.Action, entry.Detail));
@@ -296,6 +397,12 @@ public sealed class KpiAndReportsTests : BunitContext
         var current = Kpis.Current;
         Kpis.Save(current with { Targets = [.. current.Targets.Select(t => t.Kind == kind ? new KpiTarget(kind, target, alert, show) : t)] }, "admin");
     }
+
+    private static DateOnly HistoryStart => ProjectHistory.FirstDay(Today);
+
+    private static string KpiStatusOf(IRenderedComponent<DashboardPage> cut, KpiKind kind) => cut.Find($"#kpi-{kind} .kpi-status").TextContent;
+
+    private static string Number(double value) => ((int)Math.Round(value)).ToString("N0", CultureInfo.CurrentCulture);
 
     private static string Iso(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 

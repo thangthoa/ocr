@@ -1,23 +1,30 @@
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using Modules.Ocr.Domain.Jobs;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Quality;
 
 namespace OppOcr.Web.Features.Mockups.Data;
 
 /// <summary>
 /// In-memory store for the documents mockup: for real OCR jobs whatever the OCR service cannot keep
-/// (review status, metadata, edited text, versions), and the sample documents when they are turned on
-/// (<see cref="DocumentSampleOptions"/>). Everything is
+/// (review status, metadata, edited text, versions), the sample documents when they are turned on
+/// (<see cref="DocumentSampleOptions"/>), and a copy of each document of the simulated history
+/// (<see cref="ProjectHistory"/>) once someone changes it. Everything is
 /// lost when the app restarts and is shared by everyone using this instance (no database, ADR 0003).
 /// Every change is written to the <see cref="AuditLog"/>.
 /// </summary>
+/// <remarks>
+/// Samples and history documents are both "simulated" (<see cref="DocumentRecord.IsSample"/>): they have no OCR
+/// job behind them, and are opened, reviewed and approved the same way.
+/// </remarks>
 public sealed class DocumentStore(
     TimeProvider time,
     CaptureBatchStore batches,
     AuditLog audit,
     QualitySettingsStore quality,
-    IOptions<DocumentSampleOptions> samples)
+    IOptions<DocumentSampleOptions> samples,
+    ProjectHistory history)
 {
     public const string OcrAuthor = "ocr-service";
 
@@ -28,6 +35,10 @@ public sealed class DocumentStore(
     private readonly Dictionary<string, DocumentRecord> _records =
         (samples.Value.Enabled ? SampleDocumentSeed.Create() : []).ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>History documents stored here because someone changed them (by index).</summary>
+    private readonly HashSet<int> _changedHistory = [];
+
+    /// <summary>The samples, and the history documents someone changed.</summary>
     public IReadOnlyList<DocumentRecord> Samples()
     {
         lock (_lock)
@@ -36,11 +47,23 @@ public sealed class DocumentStore(
         }
     }
 
+    /// <summary>History documents stored with changes: the lists and figures use the stored copy instead.</summary>
+    public IReadOnlySet<int> ChangedHistory()
+    {
+        lock (_lock)
+        {
+            return _changedHistory.ToHashSet();
+        }
+    }
+
+    /// <summary>A sample or history document: the stored copy if there is one, otherwise the history as simulated.</summary>
     public DocumentRecord? FindSample(string id)
     {
         lock (_lock)
         {
-            return _records.TryGetValue(id, out var record) && record.IsSample ? record : null;
+            if (_records.TryGetValue(id, out var record))
+                return record.IsSample ? record : null;
+            return history.TryIndex(id, out var index) ? history.Materialize(index) : null;
         }
     }
 
@@ -138,8 +161,10 @@ public sealed class DocumentStore(
     {
         lock (_lock)
         {
-            if (!_records.TryGetValue(id, out var record) || !record.CanEdit)
+            var current = _records.GetValueOrDefault(id) ?? (history.TryIndex(id, out var index) ? history.Materialize(index) : null);
+            if (current is not { CanEdit: true })
                 return;
+            var record = Get(id);
 
             List<string> pages = [.. pageTexts];
             var version = new DocumentVersion(NextNumber(record), time.GetUtcNow().UtcDateTime, author,
@@ -152,7 +177,9 @@ public sealed class DocumentStore(
     {
         lock (_lock)
         {
-            return _records.TryGetValue(id, out var record) ? record.FileName : null;
+            if (_records.TryGetValue(id, out var record))
+                return record.FileName;
+            return history.TryIndex(id, out var index) ? history.Materialize(index).FileName : null;
         }
     }
 
@@ -190,10 +217,20 @@ public sealed class DocumentStore(
     private static DateOnly? ApprovedOn(DocumentRecord document) =>
         document.Approval is { } approval ? DateOnly.FromDateTime(approval.AtUtc.ToLocalTime()) : null;
 
-    /// <summary>Only documents in review can be edited; the pages never offer it otherwise.</summary>
+    /// <summary>
+    /// Only documents in review can be edited; the pages never offer it otherwise. A history document is copied
+    /// here the first time it is changed.
+    /// </summary>
     private DocumentRecord Get(string id, bool forEdit = false)
     {
-        if (!_records.TryGetValue(id, out var record))
+        if (!_records.TryGetValue(id, out var record) && history.TryIndex(id, out var index))
+        {
+            record = history.Materialize(index);
+            _records[record.Id] = record;
+            _changedHistory.Add(index);
+        }
+
+        if (record is null)
             throw new InvalidOperationException($"Document {id} has nothing stored; open it first.");
         if (forEdit && !record.CanEdit)
             throw new InvalidOperationException($"Document {id} cannot be edited in status {record.Status}.");

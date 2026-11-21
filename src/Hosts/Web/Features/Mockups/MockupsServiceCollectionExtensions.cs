@@ -3,6 +3,7 @@ using OppOcr.Web.Features.Mockups.Access;
 using OppOcr.Web.Features.Mockups.Activity;
 using OppOcr.Web.Features.Mockups.Approved;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Kpi;
 using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Mockups.Reports;
@@ -13,9 +14,10 @@ namespace OppOcr.Web.Features.Mockups;
 public static class MockupsServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the documents mockup: the in-memory store (one per app, like the OCR job list), the
-    /// catalog that joins it with OCR jobs, the automatic quality check, KPI targets and reports, users and roles, the activity log, and the Word
-    /// editor and preview (ADR 0004). Needs the OCR module's application services and <c>OcrJobNotifications</c>.
+    /// Registers the documents mockup: the simulated project history (ADR 0008), the in-memory store (one per app, like
+    /// the OCR job list), the catalog that joins them with OCR jobs, the automatic quality check, KPI targets and reports,
+    /// users and roles, the activity log, and the Word editor and preview (ADR 0004). Needs the OCR module's application
+    /// services and <c>OcrJobNotifications</c>.
     /// </summary>
     public static IServiceCollection AddMockups(this IServiceCollection services, IConfiguration configuration)
     {
@@ -30,6 +32,9 @@ public static class MockupsServiceCollectionExtensions
         services.AddScoped<ActivityTrail>();
         services.AddScoped<ReportBuilder>();
         services.AddOptions<DocumentSampleOptions>().Bind(configuration.GetSection(DocumentSampleOptions.SectionName));
+        services.AddOptions<HistoryOptions>().Bind(configuration.GetSection(HistoryOptions.SectionName));
+        services.AddSingleton<ProjectHistory>();
+        services.AddHostedService<HistoryWarmup>();
         services.AddSingleton<DocumentStore>();
         services.AddScoped<DocumentCatalog>();
         services.AddHostedService<QualityCheckTrigger>();

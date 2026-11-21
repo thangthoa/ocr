@@ -14,7 +14,7 @@
         {
             var selected = kind == _kind;
             <button type="button" id="@($"report-{kind}")" class="report-choice @(selected ? "active" : null)"
-                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => Select(kind)">
+                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => SelectAsync(kind)">
                 <span class="report-choice-title">@Text[$"Report.{kind}.Title"]</span>
                 <span class="report-choice-text">@Text[$"Report.{kind}.Description"]</span>
             </button>
@@ -22,12 +22,12 @@
     </nav>
 
     <div class="report-main">
-        <form id="report-form" class="report-params no-print" novalidate @onsubmit="View">
+        <form id="report-form" class="report-params no-print" novalidate @onsubmit="ViewAsync">
             <div class="report-presets" role="group" aria-label="@Text["Reports.Presets"]">
                 @foreach (var preset in Enum.GetValues<RangePreset>())
                 {
                     <button type="button" id="@($"preset-{preset}")" class="btn btn-sm btn-outline-secondary"
-                            @onclick="() => ApplyPreset(preset)">@Text[$"Reports.Preset.{preset}"]</button>
+                            @onclick="() => ApplyPresetAsync(preset)">@Text[$"Reports.Preset.{preset}"]</button>
                 }
             </div>
             <div class="report-dates">

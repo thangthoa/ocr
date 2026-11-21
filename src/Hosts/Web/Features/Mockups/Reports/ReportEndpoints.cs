@@ -25,7 +25,8 @@ internal static class ReportEndpoints
 
     public static IEndpointRouteBuilder MapReportEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/reports/export.csv", (string? report, string? from, string? to, ReportBuilder reports, HttpContext http) =>
+        endpoints.MapGet("/reports/export.csv", async (string? report, string? from, string? to, ReportBuilder reports, HttpContext http,
+            CancellationToken ct) =>
         {
             var start = ParseDate(from);
             var end = ParseDate(to);
@@ -34,7 +35,7 @@ internal static class ReportEndpoints
             if (ReportRange.Check(start, end, reports.Today) is { } error)
                 return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "report." + error.ToString().ToLowerInvariant());
 
-            var file = reports.Export(kind, start!.Value, end!.Value, LoginPage.DemoUserName);
+            var file = await reports.ExportAsync(kind, start!.Value, end!.Value, LoginPage.DemoUserName, ct);
             http.Response.Headers.XContentTypeOptions = "nosniff";
             http.Response.Headers.ContentSecurityPolicy = "sandbox";
             http.Response.Headers.CacheControl = "no-store";

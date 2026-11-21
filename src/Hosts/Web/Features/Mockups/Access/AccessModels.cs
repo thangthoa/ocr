@@ -119,14 +119,20 @@ public static partial class AccessRules
     /// <remarks>A document without a department (a fresh OCR job) is seen only by users of every department.</remarks>
     public static bool CanSee(AppUser user, IReadOnlySet<AccessRight> permissions, DocumentRecord document)
     {
+        ArgumentNullException.ThrowIfNull(document);
+        return CanSee(user, permissions, document.Metadata.Department, document.Metadata.Confidentiality);
+    }
+
+    /// <summary>The same rule for a document's department and confidentiality (to count documents without building them).</summary>
+    public static bool CanSee(AppUser user, IReadOnlySet<AccessRight> permissions, DocumentDepartment? department,
+        DocumentConfidentiality confidentiality)
+    {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(permissions);
-        ArgumentNullException.ThrowIfNull(document);
-        var metadata = document.Metadata;
         return user.IsActive
             && permissions.Contains(AccessRight.ViewDocuments)
-            && (user.AllDepartments || (metadata.Department is { } department && user.Departments.Contains(department)))
-            && metadata.Confidentiality <= user.Clearance;
+            && (user.AllDepartments || (department is { } value && user.Departments.Contains(value)))
+            && confidentiality <= user.Clearance;
     }
 
     /// <summary>

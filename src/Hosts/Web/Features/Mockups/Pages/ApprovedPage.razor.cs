@@ -4,12 +4,14 @@ using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Approved;
 using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Ocr;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
-/// Document Archive: the final, reviewed documents, newest approval first, with who approved them.
+/// Document Archive: the final, reviewed documents (the simulated history's included), newest approval first, with
+/// who approved them, a page at a time.
 /// Each can be downloaded as DOCX, PDF (when the document server is configured) or text. The CSV export
 /// of the list stays available at its address (<see cref="ApprovedDocumentEndpoints.ExportUrl"/>) but has
 /// no button.
@@ -19,8 +21,8 @@ public sealed partial class ApprovedPage : IDisposable
     private readonly CancellationTokenSource _disposed = new();
     private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
-    private DocumentList? _list;
-    private IReadOnlyList<DocumentRecord> _results = [];
+    private DocumentSnapshot? _snapshot;
+    private DocumentPage _results = new([], 0);
     private string _search = string.Empty;
     private DocumentSearchField _field = DocumentSearchField.All;
     private DocumentDepartment? _department;
@@ -33,6 +35,8 @@ public sealed partial class ApprovedPage : IDisposable
     [Inject] private DocumentCatalog Catalog { get; set; } = default!;
 
     [Inject] private ApprovedDocumentFiles Files { get; set; } = default!;
+
+    [Inject] private ProjectHistory History { get; set; } = default!;
 
     [Inject] private OcrJobNotifications Notifications { get; set; } = default!;
 
@@ -73,7 +77,7 @@ public sealed partial class ApprovedPage : IDisposable
         _loadError = null;
         try
         {
-            _list = await Catalog.ListAsync(_disposed.Token);
+            _snapshot = await Catalog.SnapshotAsync(_disposed.Token);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -86,11 +90,23 @@ public sealed partial class ApprovedPage : IDisposable
 
     private void Apply(bool keepPage = false)
     {
-        _results = ApprovedDocumentFiles.Approved(_list?.Documents ?? [], Query);
-        if (keepPage)
-            _paging.Clamp(_results.Count);
-        else
+        if (!keepPage)
             _paging.Reset();
+        ShowPage();
+    }
+
+    /// <summary>Reads the current page; a list that got shorter moves back to its last page.</summary>
+    private void ShowPage()
+    {
+        if (_snapshot is null)
+            return;
+        var query = Query with { Status = DocumentStatus.Archived };
+        _results = Catalog.Query(_snapshot, query, DocumentOrder.NewestApproval, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        if (_paging.Page > _paging.PageCount(_results.Total))
+        {
+            _paging.Clamp(_results.Total);
+            _results = Catalog.Query(_snapshot, query, DocumentOrder.NewestApproval, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        }
     }
 
     private void ClearFilters()

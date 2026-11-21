@@ -4,12 +4,32 @@
 
 <PageTitle>@Text["Dashboard.Title"]</PageTitle>
 
+@if (_report is null)
+{
+    <h1 class="h3 mb-3">@Text["Dashboard.Title"]</h1>
+    @if (_loadError is not null)
+    {
+        <div class="alert alert-danger d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
+            <span class="me-auto">@_loadError</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted" role="status">@OcrText["Loading"]</p>
+    }
+    return;
+}
+
 <div class="d-flex flex-wrap align-items-end gap-3 mb-4">
     <div class="me-auto">
         <h1 class="h3 mb-1">@Text["Dashboard.Title"]</h1>
         <p class="text-muted mb-0">
             <span id="report-range">@RangeLabel</span>
-            <span class="badge tag-gray ms-2">@Text["SampleData"]</span>
+            @if (HasSimulatedData)
+            {
+                <span class="badge tag-gray ms-2">@Text["SampleData"]</span>
+            }
         </p>
     </div>
     <div class="content-switcher" role="group" aria-label="@Text["Period.Label"]">
@@ -17,10 +37,15 @@
         {
             var selected = period == _period;
             <button type="button" id="@($"period-{period}")" class="@(selected ? "active" : null)"
-                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => _period = period">@Text.Period(period)</button>
+                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => SelectPeriod(period)">@Text.Period(period)</button>
         }
     </div>
 </div>
+
+@if (_snapshot!.List.JobsError is { } jobsError)
+{
+    <div class="alert alert-warning py-2 small" role="alert">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</div>
+}
 
 <section class="dash-card project-card mb-4" aria-labelledby="project-title">
     <div class="dash-card-head">
@@ -31,6 +56,7 @@
     <p class="project-figure mb-2">
         <span id="project-pages" class="project-value">@FormatNumber(ProjectPages)</span>
         <span>@Text["Project.OfTotal", FormatNumber(Plan.TotalPages), FormatPercent(ProjectPercent)]</span>
+        <span class="project-documents">· <strong id="project-documents">@FormatNumber(ProjectDocuments)</strong> @Text["Project.Documents"]</span>
     </p>
     <div class="project-meter" role="img" aria-label="@ProjectSummary">
         <span class="project-fill @KpiStatusClass(ProjectStatus)" style="width: @CssPercent(ProjectPercent)"></span>
@@ -48,8 +74,11 @@
     <div class="dash-card-head">
         <h2 id="status-title" class="h5 mb-0">@Text["Status.Heading"]</h2>
         <span class="text-muted small">
-            @Text["Status.Total", FormatNumber(Report.Documents)] ·
-            @Text["Kpi.VsPrevious", FormatSigned(Report.DocumentsChangePercent, "0.0") + "%"]
+            <span id="status-total">@Text["Status.Total", FormatNumber(Report.Documents)]</span>
+            @if (Report.DocumentsChangePercent is { } change)
+            {
+                <span> · @Text["Kpi.VsPrevious", FormatSigned(change, "0.0") + "%"]</span>
+            }
         </span>
         <a class="dash-card-link" href="documents">@Text["Dashboard.OpenDocuments"]</a>
     </div>
@@ -168,10 +197,19 @@
                     @foreach (var row in Report.Departments)
                     {
                         <tr>
-                            <td><a href="@($"documents?department={row.Department}")">@Text.Department(row.Department)</a></td>
+                            <td>
+                                @if (row.Department is { } department)
+                                {
+                                    <a href="@($"documents?department={department}")">@DepartmentName(department)</a>
+                                }
+                                else
+                                {
+                                    @DepartmentName(null)
+                                }
+                            </td>
                             <td class="text-end">@FormatNumber(row.Documents)</td>
                             <td class="text-end">@FormatNumber(row.Pages)</td>
-                            <td class="text-end">@FormatPercent(row.Confidence)</td>
+                            <td class="text-end">@(row.Confidence is { } confidence ? FormatPercent(confidence) : Missing)</td>
                         </tr>
                     }
                 </tbody>

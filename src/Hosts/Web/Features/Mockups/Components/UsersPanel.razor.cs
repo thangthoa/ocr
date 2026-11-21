@@ -21,7 +21,7 @@ public sealed partial class UsersPanel : IDisposable
     private UserStatus? _statusFilter;
     private UserForm? _form;
     private string? _message;
-    private IReadOnlyList<DocumentRecord>? _documents;
+    private ProjectFacts? _documents;
 
     [Inject] private UserDirectory Accounts { get; set; } = default!;
 
@@ -41,7 +41,7 @@ public sealed partial class UsersPanel : IDisposable
     {
         try
         {
-            _documents = (await Catalog.ListAsync(_disposed.Token)).Documents;
+            _documents = (await Catalog.SnapshotAsync(_disposed.Token)).Facts;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -66,7 +66,7 @@ public sealed partial class UsersPanel : IDisposable
         ? Text["Users.AllDepartments"]
         : string.Join(Text["ListSeparator"].Value, user.Departments.Select(d => Text.Department(d)));
 
-    /// <summary>How many documents the account in the form would see, out of all the documents listed.</summary>
+    /// <summary>How many documents the account in the form would see, out of all the documents.</summary>
     private string VisibleDocuments
     {
         get
@@ -75,8 +75,8 @@ public sealed partial class UsersPanel : IDisposable
                 return Text["Users.VisibleUnknown"];
             var user = _form.ToUser();
             var permissions = Accounts.PermissionsOf(user.Role);
-            var visible = _documents.Count(d => AccessRules.CanSee(user, permissions, d));
-            return Text["Users.Visible", MockupTextExtensions.FormatNumber(visible), MockupTextExtensions.FormatNumber(_documents.Count)];
+            var visible = _documents.Count((department, _, confidentiality) => AccessRules.CanSee(user, permissions, department, confidentiality));
+            return Text["Users.Visible", MockupTextExtensions.FormatNumber(visible), MockupTextExtensions.FormatNumber(_documents.AllTime.Documents)];
         }
     }
 

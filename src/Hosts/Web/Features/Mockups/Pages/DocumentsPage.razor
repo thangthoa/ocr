@@ -5,7 +5,7 @@
 
 <h1 class="h3 mb-3">@Text["Documents.Title"]</h1>
 
-@if (_list?.JobsError is { } jobsError)
+@if (_snapshot?.List.JobsError is { } jobsError)
 {
     <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 py-2" role="alert">
         <span class="me-auto">@Text["Documents.JobsUnavailable", OcrText.Localize(jobsError)]</span>
@@ -19,11 +19,11 @@ else if (_loadError is not null)
         <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadAsync">@OcrText["Retry"]</button>
     </div>
 }
-@if (_list is { JobsFromService: false })
+@if (_snapshot?.List is { JobsFromService: false })
 {
     <div class="alert alert-info py-2 small" role="note">@OcrText["ListFromMemoryNotice"]</div>
 }
-@if (_list is { } list && list.JobsTotal > DocumentCatalog.MaxJobs)
+@if (_snapshot?.List is { } list && list.JobsTotal > DocumentCatalog.MaxJobs)
 {
     <div class="alert alert-secondary py-2 small" role="note">@Text["Documents.NewestOnly", DocumentCatalog.MaxJobs, list.JobsTotal]</div>
 }
@@ -37,14 +37,14 @@ else if (_loadError is not null)
     <DocumentFilters Filter="_filter" Id="doc" OnChange="() => Apply()" />
 </div>
 
-@if (_list is null && _loadError is null)
+@if (_snapshot is null && _loadError is null)
 {
     <p class="text-muted" role="status">@OcrText["Loading"]</p>
 }
 else
 {
     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <p class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", _results.Count]</p>
+        <p id="doc-count" class="small text-muted mb-0 me-auto" role="status">@Text["Documents.Count", FormatNumber(_results.Total)]</p>
         @if (HasFilters)
         {
             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">@Text["Filter.Clear"]</button>
@@ -56,7 +56,7 @@ else
         <div class="alert alert-danger py-2" role="alert">@_deleteError</div>
     }
 
-    @if (_results.Count == 0)
+    @if (_results.Total == 0)
     {
         <div class="empty-state">
             <p class="mb-2">@(HasFilters ? Text["Documents.None"] : Text["Documents.Empty"])</p>
@@ -86,7 +86,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var document in _paging.Slice(_results))
+                    @foreach (var document in _results.Items)
                     {
                         var metadata = document.Metadata;
                         <tr @key="document.Id" class="doc-row" @onclick="() => Open(document.Id)">
@@ -142,6 +142,6 @@ else
             </table>
         </div>
 
-        <TablePager Paging="_paging" Total="_results.Count" Id="doc-pager" OnChange="StateHasChanged" />
+        <TablePager Paging="_paging" Total="_results.Total" Id="doc-pager" OnChange="ShowPage" />
     }
 }

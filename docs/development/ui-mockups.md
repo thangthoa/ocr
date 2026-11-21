@@ -8,16 +8,16 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 | Route | Màn hình | Dữ liệu |
 |---|---|---|
 | `/login` | Đăng nhập 2 bước (layout riêng, không có menu): mật khẩu rồi mã OTP. Mọi trang khác chuyển về đây khi chưa đăng nhập | Giả: `admin` / `admin`, mã `123456`; phiên lưu trong localStorage |
-| `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng. Trên cùng là **tiến độ dự án** so với kế hoạch, rồi trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó), rồi các **thẻ KPI** so với mục tiêu đặt ở Settings | Số liệu mẫu cố định, ngày theo hôm nay; mục tiêu KPI lấy từ Settings |
+| `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng. Trên cùng là **tiến độ dự án** so với kế hoạch, rồi trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó), rồi các **thẻ KPI** so với mục tiêu đặt ở Settings | Cộng từ mọi document: lịch sử giả lập + job thật (ADR 0008); mục tiêu KPI lấy từ Settings |
 | `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: một cột giữa trang; nhập tên (bắt buộc) trước, rồi chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh), xem / sắp xếp trang rồi Upload. Trên cùng là thanh tiến trình đang ở bước **Scan** (khi đang gửi file thì bước này hiện "Sending to the OCR service…"). Upload xong thì **mở trang của document**, thanh tiến trình chạy tiếp từ Recognizing | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
-| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và thời điểm cập nhật cuối; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Job thật |
-| `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; cột Version và Last updated tách riêng | Job thật + phần lưu trong bộ nhớ |
-| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Job thật |
+| `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và thời điểm cập nhật cuối; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Lịch sử giả lập + job thật |
+| `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; cột Version và Last updated tách riêng | Lịch sử giả lập + job thật + phần lưu trong bộ nhớ |
+| `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Lịch sử giả lập + job thật |
 | `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn), cùng hàng là các nút **Approve and archive** (hoặc *Send back to review*), **Edit** (mở Word) và **Delete**; preview ảnh gốc cạnh trang Word (từng trang), bên phải số trang là ô chọn **DOCX / PDF / TXT** và nút **Download** (bản hiện tại; bản cuối khi đã lưu trữ); bên dưới là metadata (nút *Edit details* để sửa, lưu thành phiên bản mới) và lịch sử phiên bản | Job thật + phần lưu trong bộ nhớ |
-| `/reports` (`?report=…&from=yyyy-MM-dd&to=yyyy-MM-dd`) | **Reports**: chọn một trong 6 báo cáo và khoảng ngày, xem dạng bảng, xuất CSV, in | Mẫu, trừ báo cáo hoạt động người dùng (đọc nhật ký thật) |
+| `/reports` (`?report=…&from=yyyy-MM-dd&to=yyyy-MM-dd`) | **Reports**: chọn một trong 6 báo cáo và khoảng ngày, xem dạng bảng, xuất CSV, in | Cùng số liệu với Dashboard; báo cáo hoạt động người dùng đọc nhật ký thật |
 | `/users` | **Users › Users**: danh sách người dùng, thêm / sửa | Dùng thật, trong bộ nhớ; tài khoản ban đầu là mẫu |
 | `/users/roles` | **Users › Roles & access**: ma trận vai trò × quyền | Dùng thật, trong bộ nhớ |
-| `/users/activity` (`?user=&category=&result=&from=&to=&q=`) | **Users › Activity logs**: nhật ký hoạt động, kiểm tra toàn vẹn, lọc, xuất CSV | Một tháng mẫu + nhật ký thật của app |
+| `/users/activity` (`?user=&category=&result=&from=&to=&q=`) | **Users › Activity logs**: nhật ký hoạt động, kiểm tra toàn vẹn, lọc, xuất CSV | 30 ngày sinh từ lịch sử giả lập + nhật ký thật của app |
 | `/admin` (`?tab=Retention\|Quality\|Kpi\|Integrations`) | **Settings** (mục cuối của menu): phân loại & lưu giữ, cài đặt kiểm tra chất lượng tự động, mục tiêu KPI, hệ thống kết nối. Link cũ `?tab=Users\|Roles\|Audit` chuyển sang trang mới | Lưu giữ: mẫu. Cài đặt kiểm tra, mục tiêu KPI: dùng thật, trong bộ nhớ. Dịch vụ OCR: health check thật |
 | `/ocr/jobs`, `/ocr/jobs/{id}` | Không còn trang riêng: chuyển hướng sang `/documents`, `/documents/{id}` | — |
 
@@ -89,13 +89,39 @@ kèm danh sách lý do.
 - Quy tắc kiểm tra là quy tắc nghiệp vụ. Hiện chúng nằm trong Web host như phần mockup còn lại. Khi có module
   Documents, `QualityCheck` và `QualitySettings` chuyển vào Domain/Application của module đó, cài đặt lưu PostgreSQL.
 
+## Lịch sử dự án giả lập (ADR 0008)
+
+Code ở `Features/Mockups/History/`. Mockup giả lập một dự án **đã xử lý 1.093.911 document** trong 45 ngày trước hôm nay
+(`HistoryProfile.Documents`). File upload trong app được cộng thêm, nên tổng chỉ tăng khi có upload. Mọi màn hình đọc
+cùng một nguồn: Dashboard, KPI, Reports, các danh sách, Settings › Retention, khung quyền trong Users và Activity logs.
+
+- **Dây chuyền**: chạy mỗi ngày từ 07:00 đến 23:00, hai ca, 12 người scan (capture01–12). capture03 bị khoá 40 ngày trước
+  nên chỉ scan trong 5 ngày đầu. Mấy ngày đầu chạy chậm hơn (đang lên tốc độ), sau đó khoảng 25.000 document mỗi ngày.
+- **Document**: trung bình khoảng 1,1 trang, nên tổng khoảng 1,22 triệu trang trên kế hoạch 2.000.000 trang. Mỗi document
+  có phòng ban, loại, mức mật, confidence theo phòng ban, số hiệu (`PV-2019-04213`…) không trùng, tiêu đề, từ khoá và text
+  tiếng Ả Rập.
+- **Kiểm tra tự động** dùng ngưỡng mặc định. Khoảng 3,7 % document vào review; 0,2 % lỗi OCR (*Failed*).
+- **Duyệt**: 6 người duyệt (review01–06) làm ca 07:30–16:30, mỗi người một tốc độ, mỗi lần lấy document cũ nhất mà họ
+  được xem (theo phòng ban và mức mật của tài khoản). Khoảng 60 % document được sửa text trong Word (phiên bản 1.1) trước
+  khi duyệt. Những gì còn chờ ở cuối ngày hôm qua là hàng đợi review hiện tại (khoảng 370 document).
+- **Hôm nay không có gì giả lập**: chế độ *Ngày* trên Dashboard chỉ có file upload hôm nay. Ngày của lịch sử trượt theo
+  hôm nay; qua nửa đêm, cả lịch sử lùi một ngày.
+- Document lịch sử có id `DOC-0000001`…`DOC-1093911`, nhãn *Sample* và cách xử lý như tài liệu mẫu: mở, duyệt, sửa đều
+  được. Không có ảnh scan gốc. Khi bị thay đổi, `DocumentStore` giữ bản sao (mất khi restart). Tìm kiếm chỉ theo metadata,
+  không theo nội dung.
+- Lịch sử chỉ giữ khoảng 30 MB dữ liệu gọn trong bộ nhớ, dựng ở nền khi khởi động (khoảng 1 giây). Mỗi dòng chỉ được dựng
+  đầy đủ khi hiển thị; các danh sách phân trang phía server.
+- Tài liệu mẫu (khi bật) thay chỗ 14 document lịch sử, tổng vẫn là 1.093.911. Tắt lịch sử bằng
+  `Documents__History__Enabled=false`; test component tắt sẵn, trừ các test về lịch sử và về số liệu.
+
 ## Mục tiêu KPI và Dashboard
 
 Code ở `Features/Mockups/Kpi/`. Cài đặt ở `/admin?tab=Kpi`, lưu trong bộ nhớ (về mặc định khi restart), dùng chung cho mọi
 người, mỗi lần lưu ghi một dòng nhật ký.
 
 - **Dự án số hoá**: tổng số trang, ngày bắt đầu, ngày kết thúc. Mặc định 2.000.000 trang trong 100 ngày (20.000 trang/ngày,
-  mục tiêu vận hành của hồ sơ thầu), bắt đầu 45 ngày trước hôm nay để số liệu mẫu luôn cho thấy một dự án đang chạy.
+  mục tiêu vận hành của hồ sơ thầu), bắt đầu 45 ngày trước hôm nay, trùng ngày đầu của lịch sử giả lập. Thẻ này cũng ghi
+  số document từ ngày bắt đầu (1.093.911 cộng file upload).
   Dashboard so số trang đã scan từ ngày bắt đầu với kế hoạch chia đều theo ngày: đạt hoặc vượt kế hoạch là *On track*,
   chậm dưới 5 % là *At risk*, chậm hơn là *Off track*. Thẻ này không đổi theo nút Ngày / Tuần / Tháng.
 - **KPI**: danh sách cố định, người dùng chỉ đặt **mục tiêu**, **mức cảnh báo** và có hiện trên Dashboard hay không.
@@ -108,15 +134,17 @@ người, mỗi lần lưu ghi một dòng nhật ký.
   | Review backlog | ≤ | 300 / 500 | Số document đang chờ duyệt (không theo kỳ) |
   | Time in review | ≤ | 24 / 48 giờ | Thời gian chờ duyệt trung bình |
   | OCR failure rate | ≤ | 1 % / 2 % | Tỉ lệ job lỗi |
-  | Pages per operator per day | ≥ | 1.800 / 1.500 | Trang mỗi ngày chia cho 12 nhân viên scan |
+  | Pages per operator per day | ≥ | 1.800 / 1.500 | Trang mỗi ngày chia cho số người đã upload trong kỳ |
 
   Trạng thái: đạt mục tiêu là *On track*; chưa đạt nhưng chưa vượt mức cảnh báo là *At risk*; vượt mức cảnh báo là
   *Off track*. Với KPI "≥", mức cảnh báo phải không cao hơn mục tiêu; với KPI "≤", không thấp hơn.
 - Đường mục tiêu trên biểu đồ Dashboard là mục tiêu *Pages scanned per day* (chia đều cho các giờ khi xem theo Ngày),
   không còn là hằng số 26.000. Ba ô số liệu cũ (Pages scanned, Average OCR confidence, Waiting for review) được thay bằng
   các thẻ KPI. Nút *Start reviewing* và link số job lỗi nằm trong thẻ tương ứng.
-- Số đo vẫn là số liệu mẫu (`SampleReports`). Khi có dữ liệu thật, các quy tắc trong `KpiRules` chuyển vào module báo cáo
-  (Domain/Application), cài đặt lưu PostgreSQL.
+- Số đo cộng từ mọi document (`ProjectFacts`, `ProjectReports`): kỳ *Ngày* là hôm nay, *Tuần* là 7 ngày, *Tháng* là 30 ngày,
+  đều tính tới hôm nay. Kỳ không có gì để đo (vd. chưa có document nào được kiểm tra hôm nay) hiện `—` và *No data yet*.
+  Mức so với kỳ trước chỉ hiện khi kỳ trước nằm trọn trong dự án. Dashboard tự tải lại khi có job OCR thay đổi. Khi có
+  dữ liệu thật, các quy tắc trong `KpiRules` chuyển vào module báo cáo (Domain/Application), cài đặt lưu PostgreSQL.
 
 ## Báo cáo (Reports)
 
@@ -128,14 +156,16 @@ nhất. Khoảng ngày không quá 366 ngày, không có ngày sau hôm nay.
 |---|---|---|
 | Digitization progress | Mỗi ngày | Trang, document, mục tiêu ngày (KPI), % mục tiêu, luỹ kế dự án, kế hoạch luỹ kế |
 | OCR quality | Mỗi phòng ban | Document, trang, confidence, % trang dưới ngưỡng, % tự duyệt, % vào review, % lỗi |
-| Operator productivity | Mỗi người (12 scan, 6 duyệt) | Document và trang đã scan, trang/giờ (ca 8 giờ), document đã duyệt, phút/lần duyệt |
+| Operator productivity | Mỗi người đã scan hoặc duyệt trong kỳ (vai trò lấy từ Users) | Document và trang đã scan, trang/giờ (ca 8 giờ), document đã duyệt, phút/lần duyệt |
 | Review and exceptions | Mỗi lý do chính | Số document, đã xử lý, còn mở, số giờ xử lý trung bình |
 | Archive statistics | Mỗi phòng ban | Document và trang đã lưu trữ, theo mức mật, dung lượng (≈ 0,42 MB/trang) |
 | User activity | Mỗi người dùng | Đăng nhập, upload, sửa, đổi trạng thái, xoá, tải/xuất, đổi cài đặt. **Dữ liệu thật** từ nhật ký |
 
-- Mỗi báo cáo có dòng tổng. Số liệu mẫu theo ngày (`SampleReportFacts`) dùng đúng số trang của Dashboard cho 30 ngày gần
-  nhất, và một số cố định cùng khoảng cho các ngày trước đó, nên các báo cáo khớp nhau và khớp Dashboard (ví dụ tổng 7 ngày
-  là 180.610 trang ở cả Dashboard *Week* và báo cáo tiến độ).
+- Mỗi báo cáo có dòng tổng. Năm báo cáo đầu cộng cùng số liệu với Dashboard (`ProjectFacts`), nên khớp nhau và khớp
+  Dashboard: tổng 7 ngày của báo cáo tiến độ bằng Dashboard *Week*; tổng document ở báo cáo chất lượng và năng suất bằng
+  báo cáo tiến độ; *còn mở* ở báo cáo ngoại lệ bằng hàng đợi review cộng document lỗi. Document chưa có phòng ban (file
+  vừa upload) nằm ở dòng *Department not set*. Phút/lần duyệt chỉ có với lần duyệt giả lập (thời gian làm việc của lần duyệt
+  thật không đo được).
 - **Export CSV**: `/reports/export.csv?report=…&from=…&to=…`. UTF-8 có BOM, tiêu đề cột theo ngôn ngữ đang chọn, số
   không định dạng và ngày ISO để Excel đọc là số. Mỗi lần xuất ghi một dòng nhật ký. Khoảng ngày sai trả 400.
 - **Print**: dùng lệnh in của trình duyệt; CSS in (`@media print` trong `app.css`) bỏ header, menu, danh sách báo cáo và các
@@ -176,15 +206,15 @@ Nhóm là thẻ `<details>` nên chạy được không cần Blazor. Nhóm tự
 màu như mục đang chọn kể cả khi đã thu gọn.
 
 - **Users** (`/users`):
-  - Danh sách 12 tài khoản mẫu: `admin` (tài khoản demo, Local) và các tài khoản AD cho từng vai trò, một tài khoản bị
-    khoá. Tìm theo tên / user name / e-mail, lọc theo vai trò và trạng thái, phân trang.
+  - Danh sách 25 tài khoản mẫu: `admin` (tài khoản demo, Local), quản trị IT, 12 người scan và 6 người duyệt của lịch sử
+    giả lập (đăng nhập lần cuối là ca hôm qua; capture03 bị khoá), records manager và 4 người đọc. Tìm theo tên / user name / e-mail, lọc theo vai trò và trạng thái, phân trang.
   - **Thêm / sửa**: tên, user name, e-mail, vai trò, phòng ban được xem (hoặc *All departments*), mức mật cao nhất được
     xem, bắt buộc MFA, tài khoản hoạt động.
   - Tài khoản AD không sửa được tên và e-mail (lấy từ AD). User name không đổi sau khi tạo.
   - Kiểm tra: bắt buộc tên, user name, e-mail; user name 2–64 ký tự `a-z 0-9 . _ -` và không trùng; e-mail hợp lệ; chọn
     ít nhất một phòng ban. Không được hạ vai trò hoặc khoá **administrator cuối cùng** đang hoạt động.
   - Bên cạnh form là khung **What this user can do**: các quyền của vai trò đang chọn và số document người đó thấy
-    trong danh sách hiện tại. Thấy được khi: tài khoản hoạt động, vai trò có quyền xem, document thuộc phòng ban được
+    trên tổng số document (cả lịch sử giả lập). Thấy được khi: tài khoản hoạt động, vai trò có quyền xem, document thuộc phòng ban được
     xem, mức mật không vượt mức của người dùng. Document chưa có phòng ban chỉ người xem mọi phòng ban mới thấy.
 - **Roles & access** (`/users/roles`): ma trận 5 vai trò × 12 quyền, mỗi cột ghi nhóm AD và số người dùng đang
   hoạt động. Administrator luôn giữ quyền *Manage users and roles* và *Change settings* (ô bị khoá), để không ai bị khoá
@@ -197,14 +227,17 @@ Code ở `Features/Mockups/Activity/` (`SampleActivity`, `ActivityTrail`, `Activ
 Trang `/users/activity` trả lời các câu hỏi 60, 66, 69, 70, 106 và 110 của khách.
 
 - **Dữ liệu**: gộp hai nguồn, mới nhất trước.
-  - **Một tháng mẫu** (khoảng 7.000 dòng), tạo lại giống hệt mỗi lần chạy, theo dây chuyền số hoá:
-    - nhân viên scan upload; kiểm tra tự động lưu trữ hoặc đưa vào review; người duyệt sửa Word rồi duyệt;
-    - records manager tìm, tải, xuất danh sách / báo cáo, thỉnh thoảng xoá hoặc trả về review;
-    - người đọc tìm, mở, tải, in, và đôi khi bị **từ chối truy cập** (khác phòng ban hoặc vượt mức mật);
-    - admin sửa người dùng, quyền, cài đặt, xuất nhật ký;
-    - OCR lỗi rồi gửi lại;
+  - **30 ngày mẫu** trước hôm nay (khoảng 80.000 dòng), sinh từ lịch sử giả lập nên nêu đúng document, người và giờ
+    như các danh sách. Tạo lại giống hệt mỗi lần chạy:
+    - mỗi ca của người scan: đăng nhập, mỗi lô upload (một người, một giờ) một dòng ghi số document của lô, đăng xuất;
+    - dịch vụ OCR: job lỗi, và vài job lỗi rồi gửi lại thành công;
+    - kiểm tra tự động: các document bị đưa vào review, kèm số vấn đề (không ghi từng document đạt, để không lấn hết log);
+    - người duyệt: sửa trong Word (phiên bản Word 2) rồi duyệt, đúng các document và giờ duyệt của lịch sử;
+    - ngày thường: records manager tìm, tải, xuất danh sách / báo cáo; người đọc tìm, mở, tải, in document đã lưu trữ và
+      đôi khi bị **từ chối truy cập** (khác phòng ban hoặc vượt mức mật); admin sửa người dùng, quyền, cài đặt, xuất nhật ký;
     - các sự cố bảo mật: gõ sai mật khẩu / OTP, và 3 đêm có IP bên ngoài dò mật khẩu (một lần làm **khoá tài khoản**).
-    - Mỗi dòng có IP và trình duyệt / dịch vụ. Tài khoản demo `admin` không có trong dữ liệu mẫu.
+    - Mỗi dòng có IP và trình duyệt / dịch vụ. Tài khoản demo `admin` không có trong dữ liệu mẫu. Document có link khi
+      lịch sử đang bật.
   - **Nhật ký thật** (`AuditLog`) của lần chạy này, có nhãn *Live* và nền xanh nhạt. Document của nó có link.
 - **Toàn vẹn**: các dòng được nối bằng SHA-256 (mỗi hash gồm hash trước và nội dung dòng).
   - Mỗi lần tải trang hoặc bấm *Verify again*, app băm lại toàn bộ chuỗi. Khung xanh báo số dòng và thời điểm kiểm tra.
@@ -239,7 +272,8 @@ Trang `/users/activity` trả lời các câu hỏi 60, 66, 69, 70, 106 và 110 
 - **Xuất CSV** (`/approved/export.csv?…`, cùng bộ lọc): trang Archive không còn nút xuất, nhưng địa chỉ này vẫn dùng được. UTF-8 có BOM để Excel đọc được tiếng Ả Rập,
   tiêu đề cột theo ngôn ngữ đang chọn, thời gian theo UTC (ISO 8601). Ô bắt đầu bằng `= + - @` được thêm
   dấu `'` để Excel không chạy như công thức. Khi không lấy được danh sách job OCR thì không cho xuất (trả 503),
-  để file không thiếu document mà người dùng không biết.
+  để file không thiếu document mà người dùng không biết. Tối đa 50.000 document mỗi file: nhiều hơn thì trả 400 và yêu
+  cầu lọc hẹp lại (cả kho lưu trữ có hơn một triệu document).
 
 ## Sửa Word trực tiếp (OnlyOffice Docs)
 
@@ -293,15 +327,17 @@ và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục
 - **Dữ liệu duyệt, metadata, phiên bản mất khi restart hoặc deploy lại**, dùng chung cho mọi người và chỉ đúng
   khi chạy một instance (app không có database, ADR 0003). Muốn giữ lâu dài cần module Documents có PostgreSQL.
 - Danh sách Documents lấy **100 job mới nhất** rồi lọc trong bộ nhớ; tìm theo nội dung text chỉ áp dụng cho
-  document đã mở (đã có text trong app) và tài liệu mẫu, vì danh sách job của dịch vụ không kèm text.
+  document đã mở (đã có text trong app) và tài liệu mẫu, vì danh sách job của dịch vụ không kèm text. Document của lịch sử
+  giả lập chỉ tìm theo metadata.
 - **Tài liệu mẫu** (14 document có nhãn *Sample*, `Data/SampleDocumentSeed.cs`) **tắt mặc định**: các danh sách chỉ có job
   OCR thật. Muốn demo khi không có dịch vụ OCR thì bật bằng `Documents__Samples__Enabled=true`
-  (`Documents:Samples:Enabled`). Test component bật sẵn và dùng chúng làm dữ liệu kiểm thử. Số liệu Dashboard, Reports,
-  người dùng ban đầu và lịch lưu giữ ở Settings vẫn là dữ liệu mẫu (có nhãn *Sample data*).
+  (`Documents:Samples:Enabled`). Test component bật sẵn và dùng chúng làm dữ liệu kiểm thử. Người dùng ban đầu và lịch
+  lưu giữ ở Settings vẫn là dữ liệu mẫu.
 - Khi dịch vụ OCR không kết nối được, All Documents báo lỗi (và vẫn hiện tài liệu mẫu nếu đã bật); Scan báo lỗi ngay khi bấm Upload (và ở lại trang).
 - Trang Document Archive và file CSV cũng chỉ gồm các job trong danh sách job mới nhất mà trang Documents lấy về. Link tải
   bản cuối và xuất CSV, như mọi trang khác, **chưa có phân quyền** (đăng nhập còn là giả).
-- **Mục tiêu KPI về mặc định khi restart**, và mọi số đo trên Dashboard, Reports (trừ *User activity*) là số liệu mẫu.
+- **Mục tiêu KPI về mặc định khi restart.** Số đo trên Dashboard và Reports (trừ *User activity*) gồm lịch sử giả lập (nhãn
+  *Sample data*) và job thật.
 - **Người dùng và quyền về mặc định khi restart.** Lịch lưu giữ là dữ liệu mẫu: không có tự động huỷ hay legal hold. Các hệ thống AD, SharePoint, CMS, hệ thống nội bộ, SIEM chỉ ghi *Planned*.
 - **Confidence của job thật là giả lập** (xem mục kiểm tra tự động). Không có overlay vùng confidence thấp trên
   ảnh vì dịch vụ OCR không trả toạ độ chữ, nên mức chi tiết nhỏ nhất là từng trang.

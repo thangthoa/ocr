@@ -60,6 +60,7 @@
   <data name="Chart.Pages" xml:space="preserve"><value>Pages</value></data>
   <data name="Status.Heading" xml:space="preserve"><value>Documents by status</value></data>
   <data name="Dept.Heading" xml:space="preserve"><value>By department</value></data>
+  <data name="Dept.Unassigned" xml:space="preserve"><value>Department not set</value></data>
   <data name="Dept.Department" xml:space="preserve"><value>Department</value></data>
   <data name="Dept.Documents" xml:space="preserve"><value>Documents</value></data>
   <data name="Dept.Pages" xml:space="preserve"><value>Pages</value></data>
@@ -81,6 +82,7 @@
   <data name="Search.Label" xml:space="preserve"><value>Search metadata</value></data>
   <data name="Search.Field" xml:space="preserve"><value>Search in</value></data>
   <data name="Search.Placeholder" xml:space="preserve"><value>File name, title, reference no., keyword…</value></data>
+  <data name="Search.HistoryContent" xml:space="preserve"><value>Simulated history documents are searched by their details only, not by their text.</value></data>
   <data name="Column.File" xml:space="preserve"><value>File</value></data>
   <data name="Column.Title" xml:space="preserve"><value>Title</value></data>
   <data name="Column.Reference" xml:space="preserve"><value>Reference no.</value></data>
@@ -240,6 +242,7 @@
   <data name="Audit.SignedIn" xml:space="preserve"><value>Signed in</value></data>
   <data name="Audit.SignInFailed" xml:space="preserve"><value>Sign-in failed</value></data>
   <data name="Audit.Uploaded" xml:space="preserve"><value>Uploaded (batch {0})</value></data>
+  <data name="Audit.UploadedBatch" xml:space="preserve"><value>Uploaded {1} document(s) (batch {0})</value></data>
   <data name="Audit.Edited" xml:space="preserve"><value>Saved version {0}</value></data>
   <data name="Audit.Restored" xml:space="preserve"><value>Restored as version {0}</value></data>
   <data name="Audit.StatusChanged" xml:space="preserve"><value>Changed the status to {0}</value></data>
@@ -379,6 +382,7 @@
   <data name="KpiStatus.OnTrack" xml:space="preserve"><value>On track</value></data>
   <data name="KpiStatus.AtRisk" xml:space="preserve"><value>At risk</value></data>
   <data name="KpiStatus.OffTrack" xml:space="preserve"><value>Off track</value></data>
+  <data name="KpiStatus.NoData" xml:space="preserve"><value>No data yet</value></data>
   <data name="KpiUnit.Pages" xml:space="preserve"><value>pages</value></data>
   <data name="KpiUnit.Documents" xml:space="preserve"><value>documents</value></data>
   <data name="KpiUnit.Percent" xml:space="preserve"><value>%</value></data>
@@ -394,6 +398,7 @@
   <data name="Project.Heading" xml:space="preserve"><value>Project progress</value></data>
   <data name="Project.Report" xml:space="preserve"><value>View progress report</value></data>
   <data name="Project.OfTotal" xml:space="preserve"><value>of {0} pages ({1})</value></data>
+  <data name="Project.Documents" xml:space="preserve"><value>documents</value></data>
   <data name="Project.Summary" xml:space="preserve"><value>{0} of {1} pages scanned; the plan expects {2} by today.</value></data>
   <data name="Project.PlanToDate" xml:space="preserve"><value>Plan to date: {0} ({1})</value></data>
   <data name="Project.Ahead" xml:space="preserve"><value>Ahead of plan by {0} pages</value></data>

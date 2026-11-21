@@ -16,7 +16,7 @@
                 }
             </select>
         </div>
-        <p id="@($"{Id}-range")" class="pager-range" role="status">@Text["Pager.Range", First, Last, Total]</p>
+        <p id="@($"{Id}-range")" class="pager-range" role="status">@Text["Pager.Range", FormatNumber(First), FormatNumber(Last), FormatNumber(Total)]</p>
         @if (PageCount > 1)
         {
             <nav class="pager-pages" aria-label="@Text["Pager.Label"]">

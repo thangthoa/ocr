@@ -3,13 +3,14 @@ using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Ocr;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
 /// <summary>
-/// Documents: the newest OCR jobs plus the samples, filtered in memory. Filters can be pre-set from
-/// the query string; the list reloads when an OCR job changes.
+/// Documents: every document (the OCR jobs of this app first, then the samples and the simulated history), filtered
+/// and shown a page at a time. Filters can be pre-set from the query string; the list reloads when an OCR job changes.
 /// </summary>
 public sealed partial class DocumentsPage : IDisposable
 {
@@ -17,9 +18,8 @@ public sealed partial class DocumentsPage : IDisposable
     private readonly DocumentFilterState _filter = new();
     private readonly TablePaging _paging = new();
     private IDisposable? _subscription;
-    private DocumentList? _list;
-    private IReadOnlyList<DocumentRecord> _results = [];
-    private IReadOnlyDictionary<DocumentStatus, int> _counts = new Dictionary<DocumentStatus, int>();
+    private DocumentSnapshot? _snapshot;
+    private DocumentPage _results = new([], 0);
     private DocumentStatus? _status;
     private string? _loadError;
     private string? _deletingId;
@@ -88,7 +88,7 @@ public sealed partial class DocumentsPage : IDisposable
         _loadError = null;
         try
         {
-            _list = await Catalog.ListAsync(_disposed.Token);
+            _snapshot = await Catalog.SnapshotAsync(_disposed.Token);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -101,18 +101,28 @@ public sealed partial class DocumentsPage : IDisposable
 
     private void Apply(bool keepPage = false)
     {
-        var documents = _list?.Documents ?? [];
-        _counts = documents.GroupBy(d => d.Status).ToDictionary(g => g.Key, g => g.Count());
-        _results = DocumentStore.Filter(documents, _filter.ToQuery(_status));
-        if (keepPage)
-            _paging.Clamp(_results.Count);
-        else
+        if (!keepPage)
             _paging.Reset();
+        ShowPage();
     }
 
-    /// <summary>Every status, so the legend keeps its place when a status has no documents.</summary>
+    /// <summary>Reads the current page (a new filter, page or page size); a list that got shorter moves back to its last page.</summary>
+    private void ShowPage()
+    {
+        if (_snapshot is null)
+            return;
+        var query = _filter.ToQuery(_status);
+        _results = Catalog.Query(_snapshot, query, DocumentOrder.Newest, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        if (_paging.Page > _paging.PageCount(_results.Total))
+        {
+            _paging.Clamp(_results.Total);
+            _results = Catalog.Query(_snapshot, query, DocumentOrder.Newest, (_paging.Page - 1) * _paging.Size, _paging.Size);
+        }
+    }
+
+    /// <summary>Every status of every document, so the legend keeps its place when a status has none.</summary>
     private List<KeyValuePair<DocumentStatus, int>> StatusCounts =>
-        Enum.GetValues<DocumentStatus>().Select(s => KeyValuePair.Create(s, _counts.GetValueOrDefault(s))).ToList();
+        Enum.GetValues<DocumentStatus>().Select(s => KeyValuePair.Create(s, _snapshot?.StatusCounts[s] ?? 0)).ToList();
 
     private void SetStatus(DocumentStatus? status)
     {

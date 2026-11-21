@@ -9,8 +9,9 @@ namespace OppOcr.Web.Features.Mockups.Pages;
 /// the period can come from the query string (<c>?report=Quality&amp;from=2026-11-01&amp;to=2026-11-20</c>), so other
 /// pages can link to a report.
 /// </summary>
-public sealed partial class ReportsPage
+public sealed partial class ReportsPage : IDisposable
 {
+    private readonly CancellationTokenSource _disposed = new();
     private ReportKind _kind = ReportKind.Progress;
     private DateOnly? _from;
     private DateOnly? _to;
@@ -41,22 +42,28 @@ public sealed partial class ReportsPage
 
     [Inject] private IStringLocalizer<MockupText> Text { get; set; } = default!;
 
-    protected override void OnParametersSet()
+    public void Dispose()
+    {
+        _disposed.Cancel();
+        _disposed.Dispose();
+    }
+
+    protected override async Task OnParametersSetAsync()
     {
         var today = Reports.Today;
         _kind = ReportEndpoints.ParseKind(QueryReport) ?? ReportKind.Progress;
         _from = ReportEndpoints.ParseDate(QueryFrom) ?? today.AddDays(-6);
         _to = ReportEndpoints.ParseDate(QueryTo) ?? today;
-        View();
+        await ViewAsync();
     }
 
-    private void Select(ReportKind kind)
+    private async Task SelectAsync(ReportKind kind)
     {
         _kind = kind;
-        View();
+        await ViewAsync();
     }
 
-    private void ApplyPreset(RangePreset preset)
+    private async Task ApplyPresetAsync(RangePreset preset)
     {
         var today = Reports.Today;
         (_from, _to) = preset switch
@@ -66,11 +73,11 @@ public sealed partial class ReportsPage
             RangePreset.Last30Days => (today.AddDays(-29), today),
             _ => (new DateOnly(today.Year, today.Month, 1), today),
         };
-        View();
+        await ViewAsync();
     }
 
     /// <summary>Builds the chosen report for the period, or says why the period cannot be used.</summary>
-    private void View()
+    private async Task ViewAsync()
     {
         _error = ReportRange.Check(_from, _to, Reports.Today);
         if (_error is not null)
@@ -79,7 +86,7 @@ public sealed partial class ReportsPage
             return;
         }
 
-        _table = Reports.Build(_kind, _from!.Value, _to!.Value);
+        _table = await Reports.BuildAsync(_kind, _from!.Value, _to!.Value, _disposed.Token);
         _generatedUtc = Time.GetUtcNow().UtcDateTime;
     }
 

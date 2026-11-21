@@ -9,6 +9,7 @@ using Modules.Ocr.Application;
 using Modules.Ocr.Application.Ports;
 using OppOcr.Web.Features.Mockups;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Ocr;
 using OppOcr.Web.Localization;
 
@@ -39,19 +40,22 @@ internal static class TestServices
 
     /// <summary>
     /// The mockup's services with a temporary content root (for Word files) and the given settings. The
-    /// sample documents are the fixtures of most tests, so they are on unless the settings turn them off.
+    /// sample documents are the fixtures of most tests, so they are on unless the settings turn them off; the
+    /// simulated history is off unless the settings turn it on (<see cref="HistoryEnabled"/>).
     /// </summary>
     public static IServiceCollection AddDocumentsMockup(this IServiceCollection services, IDictionary<string, string?>? settings = null)
     {
         services.AddSingleton<IHostEnvironment>(new TestHostEnvironment(
             Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ocr-component-tests", Guid.NewGuid().ToString("N"))).FullName));
-        var values = new Dictionary<string, string?> { [SamplesEnabled] = "true" };
+        var values = new Dictionary<string, string?> { [SamplesEnabled] = "true", [HistoryEnabled] = "false" };
         foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
             values[key] = value;
         return services.AddMockups(new ConfigurationBuilder().AddInMemoryCollection(values).Build());
     }
 
     public const string SamplesEnabled = DocumentSampleOptions.SectionName + ":Enabled";
+
+    public const string HistoryEnabled = HistoryOptions.SectionName + ":Enabled";
 
     public static void SetCulture(string name) =>
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = LocalizationSetup.CreateCulture(name);

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
 using OppOcr.Web.Features.Mockups.Access;
 using OppOcr.Web.Features.Mockups.Activity;
 using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 
 namespace OppOcr.Web.Features.Mockups.Pages;
 
@@ -50,7 +50,7 @@ public sealed partial class ActivityLogPage
 
     [Inject] private UserDirectory Accounts { get; set; } = default!;
 
-    [Inject] private IOptions<DocumentSampleOptions> SampleOptions { get; set; } = default!;
+    [Inject] private ProjectHistory History { get; set; } = default!;
 
     [Inject] private TimeProvider Time { get; set; } = default!;
 
@@ -104,12 +104,11 @@ public sealed partial class ActivityLogPage
     private string? DisplayName(string userName) => Accounts.Find(userName)?.DisplayName;
 
     /// <summary>
-    /// A link only where the document can be opened: this app's own entries, and the sample documents when they are
-    /// on. The sample month also names documents that exist only in the log.
+    /// A link only where the document can be opened: this app's own entries, and the history documents of the sample
+    /// month when the history is on (otherwise they exist only in the log).
     /// </summary>
     private bool CanOpen(ActivityRow row) =>
-        row.Entry.Action != AuditAction.Deleted
-        && (!row.IsSample || (SampleOptions.Value.Enabled && row.Entry.DocumentId!.StartsWith("DOC-2026-0001", StringComparison.Ordinal)));
+        row.Entry.Action != AuditAction.Deleted && (!row.IsSample || History.Contains(row.Entry.DocumentId));
 
     private static string ResultClass(ActivityResult result) => result switch
     {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using OppOcr.Web.Features.Mockups.Activity;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Pages;
 
 namespace OppOcr.Web.ComponentTests;
@@ -47,12 +48,12 @@ public sealed class ActivityLogTests : BunitContext
     [Fact]
     public void The_sample_month_is_the_same_on_every_run()
     {
-        var first = new SampleActivity(TimeProvider.System).Entries;
-        var second = new SampleActivity(TimeProvider.System).Entries;
+        var history = Services.GetRequiredService<ProjectHistory>();
+        var first = new SampleActivity(TimeProvider.System, history).Entries;
+        var second = new SampleActivity(TimeProvider.System, history).Entries;
 
-        // Today's entries depend on the time of day, so compare up to yesterday.
-        var yesterday = DateTime.UtcNow.Date;
-        Assert.Equal(first.Where(e => e.AtUtc < yesterday), second.Where(e => e.AtUtc < yesterday));
+        // Nothing is simulated today, so the month is the same whatever the time of day.
+        Assert.Equal(first, second);
     }
 
     [Fact]

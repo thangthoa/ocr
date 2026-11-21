@@ -5,6 +5,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Data;
+using OppOcr.Web.Features.Mockups.History;
 using OppOcr.Web.Features.Mockups.Word;
 
 namespace OppOcr.Web.Features.Mockups.Approved;
@@ -26,6 +27,7 @@ internal static class ApprovedErrors
     public const string NoTextCode = "documents.no_text";
     public const string PdfUnavailableCode = "documents.pdf_unavailable";
     public const string PdfFailedCode = "documents.pdf_failed";
+    public const string ExportTooLargeCode = "documents.export_too_large";
 
     public static readonly Error NotFinal = Error.Conflict(NotFinalCode, "Only approved or archived documents have a final version.");
 
@@ -34,6 +36,10 @@ internal static class ApprovedErrors
     public static readonly Error PdfUnavailable = Error.Validation(PdfUnavailableCode, "PDF needs the document server, which is not configured.");
 
     public static readonly Error PdfFailed = Error.Failure(PdfFailedCode, "The document server could not make the PDF.");
+
+    public static Error ExportTooLarge(int documents) => Error.Validation(ExportTooLargeCode,
+        string.Create(CultureInfo.InvariantCulture,
+            $"{documents} documents match; narrow the filters to {ApprovedDocumentFiles.MaxExportRows} or fewer to export them."));
 }
 
 /// <summary>
@@ -60,15 +66,8 @@ internal sealed partial class ApprovedDocumentFiles(
 
     private static readonly SearchValues<char> NeedsQuotes = SearchValues.Create(",\"\r\n");
 
-    /// <summary>Archived (approved) documents matching the query: real ones before samples, then the newest approval first.</summary>
-    public static IReadOnlyList<DocumentRecord> Approved(IEnumerable<DocumentRecord> documents, DocumentQuery query)
-    {
-        ArgumentNullException.ThrowIfNull(query);
-        return DocumentStore.Filter(documents, query with { Status = DocumentStatus.Archived })
-            .OrderBy(d => d.IsSample)
-            .ThenByDescending(d => d.Approval?.AtUtc ?? DateTime.MinValue)
-            .ToList();
-    }
+    /// <summary>The largest list the CSV export builds (the archive has about a million documents).</summary>
+    public const int MaxExportRows = 50_000;
 
     /// <summary>PDF is made by the document server, so it is offered only when one is configured.</summary>
     public IReadOnlyList<FinalFileFormat> Formats =>
@@ -148,16 +147,21 @@ internal sealed partial class ApprovedDocumentFiles(
 
     /// <summary>
     /// The approved documents matching the query as CSV (UTF-8 with a byte order mark, so spreadsheet
-    /// applications show Arabic correctly). Fails when the OCR jobs cannot be loaded, rather than
-    /// exporting only the samples.
+    /// applications show Arabic correctly), in the order of the Document Archive. Fails when the OCR jobs cannot be
+    /// loaded, rather than exporting only the samples, and when more than <see cref="MaxExportRows"/> documents match.
     /// </summary>
     public async Task<Result<DownloadFile>> ExportAsync(DocumentQuery query, string user, CancellationToken cancellationToken)
     {
-        var list = await catalog.ListAsync(cancellationToken);
-        if (list.JobsError is { } error)
+        ArgumentNullException.ThrowIfNull(query);
+        var snapshot = await catalog.SnapshotAsync(cancellationToken);
+        if (snapshot.List.JobsError is { } error)
             return error;
 
-        var documents = Approved(list.Documents, query);
+        var page = catalog.Query(snapshot, query with { Status = DocumentStatus.Archived }, DocumentOrder.NewestApproval, 0, MaxExportRows);
+        if (page.Total > MaxExportRows)
+            return ApprovedErrors.ExportTooLarge(page.Total);
+
+        var documents = page.Items;
         var csv = new StringBuilder();
         AppendRow(csv,
         [

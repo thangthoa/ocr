@@ -26,7 +26,9 @@ public sealed class UsersAndRolesTests : BunitContext
         var cut = Render<UsersPage>();
 
         Assert.Equal("Users", cut.Find("h1").TextContent);
-        Assert.Equal("12 users · 11 active · 1 disabled", cut.Find("#users-summary").TextContent.Trim());
+        // The demo account, the IT administrator, the people of the simulated line (12 operators, 6 reviewers) and the office.
+        Assert.Equal("25 users · 24 active · 1 disabled", cut.Find("#users-summary").TextContent.Trim());
+        cut.Find("#user-search").Input("review02");
         var reviewer = cut.Find("[id='user-review02']").TextContent;
         Assert.Contains("OCR reviewer", reviewer, StringComparison.Ordinal);
         Assert.Contains("Finance, Procurement", reviewer, StringComparison.Ordinal);
@@ -64,27 +66,28 @@ public sealed class UsersAndRolesTests : BunitContext
         Assert.Equal("Another account already uses this user name.", cut.Find("#user-username-error").TextContent);
         Assert.Equal("Enter an e-mail address such as name@example.org.", cut.Find("#user-email-error").TextContent);
         Assert.Equal("Choose at least one department, or All departments.", cut.Find("#user-departments-error").TextContent);
-        Assert.Null(Accounts.Find("capture04"));
+        Assert.Null(Accounts.Find("capture13"));
 
         cut.Find("#user-name").Change("Test Operator");
-        cut.Find("#user-username").Change("capture04");
-        cut.Find("#user-email").Change("capture04@example.org");
+        cut.Find("#user-username").Change("capture13");
+        cut.Find("#user-email").Change("capture13@example.org");
         cut.Find("#user-role").Change("CaptureOperator");
         cut.Find("#user-dept-Finance").Change(true);
         cut.Find("#user-form").Submit();
 
         Assert.Equal("Test Operator saved.", cut.Find("#users-message").TextContent);
-        var saved = Accounts.Find("capture04")!;
+        var saved = Accounts.Find("capture13")!;
         Assert.Equal((UserRole.CaptureOperator, UserSource.Local, UserStatus.Active), (saved.Role, saved.Source, saved.Status));
         Assert.Equal(new[] { DocumentDepartment.Finance }, saved.Departments);
         var entry = Audit.Latest()[0];
-        Assert.Equal((AuditAction.UserAdded, "capture04"), (entry.Action, entry.Detail));
+        Assert.Equal((AuditAction.UserAdded, "capture13"), (entry.Action, entry.Detail));
     }
 
     [Fact]
     public void Editing_a_directory_account_keeps_its_name_and_logs_the_change()
     {
         var cut = Render<UsersPage>();
+        cut.Find("#user-search").Input("review02");
         cut.Find("[id='user-edit-review02']").Click();
 
         Assert.True(cut.Find("#user-name").HasAttribute("disabled"));
@@ -103,7 +106,7 @@ public sealed class UsersAndRolesTests : BunitContext
     public void The_form_shows_what_the_user_would_be_allowed_to_see_and_do()
     {
         var cut = Render<UsersPage>();
-        // Twelve accounts make two pages of ten: find this one first.
+        // The accounts take several pages of ten: find this one first.
         cut.Find("#user-search").Input("reader.finance");
         cut.Find("[id='user-edit-reader.finance']").Click();
 

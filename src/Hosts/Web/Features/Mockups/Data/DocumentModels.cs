@@ -128,7 +128,13 @@ public sealed record DocumentRecord(
     public double? PageConfidence(int pageNumber) =>
         PageConfidences is { } values && pageNumber >= 1 && pageNumber <= values.Count ? values[pageNumber - 1] : null;
 
+    /// <summary>The number of a document's first version (the OCR result).</summary>
+    public const string FirstVersionNumber = "1.0";
+
     public DocumentVersion? CurrentVersion => Versions.Count > 0 ? Versions[^1] : null;
+
+    /// <summary>The current version's number; a document without a saved version yet (still recognizing, failed…) is at the first.</summary>
+    public string VersionNumber => CurrentVersion?.Number ?? FirstVersionNumber;
 
     public DateTime? UpdatedAtUtc => CurrentVersion?.CreatedAtUtc ?? Job?.FinishedAtUtc ?? UploadedAtUtc;
 

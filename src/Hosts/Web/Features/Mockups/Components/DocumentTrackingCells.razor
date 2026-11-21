@@ -1,10 +1,10 @@
-@* One row under DocumentTrackingHeaders. A value not known yet (no page count, uploader, approval or version) shows the Missing dash. *@
+@* One row under DocumentTrackingHeaders. A value not known yet (no page count, uploader or approval) shows the Missing dash; the version starts at 1.0. *@
 <td class="text-end doc-pages">@(Document.Pages > 0 ? FormatNumber(Document.Pages) : Missing)</td>
 <td class="text-nowrap doc-uploaded-by" dir="ltr">@OrMissing(Document.UploadedBy)</td>
 <td class="small date-cell doc-uploaded">@FormatDateTime(Document.UploadedAtUtc)</td>
 <td class="text-nowrap doc-approved-by" dir="ltr">@OrMissing(Document.Approval?.By)</td>
 <td class="small date-cell doc-approved" title="@(Document.Approval is { } approval ? FormatDateTime(approval.AtUtc) : null)">@FormatShortDate(Document.Approval?.AtUtc)</td>
-<td class="text-nowrap doc-version" dir="ltr">@(Document.CurrentVersion?.Number ?? Missing)</td>
+<td class="text-nowrap doc-version" dir="ltr">@Document.VersionNumber</td>
 <td class="small date-cell doc-updated">@FormatDateTime(Document.UpdatedAtUtc)</td>
 
 @code {

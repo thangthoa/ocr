@@ -267,7 +267,7 @@ public sealed class DocumentStore(
     private static DocumentRecord FirstVersion(OcrJob job, DocumentMetadata metadata, DateTime nowUtc)
     {
         var pages = OcrPageTexts(job);
-        var ocr = new DocumentVersion("1.0", job.FinishedAtUtc ?? job.CreatedAtUtc ?? nowUtc, OcrAuthor,
+        var ocr = new DocumentVersion(DocumentRecord.FirstVersionNumber, job.FinishedAtUtc ?? job.CreatedAtUtc ?? nowUtc, OcrAuthor,
             DocumentVersionChange.OcrResult, null, null, pages, metadata);
         return new DocumentRecord(job.Id.Value, IsSample: false, job.FileName, job.PagesTotal, null, job.CreatedAtUtc, null, null,
             DocumentStatus.NeedsReview, metadata, pages, [ocr], OcrEdits: job.Edits);
@@ -339,7 +339,7 @@ public sealed class DocumentStore(
     private static string NextNumber(DocumentRecord record)
     {
         if (record.CurrentVersion is not { } current)
-            return "1.0";
+            return DocumentRecord.FirstVersionNumber;
 
         var parts = current.Number.Split('.');
         var major = int.Parse(parts[0], CultureInfo.InvariantCulture);

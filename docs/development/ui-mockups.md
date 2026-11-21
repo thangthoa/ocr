@@ -23,7 +23,8 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 
 Mọi bảng danh sách document (All Documents, Review Queue, Document Archive) bắt buộc có cùng các **cột theo dõi**, theo thứ tự:
 **Pages**, **Uploaded by**, **Uploaded at**, **Approved by**, **Approved date**, **Version**, **Last updated at**. Chưa có dữ liệu
-(chưa đếm được trang, không rõ người upload, chưa duyệt, chưa có phiên bản…) thì hiện —. Hai component
+(chưa đếm được trang, không rõ người upload, chưa duyệt…) thì hiện —; riêng **Version** mặc định là 1.0 khi document
+chưa có phiên bản nào (đang nhận dạng, lỗi…). Hai component
 `DocumentTrackingHeaders` / `DocumentTrackingCells` vẽ các cột này; bảng danh sách document mới cũng dùng chúng.
 
 ## Document = job OCR

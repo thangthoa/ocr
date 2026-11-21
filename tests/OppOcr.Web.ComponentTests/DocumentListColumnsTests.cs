@@ -14,8 +14,9 @@ public sealed class DocumentListColumnsTests : BunitContext
     private static readonly string[] Required =
         ["Pages", "Uploaded by", "Uploaded at", "Approved by", "Approved date", "Version", "Last updated at"];
 
-    private static readonly string[] TrackingCells =
-        ["doc-pages", "doc-uploaded-by", "doc-uploaded", "doc-approved-by", "doc-approved", "doc-version", "doc-updated"];
+    /// <summary>The tracking cells that show a dash while their value is not known; the version is never missing.</summary>
+    private static readonly string[] CellsWithoutDefault =
+        ["doc-pages", "doc-uploaded-by", "doc-uploaded", "doc-approved-by", "doc-approved", "doc-updated"];
 
     private readonly InMemoryOcr _ocr;
 
@@ -34,16 +35,38 @@ public sealed class DocumentListColumnsTests : BunitContext
     }
 
     [Fact]
-    public void A_document_with_nothing_known_yet_shows_a_dash_in_every_tracking_column()
+    public void A_document_with_nothing_known_yet_shows_dashes_and_version_1_0()
     {
-        // Queued and not counted yet: no pages, no batch (so no uploader), no upload time, no approval, no version.
+        // Queued and not counted yet: no pages, no batch (so no uploader), no upload time, no approval, no saved version.
         _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000001", "fresh.png", OcrJobStatus.Queued) with { PagesTotal = 0 });
 
         var cut = Render<DocumentsPage>();
 
         var row = cut.WaitForElement("tbody tr");
         Assert.Contains("fresh.png", row.TextContent, StringComparison.Ordinal);
-        Assert.All(TrackingCells, cell => Assert.Equal("—", row.QuerySelector($"td.{cell}")!.TextContent.Trim()));
+        Assert.All(CellsWithoutDefault, cell => Assert.Equal("—", Cell(row, cell)));
+        Assert.Equal("1.0", Cell(row, "doc-version"));
+    }
+
+    [Fact]
+    public void Every_row_of_every_document_list_has_a_version()
+    {
+        // A failed job never gets a saved version; it is still at 1.0.
+        _ocr.Seed(InMemoryOcr.NewJob("job_0000000000000002", "broken.png", OcrJobStatus.Failed));
+
+        Assert.All(Versions<DocumentsPage>().Concat(Versions<ReviewPage>()).Concat(Versions<ApprovedPage>()),
+            version => Assert.Matches(@"^\d+\.\d+$", version));
+        Assert.Equal("1.0", Versions<DocumentsPage>()[0]);
+    }
+
+    private string[] Versions<TPage>()
+        where TPage : IComponent
+    {
+        var cut = Render<TPage>();
+        cut.WaitForElement("tbody tr");
+        var versions = cut.FindAll("td.doc-version").Select(cell => cell.TextContent.Trim()).ToArray();
+        Assert.Equal(cut.FindAll("tbody tr").Count, versions.Length);
+        return versions;
     }
 
     [Fact]

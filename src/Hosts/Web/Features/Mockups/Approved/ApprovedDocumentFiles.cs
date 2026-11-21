@@ -114,7 +114,7 @@ internal sealed partial class ApprovedDocumentFiles(
             return ApprovedErrors.NoText;
 
         var name = Path.GetFileNameWithoutExtension(document.FileName);
-        var version = document.CurrentVersion?.Number ?? "1.0";
+        var version = document.VersionNumber;
         DownloadFile file;
         if (format == FinalFileFormat.Pdf)
         {
@@ -184,7 +184,7 @@ internal sealed partial class ApprovedDocumentFiles(
                 text.Confidentiality(metadata.Confidentiality),
                 string.Join("; ", metadata.Keywords),
                 document.Pages > 0 ? document.Pages.ToString(CultureInfo.InvariantCulture) : null,
-                document.CurrentVersion?.Number,
+                document.VersionNumber,
                 document.UploadedBy,
                 Timestamp(document.UploadedAtUtc),
                 document.Approval?.By,

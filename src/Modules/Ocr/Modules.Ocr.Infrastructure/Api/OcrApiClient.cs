@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -100,6 +101,23 @@ internal sealed partial class OcrApiClient(
         return SendForFileAsync($"{JobPath(jobId)}/download?format={wire}", $"result.{wire}", cancellationToken);
     }
 
+    // Page changes (API doc §3.8) take only uploaded files: the service offers no file_url there (checked against
+    // its openapi.json, 2026-11-21), so the files go up directly even when AppUrl is set.
+    public Task<Result<OcrJob>> InsertPagesAsync(OcrJobId jobId, IReadOnlyList<OcrUpload> files, int? position, CancellationToken cancellationToken) =>
+        SendForJobAsync(() =>
+        {
+            var form = FilesForm(files);
+            if (position is { } value)
+                form.Add(new StringContent(value.ToString(CultureInfo.InvariantCulture)), "position");
+            return new HttpRequestMessage(HttpMethod.Post, $"{JobPath(jobId)}/pages") { Content = form };
+        }, cancellationToken);
+
+    public Task<Result<OcrJob>> ReplacePageAsync(OcrJobId jobId, int pageNumber, OcrUpload file, CancellationToken cancellationToken) =>
+        SendForJobAsync(() => new HttpRequestMessage(HttpMethod.Put, PagePath(jobId, pageNumber)) { Content = FilesForm([file]) }, cancellationToken);
+
+    public Task<Result<OcrJob>> DeletePageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken) =>
+        SendForJobAsync(() => new HttpRequestMessage(HttpMethod.Delete, PagePath(jobId, pageNumber)), cancellationToken);
+
     /// <summary>Calls the unauthenticated health endpoint (API doc §3.7).</summary>
     internal async Task<bool> PingAsync(CancellationToken cancellationToken)
     {
@@ -122,6 +140,23 @@ internal sealed partial class OcrApiClient(
     }
 
     private static string JobPath(OcrJobId jobId) => $"v1/jobs/{Uri.EscapeDataString(jobId.Value)}";
+
+    private static string PagePath(OcrJobId jobId, int pageNumber) =>
+        string.Create(CultureInfo.InvariantCulture, $"{JobPath(jobId)}/pages/{pageNumber}");
+
+    /// <summary>One <c>file</c> field per file, in order: the service keeps that order for the pages.</summary>
+    private static MultipartFormDataContent FilesForm(IReadOnlyList<OcrUpload> files)
+    {
+        var form = new MultipartFormDataContent();
+        foreach (var file in files)
+        {
+            var content = new ReadOnlyMemoryContent(file.Content);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            form.Add(content, "file", file.FileName);
+        }
+
+        return form;
+    }
 
     private static string AppLink(OcrApiOptions settings, string path) => settings.AppUrl!.AbsoluteUri.TrimEnd('/') + "/" + path;
 

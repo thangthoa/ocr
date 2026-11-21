@@ -296,6 +296,8 @@
   <data name="Quality.Summary.LowPages" xml:space="preserve"><value>صفحات منخفضة الدقة: {0}</value></data>
   <data name="Quality.Summary.Warnings" xml:space="preserve"><value>صفحات فيها مشكلات في التعرّف: {0}</value></data>
   <data name="Quality.Summary.EmptyPages" xml:space="preserve"><value>صفحات بلا نص: {0}</value></data>
+  <data name="Quality.Issue.Duplicate" xml:space="preserve"><value>قد تكون الصفحة {0} هي نفسها الصفحة {1}</value></data>
+  <data name="Quality.Summary.Duplicates" xml:space="preserve"><value>صفحات قد تكون مكررة: {0}</value></data>
   <data name="Quality.Heading" xml:space="preserve"><value>الفحص الآلي للجودة</value></data>
   <data name="Quality.Passed" xml:space="preserve"><value>اجتاز</value></data>
   <data name="Quality.Flagged" xml:space="preserve"><value>مشكلات: {0}</value></data>
@@ -315,7 +317,7 @@
   <data name="QualitySettings.MinPage" xml:space="preserve"><value>كل صفحة</value></data>
   <data name="QualitySettings.MinPageHint" xml:space="preserve"><value>تكفي صفحة واحدة أقل منه لإرسال المستند إلى المراجعة.</value></data>
   <data name="QualitySettings.Rules" xml:space="preserve"><value>أرسل أيضًا إلى المراجعة</value></data>
-  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>الصفحات التي أبلغت خدمة OCR عن مشكلات فيها</value></data>
+  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>الصفحات التي أبلغت خدمة OCR عن مشكلات فيها أو عن تكرارها</value></data>
   <data name="QualitySettings.FlagEmpty" xml:space="preserve"><value>الصفحات التي لم يُتعرّف فيها على نص، أو الناقصة من نتيجة التعرّف</value></data>
   <data name="QualitySettings.Required" xml:space="preserve"><value>البيانات الوصفية المطلوبة</value></data>
   <data name="QualitySettings.RequiredHint" xml:space="preserve"><value>مستندات خدمة OCR ليس لها إلا عنوان (من اسم الملف)، لذلك كل حقل تختاره هنا يرسل كل مستند جديد إلى المراجعة.</value></data>
@@ -660,4 +662,41 @@
   <data name="Audit.OcrFailed" xml:space="preserve"><value>فشل التعرّف الضوئي ({0})</value></data>
   <data name="Audit.OcrRetried" xml:space="preserve"><value>أُعيد إرسال التعرّف الضوئي</value></data>
   <data name="Audit.ActivityExported" xml:space="preserve"><value>صدّر سجل النشاط ({0} قيد)</value></data>
+  <data name="Pages.Heading" xml:space="preserve"><value>الصفحات</value></data>
+  <data name="Pages.Tools" xml:space="preserve"><value>تعديل الصفحات</value></data>
+  <data name="Pages.Duplicates" xml:space="preserve"><value>قد تكون هذه الصفحات صفحة واحدة مكررة:</value></data>
+  <data name="Pages.Duplicate.Identical" xml:space="preserve"><value>الصفحتان {0} و{1} ملف واحد مكرر.</value></data>
+  <data name="Pages.Duplicate.Similar" xml:space="preserve"><value>تبدو الصفحتان {0} و{1} الصفحة نفسها ممسوحة مرتين.</value></data>
+  <data name="Pages.Duplicate.SameText" xml:space="preserve"><value>نص الصفحتين {0} و{1} متطابق تقريبًا (95٪ أو أكثر).</value></data>
+  <data name="Pages.DuplicatesNote" xml:space="preserve"><value>هذا تنبيه فقط: لا يُحذف شيء ما لم تختر ذلك.</value></data>
+  <data name="Pages.ShowPage" xml:space="preserve"><value>عرض الصفحة {0}</value></data>
+  <data name="Pages.Delete" xml:space="preserve"><value>حذف الصفحة {0}</value></data>
+  <data name="Pages.DeleteDuplicateLabel" xml:space="preserve"><value>حذف الصفحة {0}، المكررة من الصفحة {1}</value></data>
+  <data name="Pages.DeleteTitle" xml:space="preserve"><value>حذف الصفحة {0}؟</value></data>
+  <data name="Pages.DeleteNote" xml:space="preserve"><value>تُحذف الصفحة {0} وتتقدّم الصفحات التي بعدها. يُعاد بناء النص وملف Word من نتيجة التعرّف الضوئي، وتبقى الإصدارات السابقة، بما فيها التعديلات، في سجل الإصدارات.</value></data>
+  <data name="Pages.Insert" xml:space="preserve"><value>إدراج صفحات</value></data>
+  <data name="Pages.Replace" xml:space="preserve"><value>استبدال الصفحة {0}</value></data>
+  <data name="Pages.BusyReading" xml:space="preserve"><value>يقرأ التعرّف الضوئي الصفحات الآن، ويمكن تعديلها بعد انتهائه.</value></data>
+  <data name="Pages.BusyWord" xml:space="preserve"><value>تُكمل خدمة التعرّف الضوئي ملف Word، ويمكن تعديل الصفحات بعد قليل.</value></data>
+  <data name="Pages.InsertFiles" xml:space="preserve"><value>صور أو ملف PDF للإدراج</value></data>
+  <data name="Pages.ReplaceFile" xml:space="preserve"><value>الصورة الجديدة للصفحة {0}</value></data>
+  <data name="Pages.OneFile" xml:space="preserve"><value>اختر ملفًا واحدًا: الصورة الجديدة للصفحة.</value></data>
+  <data name="Pages.Position" xml:space="preserve"><value>الإدراج في</value></data>
+  <data name="Pages.AsPage" xml:space="preserve"><value>الصفحة {0}</value></data>
+  <data name="Pages.AtEnd" xml:space="preserve"><value>الصفحة {0}، في النهاية</value></data>
+  <data name="Pages.Selected" xml:space="preserve"><value>الملفات المختارة</value></data>
+  <data name="Pages.Limits" xml:space="preserve"><value>{0}؛ بحد أقصى {1} ميغابايت إجمالًا؛ ولا يتجاوز المستند {2} صفحة.</value></data>
+  <data name="Pages.InsertHint" xml:space="preserve"><value>تأخذ الصفحات الجديدة الرقم المختار وتتأخر الصفحات التي تليه. تُقرأ الصفحات الجديدة فقط (نحو دقيقة للصفحة المطبوعة، وبضع دقائق للمكتوبة بخط اليد)، ثم يُعاد بناء النص وملف Word من نتيجة التعرّف الضوئي. تبقى الإصدارات السابقة، بما فيها التعديلات، في سجل الإصدارات. {0}</value></data>
+  <data name="Pages.ReplaceHint" xml:space="preserve"><value>تُقرأ هذه الصفحة فقط من جديد (نحو دقيقة إن كانت مطبوعة، وبضع دقائق إن كانت بخط اليد)، ثم يُعاد بناء النص وملف Word من نتيجة التعرّف الضوئي. تبقى الإصدارات السابقة، بما فيها التعديلات، في سجل الإصدارات. {0}</value></data>
+  <data name="Pages.InsertSubmit" xml:space="preserve"><value>إدراج</value></data>
+  <data name="Pages.Working" xml:space="preserve"><value>جارٍ الإرسال…</value></data>
+  <data name="Pages.Inserted" xml:space="preserve"><value>أُدرجت الملفات ({0}) بدءًا من الصفحة {1}. يقرأ التعرّف الضوئي الصفحات الجديدة، ويُحدَّث النص وملف Word عند انتهائه.</value></data>
+  <data name="Pages.Replaced" xml:space="preserve"><value>استُبدلت الصفحة {0}. يقرأها التعرّف الضوئي الآن، ويُحدَّث النص وملف Word عند انتهائه.</value></data>
+  <data name="Pages.Deleted" xml:space="preserve"><value>حُذفت الصفحة {0} وتقدّمت الصفحات التي بعدها.</value></data>
+  <data name="Change.PagesChanged" xml:space="preserve"><value>نتيجة التعرّف الضوئي بعد تعديل الصفحات</value></data>
+  <data name="Preview.WordPending" xml:space="preserve"><value>تُكمل خدمة التعرّف الضوئي ملف Word…</value></data>
+  <data name="Word.Pending" xml:space="preserve"><value>لا تزال خدمة التعرّف الضوئي تُكمل ملف Word لهذا المستند. حاول مرة أخرى بعد قليل.</value></data>
+  <data name="Audit.PagesInserted" xml:space="preserve"><value>أدرج ملفات ({0}) بدءًا من الصفحة {1}</value></data>
+  <data name="Audit.PageReplaced" xml:space="preserve"><value>استبدل الصفحة {0}</value></data>
+  <data name="Audit.PageDeleted" xml:space="preserve"><value>حذف الصفحة {0}</value></data>
 </root>

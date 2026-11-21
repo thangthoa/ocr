@@ -27,6 +27,10 @@ public static class QualityCheck
 
         foreach (var page in pages.OrderBy(p => p.Number))
         {
+            // Someone has to choose which copy goes: the service only warns.
+            if (settings.FlagWarnings && page.DuplicateOf is { } original)
+                issues.Add(new QualityIssue(QualityIssueKind.DuplicatePage, page.Number, DuplicateOf: original));
+
             if (!page.HasText)
             {
                 if (settings.FlagEmptyPages)

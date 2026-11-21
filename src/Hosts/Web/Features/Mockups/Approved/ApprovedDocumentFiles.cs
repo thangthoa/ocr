@@ -260,7 +260,7 @@ internal sealed partial class ApprovedDocumentFiles(
         var latest = versions[^1];
         var matches = current.Change switch
         {
-            DocumentVersionChange.EditedInWord => current.WordVersion == latest.Number,
+            DocumentVersionChange.EditedInWord or DocumentVersionChange.PagesChanged => current.WordVersion == latest.Number,
             DocumentVersionChange.OcrResult => latest.Source == WordVersionSource.Ocr,
             _ => false,
         };

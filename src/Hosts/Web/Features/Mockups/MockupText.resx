@@ -296,6 +296,8 @@
   <data name="Quality.Summary.LowPages" xml:space="preserve"><value>Low-confidence pages: {0}</value></data>
   <data name="Quality.Summary.Warnings" xml:space="preserve"><value>Pages with OCR problems: {0}</value></data>
   <data name="Quality.Summary.EmptyPages" xml:space="preserve"><value>Pages without text: {0}</value></data>
+  <data name="Quality.Issue.Duplicate" xml:space="preserve"><value>Page {0} may be the same page as page {1}</value></data>
+  <data name="Quality.Summary.Duplicates" xml:space="preserve"><value>Possible duplicate pages: {0}</value></data>
   <data name="Quality.Heading" xml:space="preserve"><value>Automatic quality check</value></data>
   <data name="Quality.Passed" xml:space="preserve"><value>Passed</value></data>
   <data name="Quality.Flagged" xml:space="preserve"><value>Issues: {0}</value></data>
@@ -315,7 +317,7 @@
   <data name="QualitySettings.MinPage" xml:space="preserve"><value>Each page</value></data>
   <data name="QualitySettings.MinPageHint" xml:space="preserve"><value>One page below it is enough to send the document to review.</value></data>
   <data name="QualitySettings.Rules" xml:space="preserve"><value>Also send to review</value></data>
-  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>Pages the OCR service reported problems on</value></data>
+  <data name="QualitySettings.FlagWarnings" xml:space="preserve"><value>Pages the OCR service reported problems on, or as duplicates</value></data>
   <data name="QualitySettings.FlagEmpty" xml:space="preserve"><value>Pages with no recognised text, or missing from the OCR result</value></data>
   <data name="QualitySettings.Required" xml:space="preserve"><value>Required metadata</value></data>
   <data name="QualitySettings.RequiredHint" xml:space="preserve"><value>Documents from the OCR service only have a title (from the file name), so each field ticked here sends every new document to review.</value></data>
@@ -660,4 +662,41 @@
   <data name="Audit.OcrFailed" xml:space="preserve"><value>OCR failed ({0})</value></data>
   <data name="Audit.OcrRetried" xml:space="preserve"><value>OCR sent again</value></data>
   <data name="Audit.ActivityExported" xml:space="preserve"><value>Exported the activity log ({0} entries)</value></data>
+  <data name="Pages.Heading" xml:space="preserve"><value>Pages</value></data>
+  <data name="Pages.Tools" xml:space="preserve"><value>Change pages</value></data>
+  <data name="Pages.Duplicates" xml:space="preserve"><value>These pages may be the same page:</value></data>
+  <data name="Pages.Duplicate.Identical" xml:space="preserve"><value>Pages {0} and {1} are the same file.</value></data>
+  <data name="Pages.Duplicate.Similar" xml:space="preserve"><value>Pages {0} and {1} look like the same page scanned twice.</value></data>
+  <data name="Pages.Duplicate.SameText" xml:space="preserve"><value>Pages {0} and {1} have almost the same text (95 % or more).</value></data>
+  <data name="Pages.DuplicatesNote" xml:space="preserve"><value>This is only a warning: nothing is deleted unless you choose to.</value></data>
+  <data name="Pages.ShowPage" xml:space="preserve"><value>Show page {0}</value></data>
+  <data name="Pages.Delete" xml:space="preserve"><value>Delete page {0}</value></data>
+  <data name="Pages.DeleteDuplicateLabel" xml:space="preserve"><value>Delete page {0}, a duplicate of page {1}</value></data>
+  <data name="Pages.DeleteTitle" xml:space="preserve"><value>Delete page {0}?</value></data>
+  <data name="Pages.DeleteNote" xml:space="preserve"><value>Page {0} is removed and the pages after it move up. The text and the Word file are rebuilt from the OCR result; earlier versions, including edits, stay in the version history.</value></data>
+  <data name="Pages.Insert" xml:space="preserve"><value>Insert pages</value></data>
+  <data name="Pages.Replace" xml:space="preserve"><value>Replace page {0}</value></data>
+  <data name="Pages.BusyReading" xml:space="preserve"><value>OCR is reading the pages; they can be changed when it finishes.</value></data>
+  <data name="Pages.BusyWord" xml:space="preserve"><value>The OCR service is finishing the Word file; pages can be changed in a moment.</value></data>
+  <data name="Pages.InsertFiles" xml:space="preserve"><value>Images or PDF to insert</value></data>
+  <data name="Pages.ReplaceFile" xml:space="preserve"><value>New image of page {0}</value></data>
+  <data name="Pages.OneFile" xml:space="preserve"><value>Choose one file: the new image of the page.</value></data>
+  <data name="Pages.Position" xml:space="preserve"><value>Insert as</value></data>
+  <data name="Pages.AsPage" xml:space="preserve"><value>Page {0}</value></data>
+  <data name="Pages.AtEnd" xml:space="preserve"><value>Page {0}, at the end</value></data>
+  <data name="Pages.Selected" xml:space="preserve"><value>Chosen files</value></data>
+  <data name="Pages.Limits" xml:space="preserve"><value>{0}; up to {1} MB in total; a document has at most {2} pages.</value></data>
+  <data name="Pages.InsertHint" xml:space="preserve"><value>The new pages take the number chosen and the pages from there move down. Only the new pages are read (about a minute per printed page, a few minutes if handwritten); the text and the Word file are then rebuilt from the OCR result. Earlier versions, including edits, stay in the version history. {0}</value></data>
+  <data name="Pages.ReplaceHint" xml:space="preserve"><value>Only this page is read again (about a minute if printed, a few minutes if handwritten); the text and the Word file are then rebuilt from the OCR result. Earlier versions, including edits, stay in the version history. {0}</value></data>
+  <data name="Pages.InsertSubmit" xml:space="preserve"><value>Insert</value></data>
+  <data name="Pages.Working" xml:space="preserve"><value>Sending…</value></data>
+  <data name="Pages.Inserted" xml:space="preserve"><value>Inserted {0} file(s) as page {1}. OCR is reading the new pages; the text and the Word file are updated when it finishes.</value></data>
+  <data name="Pages.Replaced" xml:space="preserve"><value>Page {0} replaced. OCR is reading it; the text and the Word file are updated when it finishes.</value></data>
+  <data name="Pages.Deleted" xml:space="preserve"><value>Page {0} deleted; the pages after it moved up.</value></data>
+  <data name="Change.PagesChanged" xml:space="preserve"><value>OCR result after the pages changed</value></data>
+  <data name="Preview.WordPending" xml:space="preserve"><value>The OCR service is finishing the Word file…</value></data>
+  <data name="Word.Pending" xml:space="preserve"><value>The OCR service is still finishing the Word file of this document. Try again in a moment.</value></data>
+  <data name="Audit.PagesInserted" xml:space="preserve"><value>Inserted {0} file(s) as page {1}</value></data>
+  <data name="Audit.PageReplaced" xml:space="preserve"><value>Replaced page {0}</value></data>
+  <data name="Audit.PageDeleted" xml:space="preserve"><value>Deleted page {0}</value></data>
 </root>

@@ -37,6 +37,7 @@ public static class MockupsServiceCollectionExtensions
         services.AddHostedService<HistoryWarmup>();
         services.AddSingleton<DocumentStore>();
         services.AddScoped<DocumentCatalog>();
+        services.AddScoped<DocumentPageEditor>();
         services.AddHostedService<QualityCheckTrigger>();
         services.AddScoped<ApprovedDocumentFiles>();
 

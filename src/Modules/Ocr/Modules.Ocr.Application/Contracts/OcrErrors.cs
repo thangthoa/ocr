@@ -21,6 +21,10 @@ public static class OcrErrorCodes
     public const string TooManyPages = "ocr.too_many_pages";
     public const string UnsupportedPageFormat = "ocr.unsupported_page_format";
     public const string ImageNotSupported = "ocr.image_not_supported";
+    public const string JobBusy = "ocr.job_busy";
+    public const string LastPage = "ocr.last_page";
+    public const string PageNotFound = "ocr.page_not_found";
+    public const string PagesNotEditable = "ocr.pages_not_editable";
 }
 
 /// <summary>
@@ -43,6 +47,12 @@ public static class OcrServiceErrorCodes
 
     /// <summary>A correctly signed callback whose body is not a job.</summary>
     public const string CallbackInvalid = "callback_invalid";
+
+    /// <summary>Sent by the service: pages cannot change while it reads them or builds the Word file (API doc §3.8).</summary>
+    public const string JobBusy = "job_busy";
+
+    /// <summary>Sent by the service: the only page left cannot be deleted.</summary>
+    public const string LastPage = "last_page";
 }
 
 public static class OcrErrors
@@ -58,6 +68,15 @@ public static class OcrErrors
 
     public static readonly Error ImageNotSupported = Error.Validation(
         OcrErrorCodes.ImageNotSupported, "An image cannot be placed on a PDF page (for example an interlaced PNG).");
+
+    public static readonly Error JobBusy = Error.Conflict(
+        OcrErrorCodes.JobBusy, "Pages cannot change while the OCR service reads them or builds the Word file; try again when it is done.");
+
+    public static readonly Error LastPage = Error.Conflict(OcrErrorCodes.LastPage, "The only page of a document cannot be deleted.");
+
+    public static readonly Error PageNotFound = Error.NotFound(OcrErrorCodes.PageNotFound, "The document has no such page.");
+
+    public static readonly Error PagesNotEditable = Error.Conflict(OcrErrorCodes.PagesNotEditable, "The pages of a cancelled job cannot change.");
 
     public static Error ServiceUnavailable(Error cause) =>
         Error.Failure(OcrErrorCodes.ServiceUnavailable, $"OCR service request failed: {cause.Code}.");

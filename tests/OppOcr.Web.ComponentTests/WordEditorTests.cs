@@ -344,6 +344,50 @@ public sealed class WordEditorTests : BunitContext
         Assert.Empty(cut.FindAll("#preview-retry"));
     }
 
+    [Fact]
+    public async Task After_a_page_change_the_new_ocr_word_file_is_taken_once_the_service_has_finished_it()
+    {
+        const string id = "job_0000000000000009";
+        Services.GetRequiredService<QualitySettingsStore>().Save(QualitySettings.Default with { AutoApprove = false }, "admin");
+        OcrPage[] pages = [new(1, OcrDocumentType.Printed, "الأولى", 5, "A v2", [], false), new(2, OcrDocumentType.Printed, "الثانية", 5, "A v2", [], false)];
+        _ocr.Seed(InMemoryOcr.NewJob(id, "scan.pdf", OcrJobStatus.Done) with { PagesTotal = 2, PagesDone = 2, Pages = pages });
+        _ocr.Docx = DocxText.Create(["الأولى", "الثانية"]);
+        var first = await Editor.CurrentVersionAsync(await DocumentAsync(id), Ct);
+
+        var deleted = await Services.GetRequiredService<DocumentPageEditor>().DeleteAsync(id, 2, "admin", Ct);
+
+        // The service is rebuilding its Word file: neither the preview nor the editor takes the old one meanwhile.
+        Assert.True(WordEditorService.IsWordPending(deleted.Value));
+        Assert.Equal(WordErrors.WordPending, (await Preview.GetAsync(deleted.Value, Ct)).Error!.Code);
+        Assert.Equal(WordErrors.WordPending, (await Editor.OpenAsync(id, "admin", CultureInfo.InvariantCulture, Ct)).Error!.Code);
+
+        _ocr.SetOnService(_ocr.OnService(id) with { WordReady = true });
+        _ocr.Docx = DocxText.Create(["الأولى"]);
+        var document = await DocumentAsync(id);
+        var latest = await Editor.CurrentVersionAsync(document, Ct);
+
+        Assert.Equal((first.Number + 1, WordVersionSource.Ocr), (latest.Number, latest.Source));
+        Assert.Equal(latest.Number, (await DocumentAsync(id)).CurrentVersion!.WordVersion);
+        // Taken once: later reads keep that version.
+        Assert.Equal(latest.Number, (await Editor.CurrentVersionAsync(await DocumentAsync(id), Ct)).Number);
+        Assert.Equal(2, (await Files.ListAsync(id, Ct)).Count);
+    }
+
+    [Fact]
+    public async Task A_job_just_done_waits_for_the_services_complete_word_file()
+    {
+        const string id = "job_0000000000000010";
+        var page = new OcrPage(1, OcrDocumentType.Printed, "نص", 5, "A v2", [], false);
+        _ocr.Seed(InMemoryOcr.NewJob(id, "scan.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page], WordReady = false });
+        _ocr.Docx = DocxText.Create(["نص"]);
+
+        var result = await Preview.GetAsync(await DocumentAsync(id), Ct);
+
+        // Taking the file now would keep it without its logo, signature and stamp images for good.
+        Assert.Equal(WordErrors.WordPending, result.Error!.Code);
+        Assert.Empty(await Files.ListAsync(id, Ct));
+    }
+
     private async Task<DocumentRecord> DocumentAsync(string id) =>
         (await Services.GetRequiredService<DocumentCatalog>().GetAsync(id, Ct)).Value;
 

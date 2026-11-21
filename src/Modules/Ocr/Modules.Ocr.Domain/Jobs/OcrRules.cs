@@ -9,7 +9,7 @@ public static class OcrRules
 
     public const int MaxFileNameLength = 255;
 
-    /// <summary>The OCR service rejects longer documents (<c>too_many_pages</c>).</summary>
+    /// <summary>The OCR service rejects longer documents (<c>too_many_pages</c>), also when pages are inserted later.</summary>
     public const int MaxPagesPerDocument = 20;
 
     // Path separators and the characters Windows rejects: the name is typed by the user and is

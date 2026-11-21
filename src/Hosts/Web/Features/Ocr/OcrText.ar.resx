@@ -127,4 +127,8 @@
   <data name="NoMatches" xml:space="preserve"><value>لا توجد مهام تطابق «{0}».</value></data>
   <data name="SearchLimited" xml:space="preserve"><value>جرى البحث في أحدث {0} مهمة فقط.</value></data>
   <data name="DeleteTitle" xml:space="preserve"><value>حذف «{0}»؟</value></data>
+  <data name="ocr.job_busy" xml:space="preserve"><value>تقرأ خدمة التعرّف الضوئي هذا المستند أو تُكمل ملف Word الخاص به. حاول مرة أخرى بعد انتهائها.</value></data>
+  <data name="ocr.last_page" xml:space="preserve"><value>لا يمكن حذف الصفحة الوحيدة في المستند. احذف المستند بدلًا من ذلك.</value></data>
+  <data name="ocr.page_not_found" xml:space="preserve"><value>لا توجد هذه الصفحة في المستند. أعد تحميل الصفحة وحاول مرة أخرى.</value></data>
+  <data name="ocr.pages_not_editable" xml:space="preserve"><value>لا يمكن تعديل صفحات مستند أُلغي.</value></data>
 </root>

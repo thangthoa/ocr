@@ -38,6 +38,8 @@ public sealed partial class WordPreviewService(
             return Error.Validation(WordErrors.EditorDisabled, "The Word editor is not configured.");
         if (!WordEditorService.HasWordFile(document))
             return Error.Conflict(WordErrors.NoWordFile, "The Word file is created when OCR finishes.");
+        if (WordEditorService.IsWordPending(document))
+            return Error.Conflict(WordErrors.WordPending, "The OCR service is still making the Word file.");
 
         try
         {

@@ -28,7 +28,7 @@
                         break;
                 }
                 @* The text is edited in Word; the details (title, reference…) from the Metadata tab. *@
-                @if (progressDocument.CanEdit && Word.Enabled)
+                @if (progressDocument.CanEdit && Word.Enabled && !WordEditorService.IsWordPending(progressDocument))
                 {
                     <a id="action-edit" class="btn btn-sm btn-outline-primary" href="@WordEditorEndpoints.EditorUrl(progressDocument.Id)">@Text["Action.Edit"]</a>
                 }
@@ -241,6 +241,11 @@ else
             }
         </div>
 
+        @if (ShowsPageTools)
+        {
+            <DocumentPagesPanel Document="document" Page="_page" OnShowPage="ShowPage" OnChanged="OnPagesChanged" />
+        }
+
         @if (_viewing is not null)
         {
             <div class="alert alert-info d-flex flex-wrap align-items-center gap-2 py-2" role="status">
@@ -259,9 +264,9 @@ else
                     @if (job is not null)
                     {
                         var ocrPage = job.Pages.FirstOrDefault(p => p.PageNumber == _page);
-                        if (ocrPage is not null)
+                        if (ocrPage is not null || (!job.IsFinished && job.HasPage(_page)))
                         {
-                            var scanUrl = OcrEndpoints.PageImageUrl(document.Id, _page);
+                            var scanUrl = OcrEndpoints.PageImageUrl(document.Id, _page, job.Edits);
                             <a class="page-link" href="@scanUrl" target="_blank" rel="noopener" title="@Text["Preview.OpenFull"]"
                                aria-label="@Text["Preview.OpenFullLabel", OcrText["PageImageAlt", _page]]">
                                 <img src="@scanUrl" class="page-image" alt="@OcrText["PageImageAlt", _page]" loading="lazy" />
@@ -323,7 +328,7 @@ else
                                     <span style="width: @(LineWidth(line))"></span>
                                 }
                             </div>
-                            <p class="page-empty small">@Text["Preview.Rendering"]</p>
+                            <p class="page-empty small">@(WordEditorService.IsWordPending(document) ? Text["Preview.WordPending"] : Text["Preview.Rendering"])</p>
                         </div>
                     }
                     else

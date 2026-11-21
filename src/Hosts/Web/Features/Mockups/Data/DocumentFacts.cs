@@ -315,7 +315,7 @@ internal sealed class FactsBuilder
     {
         QualityIssueKind.LowDocumentConfidence => ExceptionReason.LowDocumentConfidence,
         QualityIssueKind.LowPageConfidence => ExceptionReason.LowPageConfidence,
-        QualityIssueKind.PageWarnings => ExceptionReason.PageWarnings,
+        QualityIssueKind.PageWarnings or QualityIssueKind.DuplicatePage => ExceptionReason.PageWarnings,
         QualityIssueKind.MissingMetadata => ExceptionReason.MissingMetadata,
         _ => ExceptionReason.EmptyPage,
     };

@@ -71,6 +71,9 @@ internal static class MockupTextExtensions
             AuditAction.StatusChanged => text["Audit.StatusChanged", entry.Status is { } status ? text.Status(status) : "?"],
             AuditAction.Deleted => text["Audit.Deleted"],
             AuditAction.EditedInWord => text["Audit.EditedInWord", entry.Version ?? "?"],
+            AuditAction.PagesInserted => text["Audit.PagesInserted", entry.Detail ?? "?", entry.Version ?? "?"],
+            AuditAction.PageReplaced => text["Audit.PageReplaced", entry.Version ?? "?"],
+            AuditAction.PageDeleted => text["Audit.PageDeleted", entry.Version ?? "?"],
             AuditAction.Downloaded => text["Audit.Downloaded", entry.Detail ?? "?", entry.Version ?? "?"],
             AuditAction.Exported => text["Audit.Exported", entry.Detail ?? "?"],
             AuditAction.QualityChecked when entry.Status == DocumentStatus.Archived => text["Audit.QualityApproved"],
@@ -102,6 +105,7 @@ internal static class MockupTextExtensions
             QualityIssueKind.PageWarnings => text["Quality.Issue.Warnings", issue.Page ?? 0, issue.Count ?? 0],
             QualityIssueKind.EmptyPage => text["Quality.Issue.EmptyPage", issue.Page ?? 0],
             QualityIssueKind.MissingMetadata => text["Quality.Issue.Missing", issue.Field is { } field ? text.Required(field) : "?"],
+            QualityIssueKind.DuplicatePage => text["Quality.Issue.Duplicate", issue.Page ?? 0, issue.DuplicateOf ?? 0],
             _ => issue.Kind.ToString(),
         };
     }
@@ -123,6 +127,7 @@ internal static class MockupTextExtensions
                 QualityIssueKind.LowPageConfidence => text["Quality.Summary.LowPages", Pages(kind)].Value,
                 QualityIssueKind.PageWarnings => text["Quality.Summary.Warnings", Pages(kind)].Value,
                 QualityIssueKind.EmptyPage => text["Quality.Summary.EmptyPages", Pages(kind)].Value,
+                QualityIssueKind.DuplicatePage => text["Quality.Summary.Duplicates", Pages(kind)].Value,
                 QualityIssueKind.MissingMetadata => text["Quality.Issue.Missing",
                     string.Join(separator, check.Issues.Where(i => i.Field is not null).Select(i => text.Required(i.Field!.Value)))].Value,
                 _ => kind.ToString(),

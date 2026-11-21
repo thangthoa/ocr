@@ -55,6 +55,23 @@ public sealed class QualityCheckTests
         Assert.Equal(expected, result.Issues.Count);
     }
 
+    [Theory]
+    [InlineData(true, 1)]
+    [InlineData(false, 0)]
+    public void A_page_the_service_reports_as_a_duplicate_is_flagged_with_the_warnings(bool flagWarnings, int expected)
+    {
+        var settings = QualitySettings.Default with { FlagWarnings = flagWarnings };
+
+        var result = Run([Page(1, 95), Page(2, 95), Page(3, 95) with { DuplicateOf = 1 }], 95, settings);
+
+        Assert.Equal(expected, result.Issues.Count);
+        if (flagWarnings)
+        {
+            Assert.Equal(new QualityIssue(QualityIssueKind.DuplicatePage, 3, DuplicateOf: 1), result.Issues[0]);
+            Assert.Equal([3], result.FlaggedPages);
+        }
+    }
+
     [Fact]
     public void Required_metadata_that_is_empty_is_flagged_once_per_field()
     {

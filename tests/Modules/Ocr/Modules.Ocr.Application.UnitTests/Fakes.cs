@@ -65,6 +65,32 @@ internal sealed class FakeApi : IOcrApiClient
 
     public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken) =>
         Task.FromResult<Result<FileContent>>(Error.Conflict("not_ready", "not finished"));
+
+    /// <summary>Page changes received, as (method, job, page or position, files).</summary>
+    public List<(string Method, string JobId, int? Page, IReadOnlyList<OcrUpload> Files)> PageEdits { get; } = [];
+
+    /// <summary>What a page change answers; by default the job with its pages counted again and one more edit.</summary>
+    public Func<Result<OcrJob>>? PageEditResult { get; set; }
+
+    public Task<Result<OcrJob>> InsertPagesAsync(OcrJobId jobId, IReadOnlyList<OcrUpload> files, int? position, CancellationToken cancellationToken) =>
+        PageEdit("insert", jobId, position, files, job => job with { Status = OcrJobStatus.Queued, PagesTotal = job.PagesTotal + files.Count });
+
+    public Task<Result<OcrJob>> ReplacePageAsync(OcrJobId jobId, int pageNumber, OcrUpload file, CancellationToken cancellationToken) =>
+        PageEdit("replace", jobId, pageNumber, [file], job => job with { Status = OcrJobStatus.Queued });
+
+    public Task<Result<OcrJob>> DeletePageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken) =>
+        PageEdit("delete", jobId, pageNumber, [], job => job with { PagesTotal = job.PagesTotal - 1, WordReady = job.Status != OcrJobStatus.Done });
+
+    private Task<Result<OcrJob>> PageEdit(string method, OcrJobId jobId, int? page, IReadOnlyList<OcrUpload> files, Func<OcrJob, OcrJob> change)
+    {
+        PageEdits.Add((method, jobId.Value, page, files));
+        if (PageEditResult is not null)
+            return Task.FromResult(PageEditResult());
+
+        var job = change(Jobs[jobId.Value].Value) with { Edits = Jobs[jobId.Value].Value.Edits + 1 };
+        Jobs[jobId.Value] = job;
+        return Task.FromResult(Result.Success(job));
+    }
 }
 
 internal sealed class FakeRegistry : IOcrJobRegistry

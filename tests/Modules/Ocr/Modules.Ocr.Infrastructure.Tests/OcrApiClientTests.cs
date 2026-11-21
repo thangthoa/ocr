@@ -251,6 +251,102 @@ public sealed class OcrApiClientTests
         Assert.Null(FormValue(handler.Body, "callback_url"));
     }
 
+    [Fact]
+    public async Task Get_maps_duplicate_pages_edits_and_the_word_file_state()
+    {
+        const string body = """
+            {"job_id":"job_a","status":"done","pages_total":9,"pages_done":9,"word_ready":false,"edits":2,"updated_at":1763371400.5,
+             "duplicates":[{"pages":[3,7],"kind":"identical"},{"pages":[5,2],"kind":"similar"},{"pages":[4,8],"kind":"same_text"},
+                           {"pages":[1,6],"kind":"rotated"},{"pages":[1],"kind":"similar"},{"pages":[2,2],"kind":"identical"}]}
+            """;
+
+        var job = (await Create(new StubHandler(HttpStatusCode.OK, body)).GetAsync(JobX, Ct)).Value;
+
+        Assert.False(job.WordReady);
+        Assert.Equal(2, job.Edits);
+        Assert.Equal(new DateTime(2025, 11, 17, 9, 23, 20, 500, DateTimeKind.Utc), job.UpdatedAtUtc!.Value, TimeSpan.FromMilliseconds(1));
+        // Kinds this version does not know, and anything that is not two different pages, are left out.
+        Assert.Equal(
+            [new OcrPageDuplicate(3, 7, OcrDuplicateKind.Identical), new OcrPageDuplicate(2, 5, OcrDuplicateKind.Similar), new OcrPageDuplicate(4, 8, OcrDuplicateKind.SameText)],
+            job.Duplicates);
+    }
+
+    [Fact]
+    public async Task A_job_without_the_new_fields_has_no_duplicates_or_edits_and_a_complete_word_file()
+    {
+        var job = (await Create(new StubHandler(HttpStatusCode.OK, DoneJob)).GetAsync(JobX, Ct)).Value;
+
+        Assert.Empty(job.Duplicates);
+        Assert.Equal(0, job.Edits);
+        Assert.Null(job.UpdatedAtUtc);
+        Assert.True(job.WordReady);
+    }
+
+    [Fact]
+    public async Task Insert_posts_each_file_in_order_with_the_position()
+    {
+        var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued","pages_total":11,"edits":1}""");
+
+        var result = await Create(handler).InsertPagesAsync(JobX, [new OcrUpload("trang_05.jpg", new byte[] { 1, 2 }), new OcrUpload("phu_luc.pdf", new byte[] { 3 })], 5, Ct);
+
+        Assert.Equal((OcrJobStatus.Queued, 11, 1), (result.Value.Status, result.Value.PagesTotal, result.Value.Edits));
+        Assert.Equal(HttpMethod.Post, handler.Request!.Method);
+        Assert.Equal("/v1/jobs/job_x/pages", handler.Request.RequestUri!.AbsolutePath);
+        Assert.Equal("5", FormValue(handler.Body, "position"));
+        Assert.Equal(2, Regex.Count(handler.Body, "name=file;"));
+        Assert.InRange(handler.Body.IndexOf("filename=trang_05.jpg", StringComparison.Ordinal), 0, handler.Body.IndexOf("filename=phu_luc.pdf", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Insert_without_a_position_lets_the_service_add_at_the_end()
+    {
+        var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
+
+        await Create(handler).InsertPagesAsync(JobX, [new OcrUpload("a.png", new byte[] { 1 })], null, Ct);
+
+        Assert.Null(FormValue(handler.Body, "position"));
+    }
+
+    [Fact]
+    public async Task Page_changes_upload_the_files_even_when_the_service_could_download_them()
+    {
+        // The service takes only uploaded files for page changes (no file_url), unlike POST /v1/jobs.
+        var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
+
+        await Create(handler, LinkOptions(callbackSecret: "s3cret")).ReplacePageAsync(JobX, 5, new OcrUpload("trang_05.png", new byte[] { 1 }), Ct);
+
+        Assert.Equal(HttpMethod.Put, handler.Request!.Method);
+        Assert.Equal("/v1/jobs/job_x/pages/5", handler.Request.RequestUri!.AbsolutePath);
+        Assert.Contains("filename=trang_05.png", handler.Body, StringComparison.Ordinal);
+        Assert.Null(FormValue(handler.Body, "file_url"));
+        Assert.Null(FormValue(handler.Body, "callback_url"));
+    }
+
+    [Fact]
+    public async Task Delete_page_sends_no_body_and_reads_the_updated_job()
+    {
+        var handler = new StubHandler(HttpStatusCode.OK, """{"job_id":"job_a","status":"done","pages_total":9,"word_ready":false,"edits":1}""");
+
+        var result = await Create(handler).DeletePageAsync(JobX, 7, Ct);
+
+        Assert.Equal(HttpMethod.Delete, handler.Request!.Method);
+        Assert.Equal("/v1/jobs/job_x/pages/7", handler.Request.RequestUri!.AbsolutePath);
+        Assert.Null(handler.Request.Content);
+        Assert.Equal((9, false), (result.Value.PagesTotal, result.Value.WordReady));
+    }
+
+    [Theory]
+    [InlineData("job_busy")]
+    [InlineData("last_page")]
+    public async Task Page_change_conflicts_keep_the_services_code(string code)
+    {
+        var body = "{\"error\":{\"code\":\"" + code + "\",\"message\":\"x\"}}";
+
+        var result = await Create(new StubHandler(HttpStatusCode.Conflict, body)).DeletePageAsync(JobX, 1, Ct);
+
+        Assert.Equal((code, ErrorType.Conflict), (result.Error!.Code, result.Error.Type));
+    }
+
     private static OcrApiOptions LinkOptions(string? callbackSecret = null) =>
         new() { AppUrl = new Uri("https://ocr.example/"), CallbackSecret = callbackSecret };
 

@@ -54,7 +54,8 @@ public static class ActivityRules
         AuditAction.Viewed or AuditAction.Searched or AuditAction.Downloaded or AuditAction.Printed
             or AuditAction.Exported or AuditAction.ReportExported or AuditAction.ActivityExported => ActivityCategory.DocumentAccess,
         AuditAction.Uploaded or AuditAction.Edited or AuditAction.EditedInWord or AuditAction.Restored
-            or AuditAction.MetadataChanged or AuditAction.StatusChanged or AuditAction.Deleted => ActivityCategory.DocumentChange,
+            or AuditAction.MetadataChanged or AuditAction.StatusChanged or AuditAction.Deleted
+            or AuditAction.PagesInserted or AuditAction.PageReplaced or AuditAction.PageDeleted => ActivityCategory.DocumentChange,
         AuditAction.QualitySettingsChanged or AuditAction.KpiSettingsChanged or AuditAction.UserAdded
             or AuditAction.UserChanged or AuditAction.RolesChanged => ActivityCategory.Administration,
         _ => ActivityCategory.System,

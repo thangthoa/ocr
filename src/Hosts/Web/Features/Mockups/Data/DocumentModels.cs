@@ -62,6 +62,9 @@ public enum DocumentVersionChange
     Edited,
     Restored,
     EditedInWord,
+
+    /// <summary>The OCR text again, after pages were inserted, replaced or deleted (OCR job <c>edits</c>).</summary>
+    PagesChanged,
 }
 
 /// <summary>Descriptive data entered by people; a fresh OCR job has only a title taken from its file name.</summary>
@@ -75,7 +78,10 @@ public sealed record DocumentMetadata(
     IReadOnlyList<string> Keywords);
 
 /// <summary>A saved state of a document's text (one entry per page) and metadata.</summary>
-/// <param name="WordVersion">For an edit made in the Word editor: the Word file version it came from.</param>
+/// <param name="WordVersion">
+/// For an edit made in the Word editor: the Word file version it came from. After the pages changed: the Word file
+/// the OCR service made for the new pages, once it was taken (null until then).
+/// </param>
 public sealed record DocumentVersion(
     string Number,
     DateTime CreatedAtUtc,
@@ -97,7 +103,8 @@ public sealed record DocumentApproval(string By, DateTime AtUtc);
 /// <param name="BatchId">The capture batch the file was uploaded in, when known.</param>
 /// <param name="Approval">Set when the document is approved (and so archived); cleared when it is sent back to review.</param>
 /// <param name="PageConfidences">OCR confidence per page, from page 1; null for a page without text.</param>
-/// <param name="Quality">The automatic check, run once when OCR finishes; null until then.</param>
+/// <param name="Quality">The automatic check, run when OCR finishes (again after pages changed); null until then.</param>
+/// <param name="OcrEdits">How many page changes of the OCR job the text includes (<see cref="OcrJob.Edits"/>).</param>
 public sealed record DocumentRecord(
     string Id,
     bool IsSample,
@@ -115,7 +122,8 @@ public sealed record DocumentRecord(
     string? BatchId = null,
     DocumentApproval? Approval = null,
     IReadOnlyList<double?>? PageConfidences = null,
-    QualityCheckResult? Quality = null)
+    QualityCheckResult? Quality = null,
+    int OcrEdits = 0)
 {
     public double? PageConfidence(int pageNumber) =>
         PageConfidences is { } values && pageNumber >= 1 && pageNumber <= values.Count ? values[pageNumber - 1] : null;

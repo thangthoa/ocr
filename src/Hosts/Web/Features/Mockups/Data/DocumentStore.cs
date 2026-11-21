@@ -73,6 +73,10 @@ public sealed class DocumentStore(
     /// also when the automatic check runs: the document is approved, and so archived, if it passes (and the settings
     /// allow it), otherwise it waits in the review queue.
     /// </summary>
+    /// <remarks>
+    /// When the job's pages were changed since (inserted, replaced or deleted: <see cref="OcrJob.Edits"/>), its new
+    /// text becomes the next version once the job is done again, and the check runs again on the new pages.
+    /// </remarks>
     public DocumentRecord FromJob(OcrJob job)
     {
         ArgumentNullException.ThrowIfNull(job);
@@ -81,10 +85,16 @@ public sealed class DocumentStore(
             _records.TryGetValue(job.Id.Value, out var saved);
             var batch = batches.ForJob(job.Id.Value);
             var metadata = saved?.Metadata ?? DefaultMetadata(job.FileName);
-            if (saved is null && job.Status == OcrJobStatus.Done && job.Pages.Count > 0)
+            var hasText = job.Status == OcrJobStatus.Done && job.Pages.Count > 0;
+            if (saved is null && hasText)
             {
                 var now = time.GetUtcNow().UtcDateTime;
-                saved = CheckQuality(FirstVersion(job, metadata, now), job, now);
+                saved = CheckQuality(FirstVersion(job, metadata, now), job, now, mayApprove: true);
+                _records[job.Id.Value] = saved;
+            }
+            else if (saved is not null && hasText && job.Edits != saved.OcrEdits)
+            {
+                saved = PagesChanged(saved, job, time.GetUtcNow().UtcDateTime);
                 _records[job.Id.Value] = saved;
             }
 
@@ -99,7 +109,7 @@ public sealed class DocumentStore(
             return new DocumentRecord(job.Id.Value, IsSample: false, job.FileName, job.PagesTotal, SizeBytes: null,
                 job.CreatedAtUtc, batch?.UploadedBy, saved?.Confidence, status, metadata,
                 saved?.PageTexts ?? OcrPageTexts(job), saved?.Versions ?? [], job, batch?.Id, saved?.Approval,
-                saved?.PageConfidences, saved?.Quality);
+                saved?.PageConfidences, saved?.Quality, saved?.OcrEdits ?? job.Edits);
         }
     }
 
@@ -150,6 +160,23 @@ public sealed class DocumentStore(
             };
             _records[record.Id] = record with { Status = status, Approval = approval };
             audit.Record(author, AuditAction.StatusChanged, record.Id, record.FileName, status: status);
+        }
+    }
+
+    /// <summary>
+    /// Links the version made after the pages changed to the Word file the OCR service made for the new pages, once
+    /// that file was taken (see <see cref="DocumentVersion.WordVersion"/>).
+    /// </summary>
+    public void AttachWordVersion(string id, string versionNumber, int wordVersion)
+    {
+        lock (_lock)
+        {
+            if (!_records.TryGetValue(id, out var record))
+                return;
+            var versions = record.Versions
+                .Select(v => v.Number == versionNumber && v.Change == DocumentVersionChange.PagesChanged ? v with { WordVersion = wordVersion } : v)
+                .ToList();
+            _records[id] = record with { Versions = versions };
         }
     }
 
@@ -243,25 +270,53 @@ public sealed class DocumentStore(
         var ocr = new DocumentVersion("1.0", job.FinishedAtUtc ?? job.CreatedAtUtc ?? nowUtc, OcrAuthor,
             DocumentVersionChange.OcrResult, null, null, pages, metadata);
         return new DocumentRecord(job.Id.Value, IsSample: false, job.FileName, job.PagesTotal, null, job.CreatedAtUtc, null, null,
-            DocumentStatus.NeedsReview, metadata, pages, [ocr]);
+            DocumentStatus.NeedsReview, metadata, pages, [ocr], OcrEdits: job.Edits);
     }
 
-    /// <summary>Review round 1, with the settings in force now; the result is kept with the document.</summary>
-    private DocumentRecord CheckQuality(DocumentRecord record, OcrJob job, DateTime nowUtc)
+    /// <summary>
+    /// The OCR text after the pages changed replaces the current text as a new version: the service only has OCR
+    /// text, so edits made since the last OCR result are not carried over (they stay in the earlier versions).
+    /// The changed document is reviewed again, even if it was archived (pages are only changed in the app while
+    /// it is in review; this covers changes made through the API directly).
+    /// </summary>
+    private DocumentRecord PagesChanged(DocumentRecord record, OcrJob job, DateTime nowUtc)
+    {
+        var pages = OcrPageTexts(job);
+        var version = new DocumentVersion(NextNumber(record), nowUtc, OcrAuthor, DocumentVersionChange.PagesChanged, null, null, pages, record.Metadata);
+        var changed = record with
+        {
+            Pages = job.PagesTotal,
+            PageTexts = pages,
+            Versions = [.. record.Versions, version],
+            Status = DocumentStatus.NeedsReview,
+            Approval = null,
+            OcrEdits = job.Edits,
+        };
+
+        // Someone is reviewing it: the new result is checked, but never approved and archived under their hands.
+        return CheckQuality(changed, job, nowUtc, mayApprove: false);
+    }
+
+    /// <summary>
+    /// Review round 1, with the settings in force now; the result is kept with the document. Passing archives the
+    /// document only when <paramref name="mayApprove"/> and the settings allow it.
+    /// </summary>
+    private DocumentRecord CheckQuality(DocumentRecord record, OcrJob job, DateTime nowUtc, bool mayApprove)
     {
         var confidences = SimulatedConfidence.ForJob(job);
         var pages = confidences
             .Select((confidence, index) =>
             {
                 var page = job.Pages.FirstOrDefault(p => p.PageNumber == index + 1);
-                return new PageQuality(index + 1, confidence, !string.IsNullOrWhiteSpace(page?.Text), page?.Warnings.Count ?? 0);
+                var duplicateOf = job.Duplicates.Where(d => d.SecondPage == index + 1).Select(d => (int?)d.FirstPage).Min();
+                return new PageQuality(index + 1, confidence, !string.IsNullOrWhiteSpace(page?.Text), page?.Warnings.Count ?? 0, duplicateOf);
             })
             .ToList();
         var documentConfidence = QualityCheck.DocumentConfidence(confidences);
         var settings = quality.Current;
         var result = QualityCheck.Run(pages, documentConfidence, record.Metadata, settings, nowUtc);
 
-        var approve = result.Passed && settings.AutoApprove;
+        var approve = result.Passed && settings.AutoApprove && mayApprove;
         var status = approve ? DocumentStatus.Archived : DocumentStatus.NeedsReview;
         audit.Record(QualityCheckAuthor, AuditAction.QualityChecked, record.Id, record.FileName, status: status,
             detail: result.Issues.Count.ToString(CultureInfo.InvariantCulture));

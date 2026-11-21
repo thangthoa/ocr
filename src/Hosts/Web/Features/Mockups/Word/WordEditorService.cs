@@ -26,6 +26,9 @@ public static class WordErrors
     public const string ServerNotReady = "documents.editor_not_ready";
     public const string NoWordFile = "documents.no_word_file";
     public const string PreviewFailed = "documents.preview_failed";
+
+    /// <summary>The OCR service is still making its Word file (<see cref="OcrJob.WordReady"/>).</summary>
+    public const string WordPending = "documents.word_pending";
 }
 
 /// <summary>
@@ -74,6 +77,10 @@ public sealed partial class WordEditorService(
         if (!document.CanEdit)
             return Error.Conflict(WordErrors.NotEditable, "Only documents in review or approved can be edited.");
 
+        // Editing the previous file now would save it over the new pages once it is saved.
+        if (IsWordPending(document))
+            return Error.Conflict(WordErrors.WordPending, "The OCR service is still making the Word file.");
+
         var latest = await CurrentVersionAsync(document, cancellationToken);
         var settings = options.Value;
 
@@ -107,14 +114,24 @@ public sealed partial class WordEditorService(
     }
 
     /// <summary>
-    /// The latest Word version, creating the first one if the document has none yet. Only call it for a
-    /// document that has a recognized text (see <see cref="HasWordFile"/>).
+    /// The latest Word version. The OCR service's Word file becomes a new version when the document has none yet,
+    /// and again once the pages changed (the text is then the OCR text of the new pages). Only call it for a
+    /// document that has a recognized text (see <see cref="HasWordFile"/>) and whose Word file is not pending
+    /// (see <see cref="IsWordPending"/>).
     /// </summary>
     public async Task<WordVersion> CurrentVersionAsync(DocumentRecord document, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(document);
         var versions = await files.ListAsync(document.Id, cancellationToken);
-        return versions.Count > 0 ? versions[^1] : await CreateFirstVersionAsync(document, cancellationToken);
+        if (versions.Count == 0)
+            return await AddOcrVersionAsync(document, cancellationToken);
+
+        if (document.Versions.LastOrDefault(v => v.Change == DocumentVersionChange.PagesChanged) is not { WordVersion: null } pagesChanged)
+            return versions[^1];
+
+        var version = await AddOcrVersionAsync(document, cancellationToken);
+        store.AttachWordVersion(document.Id, pagesChanged.Number, version.Number);
+        return version;
     }
 
     /// <summary>A Word file exists, or can be made, once OCR has produced the text.</summary>
@@ -122,6 +139,16 @@ public sealed partial class WordEditorService(
     {
         ArgumentNullException.ThrowIfNull(document);
         return document.Status is DocumentStatus.NeedsReview or DocumentStatus.Archived;
+    }
+
+    /// <summary>
+    /// The OCR job is done but its Word file is not complete yet: the images of printed pages are added after the
+    /// text, and the file is rebuilt after a page is deleted. Taking it now would keep an incomplete file.
+    /// </summary>
+    public static bool IsWordPending(DocumentRecord document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        return document.Job is { Status: OcrJobStatus.Done, WordReady: false };
     }
 
     /// <summary>Handles a document server callback. Saves the edited file for statuses 2 and 6.</summary>
@@ -171,7 +198,8 @@ public sealed partial class WordEditorService(
 
     private static string LoginPageUser => Pages.LoginPage.DemoUserName;
 
-    private async Task<WordVersion> CreateFirstVersionAsync(DocumentRecord document, CancellationToken cancellationToken)
+    /// <summary>The OCR service's Word file, or one made from the text when the service has none.</summary>
+    private async Task<WordVersion> AddOcrVersionAsync(DocumentRecord document, CancellationToken cancellationToken)
     {
         if (document.Job is { Status: OcrJobStatus.Done })
         {

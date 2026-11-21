@@ -14,7 +14,12 @@ internal static class OcrEndpoints
     /// <summary>An OCR job is shown as a document; this is its page.</summary>
     public static string JobUrl(string jobId) => $"documents/{Uri.EscapeDataString(jobId)}";
 
-    public static string PageImageUrl(string jobId, int page) => $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/pages/{page}/image";
+    /// <param name="revision">
+    /// Changes when the job's pages change (<c>edits</c>), so the browser does not show a cached image of the page
+    /// that used to have this number. The endpoint ignores it.
+    /// </param>
+    public static string PageImageUrl(string jobId, int page, int revision = 0) =>
+        $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/pages/{page}/image" + (revision > 0 ? $"?v={revision}" : string.Empty);
 
     public static string DownloadUrl(string jobId, OcrResultFormat format) =>
         $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/download?format={format.ToString().ToLowerInvariant()}";

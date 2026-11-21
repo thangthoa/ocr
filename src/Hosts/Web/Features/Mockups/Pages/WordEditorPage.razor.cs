@@ -127,6 +127,7 @@ public sealed partial class WordEditorPage : IAsyncDisposable
         WordErrors.NotEditable => Text["Word.NotEditable"],
         WordErrors.EditorDisabled => Text["Word.Unavailable"],
         WordErrors.ServerNotReady => Text["Word.ServerNotReady"],
+        WordErrors.WordPending => Text["Word.Pending"],
         _ when error.Type == ErrorType.NotFound => Text["Detail.NotFound"],
         _ => OcrText.Localize(error),
     };

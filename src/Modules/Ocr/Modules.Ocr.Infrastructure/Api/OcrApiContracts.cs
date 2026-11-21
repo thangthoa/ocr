@@ -15,7 +15,14 @@ internal sealed record ApiJob(
     double? CreatedAt,
     double? FinishedAt,
     ApiResult? Result,
-    ApiError? Error);
+    ApiError? Error,
+    bool? WordReady = null,
+    IReadOnlyList<ApiDuplicate>? Duplicates = null,
+    int? Edits = null,
+    double? UpdatedAt = null);
+
+/// <summary><c>{"pages": [a, b], "kind": "identical" | "similar" | "same_text"}</c> (API doc §4.4).</summary>
+internal sealed record ApiDuplicate(IReadOnlyList<int>? Pages, string? Kind);
 
 internal sealed record ApiResult(IReadOnlyList<ApiPage>? Pages, string? FullText);
 
@@ -52,7 +59,14 @@ internal static class ApiMapping
             FromEpoch(job.FinishedAt),
             pages,
             job.Error?.Code,
-            job.Error?.Message);
+            job.Error?.Message)
+        {
+            // A service that does not report it predates the Word images: its file is complete when the job is done.
+            WordReady = job.WordReady ?? true,
+            Duplicates = ParseDuplicates(job.Duplicates),
+            Edits = Math.Max(0, job.Edits ?? 0),
+            UpdatedAtUtc = FromEpoch(job.UpdatedAt),
+        };
     }
 
     public static string ToWire(this OcrDocumentType type) => type switch
@@ -72,6 +86,28 @@ internal static class ApiMapping
         "failed" => OcrJobStatus.Failed,
         "cancelled" => OcrJobStatus.Cancelled,
         _ => throw new FormatException($"Unknown OCR job status '{status}'."),
+    };
+
+    /// <summary>Pairs this version does not understand (an unknown kind, not two pages) are left out; they are only warnings.</summary>
+    private static List<OcrPageDuplicate> ParseDuplicates(IReadOnlyList<ApiDuplicate>? duplicates)
+    {
+        var parsed = new List<OcrPageDuplicate>();
+        foreach (var duplicate in duplicates ?? [])
+        {
+            if (duplicate.Pages is [var first, var second] && first >= 1 && second >= 1 && first != second
+                && ParseDuplicateKind(duplicate.Kind) is { } kind)
+                parsed.Add(new OcrPageDuplicate(first, second, kind));
+        }
+
+        return parsed;
+    }
+
+    private static OcrDuplicateKind? ParseDuplicateKind(string? kind) => kind switch
+    {
+        "identical" => OcrDuplicateKind.Identical,
+        "similar" => OcrDuplicateKind.Similar,
+        "same_text" => OcrDuplicateKind.SameText,
+        _ => null,
     };
 
     private static OcrDocumentType ParseDocumentType(string? type) =>

@@ -30,9 +30,12 @@ public enum AuditAction
     OcrFailed,
     OcrRetried,
     ActivityExported,
+    PagesInserted,
+    PageReplaced,
+    PageDeleted,
 }
 
-/// <param name="Version">The version an edit or restore created.</param>
+/// <param name="Version">The version an edit or restore created; the page number a page change was made at.</param>
 /// <param name="Status">The status a document was moved to.</param>
 /// <param name="Detail">
 /// Extra detail for the action (the file format of a download, the number of exported documents, the number of

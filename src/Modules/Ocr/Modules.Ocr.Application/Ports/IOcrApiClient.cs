@@ -27,4 +27,16 @@ public interface IOcrApiClient
     Task<Result<FileContent>> GetPageImageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken);
 
     Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Inserts the files' pages so the first becomes page <paramref name="position"/> (null: after the last page).
+    /// The service reads only the new pages; the job is queued again.
+    /// </summary>
+    Task<Result<OcrJob>> InsertPagesAsync(OcrJobId jobId, IReadOnlyList<OcrUpload> files, int? position, CancellationToken cancellationToken);
+
+    /// <summary>Replaces page <paramref name="pageNumber"/> with a new image; the job is queued again to read it.</summary>
+    Task<Result<OcrJob>> ReplacePageAsync(OcrJobId jobId, int pageNumber, OcrUpload file, CancellationToken cancellationToken);
+
+    /// <summary>Deletes a page at once; later pages move up and the text is updated without reading anything again.</summary>
+    Task<Result<OcrJob>> DeletePageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken);
 }

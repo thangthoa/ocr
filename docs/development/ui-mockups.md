@@ -13,7 +13,7 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 | `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và thời điểm cập nhật cuối; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Lịch sử giả lập + job thật |
 | `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; cột Version và Last updated tách riêng | Lịch sử giả lập + job thật + phần lưu trong bộ nhớ |
 | `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ), người duyệt, thời điểm duyệt, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Lịch sử giả lập + job thật |
-| `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn), cùng hàng là các nút **Approve and archive** (hoặc *Send back to review*), **Edit** (mở Word) và **Delete**; preview ảnh gốc cạnh trang Word (từng trang), bên phải số trang là ô chọn **DOCX / PDF / TXT** và nút **Download** (bản hiện tại; bản cuối khi đã lưu trữ); bên dưới là metadata (nút *Edit details* để sửa, lưu thành phiên bản mới) và lịch sử phiên bản | Job thật + phần lưu trong bộ nhớ |
+| `/documents/{id}` | Trang document: trên cùng là thanh tiến trình **Scan › Recognizing › Reviewing › Archived** (dính khi cuộn), cùng hàng là các nút **Approve and archive** (hoặc *Send back to review*), **Edit** (mở Word) và **Delete**; preview ảnh gốc cạnh trang Word (từng trang), bên phải số trang là ô chọn **DOCX / PDF / TXT** và nút **Download** (bản hiện tại; bản cuối khi đã lưu trữ); dưới số trang là cảnh báo **trang trùng** và các nút **Insert pages / Replace page n / Delete page n** (mục *Sửa trang* bên dưới); bên dưới là metadata (nút *Edit details* để sửa, lưu thành phiên bản mới) và lịch sử phiên bản | Job thật + phần lưu trong bộ nhớ |
 | `/reports` (`?report=…&from=yyyy-MM-dd&to=yyyy-MM-dd`) | **Reports**: chọn một trong 6 báo cáo và khoảng ngày, xem dạng bảng, xuất CSV, in | Cùng số liệu với Dashboard; báo cáo hoạt động người dùng đọc nhật ký thật |
 | `/users` | **Users › Users**: danh sách người dùng, thêm / sửa | Dùng thật, trong bộ nhớ; tài khoản ban đầu là mẫu |
 | `/users/roles` | **Users › Roles & access**: ma trận vai trò × quyền | Dùng thật, trong bộ nhớ |
@@ -37,17 +37,30 @@ Mỗi file upload là một job OCR và được hiển thị như một documen
 Duyệt là lưu trữ: không còn trạng thái *Approved* riêng. Document đã lưu trữ là bản cuối, không sửa được; nút
 **Send back to review** đưa nó về Review Queue (xoá thông tin duyệt) để sửa rồi duyệt lại.
 
-Từ dịch vụ OCR: tên file, loại (in / viết tay), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo,
-file tải về (DOCX/TXT/MD/JSON, là kết quả OCR gốc, không gồm các lần sửa), xoá/huỷ job.
+Từ dịch vụ OCR: tên file, loại (in / viết tay), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo, trang trùng,
+file tải về (DOCX/TXT/MD/JSON, là kết quả OCR gốc, không gồm các lần sửa), chèn / thay / xoá trang, xoá/huỷ job.
 
 App lưu thêm **trong bộ nhớ** (`Features/Mockups/Data/DocumentStore.cs`): trạng thái duyệt, metadata, text
 đã sửa theo từng trang và các phiên bản. Phiên bản 1.0 là text OCR, được tạo khi mở document đã OCR xong lần đầu.
 Document upload từ Scan được gắn người upload và mã lần upload (hiện ở metadata và nhật ký); phòng ban không còn
 được chọn lúc upload, nhập ở metadata của document.
 
+**Sửa trang** (ADR 0009, mục 3.8 và 4.4 của tài liệu API). Trên trang document *Recognizing*, *Reviewing* hoặc *Failed*:
+- **Insert pages**: chọn ảnh / PDF (nhiều file được, sắp theo tên) và vị trí *Page n* (trang đang ở đó lùi xuống) hoặc
+  *at the end*; **Replace page n**: một file thay trang đang xem; **Delete page n**: hỏi lại rồi xoá ngay, các trang sau
+  lùi số. Không xoá được trang cuối cùng. Tối đa 25 MB mỗi lần gửi, 20 trang mỗi document.
+- Dịch vụ chỉ đọc trang mới. Khi đọc xong, text OCR mới thành phiên bản *OCR result after the pages changed* (text sửa
+  trước đó không mang sang, nhưng còn trong lịch sử phiên bản). Kiểm tra tự động chạy lại nhưng không tự duyệt. Khi dịch
+  vụ báo `word_ready`, file DOCX mới của dịch vụ thành phiên bản Word mới; trước đó preview ghi "đang hoàn tất file
+  Word" và nút **Edit** ẩn.
+- Khi dịch vụ đang đọc hoặc đang dựng file Word, các nút bị khoá kèm lý do; trang tự làm mới mỗi 3 giây cho tới khi xong.
+- **Trang trùng**: khung cảnh báo liệt kê từng cặp (*same file*, *scanned twice*, *same text* ≥ 95 %), nút xem hai
+  trang và nút xoá trang sau. Có ngay khi upload (ảnh scan hiện cả khi job đang chờ), nên xoá được trước khi đọc.
+- Document đã lưu trữ không sửa trang: *Send back to review* trước.
+
 **Nhật ký hoạt động** (`AuditLog`) ghi những gì làm trong app:
 - đăng nhập thành công / thất bại (không ghi mật khẩu), sai mã OTP;
-- upload, sửa, khôi phục phiên bản, đổi trạng thái, xoá, tải bản cuối, xuất CSV;
+- upload, sửa, khôi phục phiên bản, đổi trạng thái, xoá, chèn / thay / xoá trang, tải bản cuối, xuất CSV;
 - kết quả kiểm tra tự động (người dùng `quality-check`);
 - đổi cài đặt kiểm tra, mục tiêu KPI, người dùng, quyền; xuất báo cáo và xuất nhật ký.
 
@@ -64,7 +77,7 @@ kèm danh sách lý do.
 |---|---|---|
 | Confidence của document < ngưỡng | 85 % | Confidence document = trung bình các trang có text |
 | Confidence của một trang < ngưỡng | 75 % | Một trang dưới ngưỡng là đủ để đưa vào review |
-| Trang có cảnh báo của dịch vụ OCR | Bật | Cảnh báo lấy từ `result.pages[].warnings` |
+| Trang có cảnh báo của dịch vụ OCR, hoặc bị báo trùng với trang trước | Bật | Cảnh báo lấy từ `result.pages[].warnings`; trang trùng từ `duplicates` (trang sau của cặp) |
 | Trang không có text, hoặc thiếu trong kết quả | Bật | |
 | Thiếu metadata bắt buộc (số hiệu, ngày, phòng ban, loại, từ khoá) | Không chọn trường nào | Job mới chỉ có tiêu đề, nên chọn trường nào thì **mọi** document mới đều vào review |
 | Không có text nào | Luôn bật | Document trắng không bao giờ được tự duyệt |

@@ -22,6 +22,9 @@ public sealed record OcrJobChange(OcrJobId JobId, string FileName, OcrJobStatus 
 
 public sealed record FileContent(Stream Content, string ContentType, string FileName);
 
+/// <summary>A file to send to the OCR service, already read and checked (size, type, content).</summary>
+public sealed record OcrUpload(string FileName, ReadOnlyMemory<byte> Content);
+
 /// <summary>
 /// Paths on this application that the OCR service calls (ADR 0006), relative to the address it is given
 /// for this application (<c>OCR_APP_URL</c>).

@@ -34,6 +34,9 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
 
     public void SetOnService(OcrJob job) => _service[job.Id.Value] = job;
 
+    /// <summary>The job as the "service" has it now.</summary>
+    public OcrJob OnService(string id) => _service[id];
+
     public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
     {
         if (Unavailable)
@@ -68,6 +71,50 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
         Task.FromResult<Result<FileContent>>(Docx is { } docx && format == OcrResultFormat.Docx
             ? new FileContent(new MemoryStream(docx, writable: false), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "result.docx")
             : Error.NotFound("not_found", "no result"));
+
+    /// <summary>Page changes received, as (method, page or position, file names).</summary>
+    public List<(string Method, int? Page, IReadOnlyList<string> Files)> PageEdits { get; } = [];
+
+    /// <summary>When set, page changes fail with this error (for example <c>job_busy</c>).</summary>
+    public Error? PageEditError { get; set; }
+
+    public Task<Result<OcrJob>> InsertPagesAsync(OcrJobId jobId, IReadOnlyList<OcrUpload> files, int? position, CancellationToken cancellationToken) =>
+        PageEdit("insert", jobId, position, files, job => job with
+        {
+            Status = OcrJobStatus.Queued,
+            PagesTotal = job.PagesTotal + files.Count,
+            PagesDone = 0,
+            Pages = [],
+            FinishedAtUtc = null,
+        });
+
+    public Task<Result<OcrJob>> ReplacePageAsync(OcrJobId jobId, int pageNumber, OcrUpload file, CancellationToken cancellationToken) =>
+        PageEdit("replace", jobId, pageNumber, [file], job => job with { Status = OcrJobStatus.Queued, PagesDone = 0, Pages = [], FinishedAtUtc = null });
+
+    /// <summary>Like the service: later pages move up at once, and the Word file is rebuilt (not ready yet).</summary>
+    public Task<Result<OcrJob>> DeletePageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken) =>
+        PageEdit("delete", jobId, pageNumber, [], job => job with
+        {
+            PagesTotal = job.PagesTotal - 1,
+            PagesDone = Math.Max(0, job.PagesDone - 1),
+            Pages = [.. job.Pages.Where(p => p.PageNumber != pageNumber).Select(p => p.PageNumber > pageNumber ? p with { PageNumber = p.PageNumber - 1 } : p)],
+            WordReady = job.Status != OcrJobStatus.Done,
+            Duplicates = [.. job.Duplicates.Where(d => d.FirstPage != pageNumber && d.SecondPage != pageNumber)],
+        });
+
+    private Task<Result<OcrJob>> PageEdit(string method, OcrJobId jobId, int? page, IReadOnlyList<OcrUpload> files, Func<OcrJob, OcrJob> change)
+    {
+        if (Unavailable)
+            return Task.FromResult<Result<OcrJob>>(Down);
+        PageEdits.Add((method, page, [.. files.Select(f => f.FileName)]));
+        if (PageEditError is { } error)
+            return Task.FromResult<Result<OcrJob>>(error);
+
+        var current = _service[jobId.Value];
+        var job = change(current) with { Edits = current.Edits + 1, UpdatedAtUtc = DateTime.UtcNow };
+        _service[jobId.Value] = job;
+        return Task.FromResult<Result<OcrJob>>(job);
+    }
 
     void IOcrJobRegistry.Add(OcrJob job) => _registry.Add(job);
 

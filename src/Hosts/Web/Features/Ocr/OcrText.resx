@@ -127,4 +127,8 @@
   <data name="NoMatches" xml:space="preserve"><value>No jobs match “{0}”.</value></data>
   <data name="SearchLimited" xml:space="preserve"><value>Only the newest {0} jobs were searched.</value></data>
   <data name="DeleteTitle" xml:space="preserve"><value>Delete “{0}”?</value></data>
+  <data name="ocr.job_busy" xml:space="preserve"><value>The OCR service is reading this document or finishing its Word file. Try again when it is done.</value></data>
+  <data name="ocr.last_page" xml:space="preserve"><value>The only page of a document cannot be deleted. Delete the document instead.</value></data>
+  <data name="ocr.page_not_found" xml:space="preserve"><value>The document has no such page. Reload the page and try again.</value></data>
+  <data name="ocr.pages_not_editable" xml:space="preserve"><value>The pages of a cancelled document cannot be changed.</value></data>
 </root>

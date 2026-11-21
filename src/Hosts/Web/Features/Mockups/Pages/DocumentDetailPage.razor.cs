@@ -4,6 +4,7 @@ using Microsoft.Extensions.Localization;
 using Modules.Ocr.Application.Contracts;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Approved;
+using OppOcr.Web.Features.Mockups.Components;
 using OppOcr.Web.Features.Mockups.Data;
 using OppOcr.Web.Features.Mockups.Quality;
 using OppOcr.Web.Features.Mockups.Word;
@@ -102,6 +103,13 @@ public sealed partial class DocumentDetailPage : IDisposable
 
     private bool ShowsWord => _previewState == PreviewState.Ready && _viewing is null && !_showText;
 
+    /// <summary>
+    /// Pages are changed while the document is recognized or reviewed, or after OCR failed; an archived document is
+    /// sent back to review first. The OCR job decides when: while it is busy the tools are shown, waiting.
+    /// </summary>
+    private bool ShowsPageTools => _viewing is null && !_editing && !_deleted
+        && _document is { Job.AllowsPageEdits: true, Status: DocumentStatus.Processing or DocumentStatus.NeedsReview or DocumentStatus.Failed };
+
     /// <summary>The picked download format, or DOCX when it is not offered (PDF without a document server).</summary>
     private FinalFileFormat DownloadFormat => FinalFiles.Formats.Contains(_downloadFormat) ? _downloadFormat : FinalFileFormat.Docx;
 
@@ -152,7 +160,9 @@ public sealed partial class DocumentDetailPage : IDisposable
         }
     }
 
-    private static string PreviewKey(DocumentRecord document) => $"{document.Id}|{document.Status}";
+    /// <summary>Changes when OCR finishes, when the pages change and when the OCR service's Word file is ready.</summary>
+    private static string PreviewKey(DocumentRecord document) =>
+        $"{document.Id}|{document.Status}|{document.Job?.Edits}|{WordEditorService.IsWordPending(document)}";
 
     private async Task LoadWordPreviewAsync(DocumentRecord document)
     {
@@ -173,6 +183,8 @@ public sealed partial class DocumentDetailPage : IDisposable
                 _wordPreview = result.IsSuccess ? result.Value : null;
                 _previewState = result.IsSuccess ? PreviewState.Ready
                     : result.Error!.Code == WordErrors.NoWordFile ? PreviewState.None
+                    // Shown as being prepared; the page refreshes until the service has finished the file.
+                    : result.Error.Code == WordErrors.WordPending ? PreviewState.Loading
                     : PreviewState.Unavailable;
                 _wordVersions = versions;
                 StateHasChanged();
@@ -195,6 +207,14 @@ public sealed partial class DocumentDetailPage : IDisposable
 
     private void RetryPreview() => _previewFor = null;
 
+    private void OnPagesChanged(DocumentPagesUpdate update)
+    {
+        _document = update.Document;
+        _message = null;
+        _offerReviewQueue = false;
+        ShowPage(update.Page);
+    }
+
     private void ShowPage(int page) => _page = Math.Clamp(page, 1, Math.Max(PageCount, 1));
 
     private bool IsFlagged(int page) => _document?.Quality?.FlaggedPages.Contains(page) == true;
@@ -203,7 +223,8 @@ public sealed partial class DocumentDetailPage : IDisposable
         _document?.Quality?.Issues.Any(i => i.Kind == QualityIssueKind.LowPageConfidence && i.Page == page) == true;
 
     // The job may have been submitted elsewhere, so the page polls rather than relying on
-    // notifications from this instance's worker.
+    // notifications from this instance's worker. A done job is still followed until its Word file is ready
+    // (after a page change too), as the service's guide suggests.
     private async Task RefreshWhileProcessingAsync()
     {
         try
@@ -211,7 +232,8 @@ public sealed partial class DocumentDetailPage : IDisposable
             using var timer = new PeriodicTimer(RefreshInterval);
             while (await timer.WaitForNextTickAsync(_disposed.Token))
             {
-                if (_deleted || _document?.Job is not { IsFinished: false })
+                if (_deleted || _document is not { Job: not null } document
+                    || (document.Job.IsFinished && !WordEditorService.IsWordPending(document)))
                     continue;
                 await InvokeAsync(async () =>
                 {
@@ -353,6 +375,7 @@ public sealed partial class DocumentDetailPage : IDisposable
         DocumentVersionChange.OcrResult => Text["Change.OcrResult"],
         DocumentVersionChange.Restored => Text["Change.Restored", version.RestoredFrom ?? "?"],
         DocumentVersionChange.EditedInWord => Text["Change.EditedInWord", version.WordVersion ?? 0],
+        DocumentVersionChange.PagesChanged => Text["Change.PagesChanged"],
         _ => Text["Change.Edited"],
     };
 

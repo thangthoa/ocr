@@ -1,0 +1,115 @@
+@* The pages of a document's OCR job: pages the OCR service thinks are the same page, and inserting, replacing and
+   deleting the page shown. Only the service can tell when pages may change; meanwhile the buttons wait. *@
+
+@{
+    var job = Document.Job!;
+    var canChange = job.CanEditPages && !_busy;
+    var canDelete = canChange && job.CanDeletePage;
+}
+
+<section class="pages-panel" aria-label="@Text["Pages.Heading"]">
+    @if (job.Duplicates.Count > 0)
+    {
+        <div id="duplicate-pages" class="alert alert-warning duplicate-pages" role="status">
+            <div class="fw-semibold">@Text["Pages.Duplicates"]</div>
+            <ul class="duplicate-list">
+                @foreach (var duplicate in job.Duplicates)
+                {
+                    <li @key="duplicate">
+                        <span class="me-auto">@Text[$"Pages.Duplicate.{duplicate.Kind}", duplicate.FirstPage, duplicate.SecondPage]</span>
+                        <button type="button" class="issue-link" @onclick="() => OnShowPage.InvokeAsync(duplicate.FirstPage)">@Text["Pages.ShowPage", duplicate.FirstPage]</button>
+                        <button type="button" class="issue-link" @onclick="() => OnShowPage.InvokeAsync(duplicate.SecondPage)">@Text["Pages.ShowPage", duplicate.SecondPage]</button>
+                        @if (canDelete && job.HasPage(duplicate.SecondPage))
+                        {
+                            <ConfirmButton Label="@Text["Pages.Delete", duplicate.SecondPage]" AriaLabel="@Text["Pages.DeleteDuplicateLabel", duplicate.SecondPage, duplicate.FirstPage]"
+                                           Title="@Text["Pages.DeleteTitle", duplicate.SecondPage]" Message="@Text["Pages.DeleteNote", duplicate.SecondPage]"
+                                           ConfirmLabel="@Text["Pages.Delete", duplicate.SecondPage]" CancelLabel="@Text["Action.Cancel"]" BusyLabel="@Text["Pages.Working"]"
+                                           Busy="_busy" OnConfirm="() => DeleteAsync(duplicate.SecondPage)" />
+                        }
+                    </li>
+                }
+            </ul>
+            <div class="small">@Text["Pages.DuplicatesNote"]</div>
+        </div>
+    }
+
+    <div class="page-tools" role="group" aria-label="@Text["Pages.Tools"]">
+        <button type="button" id="insert-pages" class="btn btn-sm btn-outline-primary" disabled="@(!canChange)"
+                aria-expanded="@(_form == PageForm.Insert ? "true" : "false")" @onclick="() => Open(PageForm.Insert)">@Text["Pages.Insert"]</button>
+        @if (job.HasPage(Page))
+        {
+            <button type="button" id="replace-page" class="btn btn-sm btn-outline-primary" disabled="@(!canChange)"
+                    aria-expanded="@(_form == PageForm.Replace ? "true" : "false")" @onclick="() => Open(PageForm.Replace)">@Text["Pages.Replace", Page]</button>
+            @if (canDelete)
+            {
+                <ConfirmButton Label="@Text["Pages.Delete", Page]" Title="@Text["Pages.DeleteTitle", Page]" Message="@Text["Pages.DeleteNote", Page]"
+                               ConfirmLabel="@Text["Pages.Delete", Page]" CancelLabel="@Text["Action.Cancel"]" BusyLabel="@Text["Pages.Working"]"
+                               Busy="_busy" OnConfirm="() => DeleteAsync(Page)" />
+            }
+        }
+        @if (job.IsBusyWithPages)
+        {
+            <span id="pages-busy" class="small text-muted" role="status">
+                @(job.Status == OcrJobStatus.Running ? Text["Pages.BusyReading"] : Text["Pages.BusyWord"])
+            </span>
+        }
+    </div>
+
+    @if (_form is { } form)
+    {
+        var inputId = form == PageForm.Insert ? "insert-files" : "replace-file";
+        <div class="page-form" id="@(form == PageForm.Insert ? "insert-form" : "replace-form")">
+            <div class="row g-2 align-items-end">
+                <div class="@(form == PageForm.Insert ? "col-md-7" : "col-12")">
+                    <label for="@inputId" class="form-label">@(form == PageForm.Insert ? Text["Pages.InsertFiles"] : Text["Pages.ReplaceFile", _target])</label>
+                    @if (form == PageForm.Insert)
+                    {
+                        <InputFile id="@inputId" class="form-control" multiple accept="@AnyFormat" OnChange="SelectFiles" disabled="@_busy" />
+                    }
+                    else
+                    {
+                        <InputFile id="@inputId" class="form-control" accept="@AnyFormat" OnChange="SelectFiles" disabled="@_busy" />
+                    }
+                </div>
+                @if (form == PageForm.Insert)
+                {
+                    <div class="col-md-5">
+                        <label for="insert-position" class="form-label">@Text["Pages.Position"]</label>
+                        <select id="insert-position" class="form-select" @bind="_target" disabled="@_busy">
+                            @for (var position = 1; position <= job.PagesTotal + 1; position++)
+                            {
+                                <option value="@position">@(position > job.PagesTotal ? Text["Pages.AtEnd", position] : Text["Pages.AsPage", position])</option>
+                            }
+                        </select>
+                    </div>
+                }
+            </div>
+            @if (_files.Count > 0)
+            {
+                <ul class="selected-pages small" aria-label="@Text["Pages.Selected"]">
+                    @foreach (var file in _files)
+                    {
+                        <li dir="auto">@file.Name <span class="text-muted" dir="ltr">(@FileSizeFormatter.Format(file.Size))</span></li>
+                    }
+                </ul>
+            }
+            <p class="form-text mb-2">@(form == PageForm.Insert ? Text["Pages.InsertHint", Limits] : Text["Pages.ReplaceHint", Limits])</p>
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled="@_busy" @onclick="Close">@Text["Action.Cancel"]</button>
+                <button type="button" id="@(form == PageForm.Insert ? "insert-submit" : "replace-submit")" class="btn btn-sm btn-primary"
+                        disabled="@(_busy || _files.Count == 0)" @onclick="SubmitAsync">
+                    @(_busy ? Text["Pages.Working"] : form == PageForm.Insert ? Text["Pages.InsertSubmit"] : Text["Pages.Replace", _target])
+                </button>
+            </div>
+        </div>
+    }
+
+    @if (_error is not null)
+    {
+        <div id="pages-error" class="alert alert-danger py-2 mt-2 mb-0" role="alert">@_error</div>
+    }
+    @if (_message is not null)
+    {
+        <div id="pages-message" class="alert alert-success py-2 mt-2 mb-0" role="status">@_message</div>
+    }
+</section>

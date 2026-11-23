@@ -9,7 +9,7 @@ Tên hiển thị của ứng dụng là **OCR System** (`AppName` trong `Shared
 |---|---|---|
 | `/login` | Đăng nhập 2 bước (layout riêng, không có menu): mật khẩu rồi mã OTP. Mọi trang khác chuyển về đây khi chưa đăng nhập | Giả: `admin` / `admin`, mã `123456`; phiên lưu trong localStorage |
 | `/`, `/dashboard` | **Dashboard**: báo cáo theo Ngày / Tuần / Tháng. Trên cùng là **tiến độ dự án** so với kế hoạch, rồi trạng thái document là một thanh ngang (mỗi ô chú thích mở All Documents đã lọc theo trạng thái đó), rồi các **thẻ KPI** so với mục tiêu đặt ở Settings | Cộng từ mọi document: lịch sử giả lập + job thật (ADR 0008); mục tiêu KPI lấy từ Settings |
-| `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: một cột giữa trang; nhập tên (bắt buộc) trước, rồi chọn loại tài liệu (mặc định *Printed / typed*), **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh), xem / sắp xếp trang rồi Upload. Trên cùng là thanh tiến trình đang ở bước **Scan** (khi đang gửi file thì bước này hiện "Sending to the OCR service…"). Upload xong thì **mở trang của document**, thanh tiến trình chạy tiếp từ Recognizing | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
+| `/scan` (và `/capture`, `/ocr` cũ) | **Scan**: một cột giữa trang; nhập tên (bắt buộc) trước, rồi chọn **One** (một ảnh hoặc PDF) / **Multi** (nhiều ảnh, hoặc cả folder ảnh), xem / sắp xếp trang rồi Upload. Trên cùng là thanh tiến trình đang ở bước **Scan** (khi đang gửi file thì bước này hiện "Sending to the OCR service…"). Upload xong thì **mở trang của document**, thanh tiến trình chạy tiếp từ Recognizing | **Thật**: mỗi lần upload là một job trên dịch vụ OCR; nhiều ảnh được ghép thành một PDF nhiều trang (ADR 0005) |
 | `/review` | **Review Queue**: hàng đợi duyệt tay (vòng 2), document *Reviewing* kèm lý do kiểm tra tự động đưa vào (không có lý do thì hiện —) và các cột theo dõi chung; cũ nhất trước. Lọc và tìm như All Documents (thứ tự hàng đợi giữ nguyên) | Lịch sử giả lập + job thật |
 | `/documents` | **All Documents**: các job OCR thật; thanh trạng thái ngang ở đầu trang là bộ lọc theo trạng thái; các cột theo dõi chung | Lịch sử giả lập + job thật + phần lưu trong bộ nhớ |
 | `/archive` (và `/approved` cũ) | **Document Archive**: document đã duyệt (= đã lưu trữ) với các cột theo dõi chung, lọc / tìm, mỗi dòng một dropdown tải bản cuối (DOCX, PDF, TXT) | Lịch sử giả lập + job thật |
@@ -43,7 +43,7 @@ Mỗi file upload là một job OCR và được hiển thị như một documen
 Duyệt là lưu trữ: không còn trạng thái *Approved* riêng. Document đã lưu trữ là bản cuối, không sửa được; nút
 **Send back to review** đưa nó về Review Queue (xoá thông tin duyệt) để sửa rồi duyệt lại.
 
-Từ dịch vụ OCR: tên file, loại (in / viết tay), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo, trang trùng,
+Từ dịch vụ OCR: tên file, loại của từng trang (in / viết tay, dịch vụ tự nhận diện; ADR 0005), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo, trang trùng,
 file tải về (DOCX / DOCX giữ bố cục / DOCX cho Google Docs / TXT / MD / JSON, là kết quả OCR gốc, không gồm các lần
 sửa), chèn / thay / xoá trang, xoá/huỷ job.
 

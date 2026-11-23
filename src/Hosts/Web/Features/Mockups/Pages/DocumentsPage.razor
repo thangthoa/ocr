@@ -97,9 +97,10 @@ else
                                         <span class="badge tag-gray me-1">@Text["SampleTag"]</span>
                                     }
                                     <span dir="ltr">@document.Id</span>
-                                    @if (document.Job is { } job)
+                                    @* The service's job list carries no pages, so the kinds are known only for some jobs. *@
+                                    @if (document.Job is { DocumentTypes.Count: > 0 } job)
                                     {
-                                        <span> · @OcrText.DocumentType(job.DocumentType)</span>
+                                        <span> · @OcrText.DocumentTypes(job.DocumentTypes)</span>
                                     }
                                 </div>
                             </td>

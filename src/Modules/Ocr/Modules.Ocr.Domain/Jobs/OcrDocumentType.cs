@@ -1,6 +1,9 @@
 namespace Modules.Ocr.Domain.Jobs;
 
-/// <summary>The service cannot detect this itself, so the user must choose (API doc §1).</summary>
+/// <summary>
+/// How a page is written. The OCR service recognizes it for each page and reads the page with the matching engine
+/// (<c>doc_type=auto</c>); the user does not choose it.
+/// </summary>
 public enum OcrDocumentType
 {
     Printed = 1,

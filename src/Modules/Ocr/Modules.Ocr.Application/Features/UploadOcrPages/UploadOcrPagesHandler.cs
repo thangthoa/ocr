@@ -54,7 +54,7 @@ public sealed partial class UploadOcrPagesHandler(
         LogComposed(pages.Count, imageBytes, pdf.Length);
         pdf.Position = 0;
         return await uploadFile.HandleAsync(
-            new UploadOcrFileCommand(DocumentName(command.Name), pdf.Length, pdf, command.DocumentType), cancellationToken);
+            new UploadOcrFileCommand(DocumentName(command.Name), pdf.Length, pdf), cancellationToken);
     }
 
     internal static string DocumentName(string name) => OcrFileFormats.WithExtension(name.Trim(), OcrFileFormat.Pdf);

@@ -5,7 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="UploadTitle" xml:space="preserve"><value>المسح</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>اختر نوع المستند، وملفًا واحدًا أو عدة صور، واسم المستند، ثم ارفع. تُفتح صفحة المستند فور انتهاء الرفع.</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>اختر ملفًا واحدًا أو عدة صور، واسم المستند، ثم ارفع. تتعرّف خدمة OCR بنفسها على الصفحات المطبوعة والمكتوبة بخط اليد. تُفتح صفحة المستند فور انتهاء الرفع.</value></data>
   <data name="FolderPrompt" xml:space="preserve"><value>أو استخدم كل الصور داخل مجلد، مرتبة حسب اسم الملف:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>اختيار مجلد</value></data>
   <data name="FolderSkipped" xml:space="preserve"><value>تم تخطي {0} ملف في المجلد لأنه ليس صورة مدعومة.</value></data>
@@ -14,7 +14,6 @@
   <data name="FolderTooLarge" xml:space="preserve"><value>يحتوي المجلد على أكثر من {0} ملف. اختر مجلدًا أصغر.</value></data>
   <data name="JobsTitle" xml:space="preserve"><value>مهام OCR</value></data>
   <data name="JobTitle" xml:space="preserve"><value>مهمة OCR</value></data>
-  <data name="DocumentTypeLegend" xml:space="preserve"><value>نوع المستند</value></data>
   <data name="DocumentType.Printed" xml:space="preserve"><value>مطبوع / مكتوب بالآلة</value></data>
   <data name="DocumentType.Handwritten" xml:space="preserve"><value>مكتوب بخط اليد</value></data>
   <data name="DropZonePrompt" xml:space="preserve"><value>اسحب ملفًا وأفلته هنا، أو انقر للاختيار</value></data>
@@ -89,7 +88,6 @@
   <data name="ocr.empty" xml:space="preserve"><value>الملف فارغ.</value></data>
   <data name="ocr.too_large" xml:space="preserve"><value>يتجاوز حجم الملف {0} ميغابايت.</value></data>
   <data name="ocr.content_mismatch" xml:space="preserve"><value>الملف ليس مستندًا مدعومًا أو لا يطابق امتداده.</value></data>
-  <data name="ocr.document_type_required" xml:space="preserve"><value>اختر نوع المستند.</value></data>
   <data name="ocr.not_ready" xml:space="preserve"><value>النتيجة ليست جاهزة بعد.</value></data>
   <data name="ocr.service_unavailable" xml:space="preserve"><value>خدمة OCR غير متاحة حاليًا.</value></data>
   <data name="ocr.file_name_invalid" xml:space="preserve"><value>يجب ألا يحتوي اسم الملف على / \ : * ? " &lt; &gt; | أو أحرف تحكم.</value></data>

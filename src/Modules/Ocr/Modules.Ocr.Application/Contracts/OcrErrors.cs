@@ -13,7 +13,6 @@ public static class OcrErrorCodes
     public const string Empty = "ocr.empty";
     public const string TooLarge = "ocr.too_large";
     public const string ContentMismatch = "ocr.content_mismatch";
-    public const string DocumentTypeRequired = "ocr.document_type_required";
     public const string NotFound = "ocr.not_found";
     public const string NotReady = "ocr.not_ready";
     public const string ServiceUnavailable = "ocr.service_unavailable";

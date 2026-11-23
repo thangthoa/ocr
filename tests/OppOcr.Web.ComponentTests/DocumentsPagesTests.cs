@@ -142,6 +142,21 @@ public sealed class DocumentsPagesTests : BunitContext
     }
 
     [Fact]
+    public void A_document_mixing_printed_and_handwritten_pages_shows_both_kinds()
+    {
+        OcrPage[] pages =
+        [
+            new(1, OcrDocumentType.Handwritten, "أ", 5, "B", [], Cached: false),
+            new(2, OcrDocumentType.Printed, "ب", 5, "A v2", [], Cached: false),
+        ];
+        _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000014", "mixed.pdf", OcrJobStatus.Done) with { PagesTotal = 2, PagesDone = 2, Pages = pages });
+
+        var cut = RenderDocument("job_0000000000000014");
+
+        cut.WaitForAssertion(() => Assert.Equal("· Printed / typed + Handwritten", cut.Find("#document-types").TextContent.Trim()));
+    }
+
+    [Fact]
     public void Failed_job_shows_localized_service_error()
     {
         _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000003", "big.pdf", OcrJobStatus.Failed) with { ErrorCode = "processing_error" });

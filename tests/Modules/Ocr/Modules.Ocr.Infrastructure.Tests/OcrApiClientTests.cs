@@ -74,12 +74,12 @@ public sealed class OcrApiClientTests
     }
 
     [Fact]
-    public async Task Submit_sends_multipart_file_and_doc_type_and_parses_the_job()
+    public async Task Submit_sends_multipart_file_with_auto_doc_type_and_parses_the_job()
     {
         var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued","pages_total":1,"pages_done":0,"queue_position":3}""");
         var client = Create(handler);
 
-        var result = await client.SubmitAsync(new MemoryStream([1, 2, 3]), "hợp đồng.png", OcrDocumentType.Handwritten, Ct);
+        var result = await client.SubmitAsync(new MemoryStream([1, 2, 3]), "hợp đồng.png", Ct);
 
         Assert.True(result.IsSuccess);
         Assert.Equal("job_a", result.Value.Id.Value);
@@ -88,9 +88,25 @@ public sealed class OcrApiClientTests
         Assert.Equal(HttpMethod.Post, handler.Request!.Method);
         Assert.Equal("/v1/jobs", handler.Request.RequestUri!.AbsolutePath);
         Assert.Equal("secret", handler.Request.Headers.GetValues("X-API-Key").Single());
-        Assert.Contains("name=doc_type", handler.Body, StringComparison.Ordinal);
-        Assert.Contains("handwritten", handler.Body, StringComparison.Ordinal);
+        // The service tells printed from handwritten pages itself; the field is still required.
+        Assert.Equal("auto", FormValue(handler.Body, "doc_type"));
         Assert.Contains("name=file", handler.Body, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task A_job_sent_with_auto_takes_the_kind_of_each_page_from_the_service()
+    {
+        // Shape observed from GET /v1/jobs/{id} of a job created with doc_type=auto.
+        const string body = """
+            {"job_id":"job_c7a937e9c85341b9","status":"done","file_name":"input.pdf","doc_type":"auto","pages_total":2,"pages_done":2,
+             "result":{"pages":[{"page":1,"type":"handwritten","text":"أ"},{"page":2,"type":"printed","text":"ب"}],"full_text":"أ\nب","confidence":0.97},
+             "error":null,"word_ready":true,"duplicates":[]}
+            """;
+
+        var result = await Create(new StubHandler(HttpStatusCode.OK, body)).GetAsync(OcrJobId.Parse("job_c7a937e9c85341b9"), Ct);
+
+        Assert.Equal([OcrDocumentType.Handwritten, OcrDocumentType.Printed], result.Value.Pages.Select(p => p.Type));
+        Assert.Equal([OcrDocumentType.Printed, OcrDocumentType.Handwritten], result.Value.DocumentTypes);
     }
 
     [Fact]
@@ -99,7 +115,7 @@ public sealed class OcrApiClientTests
         // Regression: the upload handler reads the buffer after submitting.
         var content = new MemoryStream([1, 2, 3]);
 
-        await Create(new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""")).SubmitAsync(content, "a.png", OcrDocumentType.Printed, Ct);
+        await Create(new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""")).SubmitAsync(content, "a.png", Ct);
 
         Assert.True(content.CanRead);
         Assert.Equal(3, content.Length);
@@ -203,7 +219,7 @@ public sealed class OcrApiClientTests
             (downloaded, contentType) = (copy.ToArray(), file.ContentType);
         };
 
-        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "hợp đồng.png", OcrDocumentType.Printed, Ct);
+        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "hợp đồng.png", Ct);
 
         Assert.True(result.IsSuccess);
         var fileUrl = FormValue(handler.Body, "file_url")!;
@@ -211,7 +227,7 @@ public sealed class OcrApiClientTests
         Assert.EndsWith("/h%E1%BB%A3p%20%C4%91%E1%BB%93ng.png", fileUrl, StringComparison.Ordinal);
         Assert.Equal(64, Token(fileUrl).Length);
         Assert.DoesNotContain("filename=", handler.Body, StringComparison.Ordinal);
-        Assert.Equal("printed", FormValue(handler.Body, "doc_type"));
+        Assert.Equal("auto", FormValue(handler.Body, "doc_type"));
         Assert.Equal([1, 2, 3], downloaded);
         Assert.Equal("image/png", contentType);
     }
@@ -222,7 +238,7 @@ public sealed class OcrApiClientTests
         var store = new OcrSourceFileStore(TimeProvider.System);
         var handler = new StubHandler(HttpStatusCode.UnprocessableEntity, """{"error":{"code":"file_download_failed","message":"HTTP 404"}}""");
 
-        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", OcrDocumentType.Printed, Ct);
+        var result = await Create(handler, LinkOptions(), store).SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", Ct);
 
         Assert.Equal(OcrServiceErrorCodes.FileDownloadFailed, result.Error!.Code);
         Assert.Equal(ErrorType.Validation, result.Error.Type);
@@ -236,7 +252,7 @@ public sealed class OcrApiClientTests
         var store = new OcrSourceFileStore(TimeProvider.System);
 
         var result = await Create(new StubHandler(new HttpRequestException("connection refused")), LinkOptions(), store)
-            .SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", OcrDocumentType.Printed, Ct);
+            .SubmitAsync(new MemoryStream([1, 2, 3]), "a.png", Ct);
 
         Assert.Equal(ErrorType.Failure, result.Error!.Type);
         Assert.Equal(0, store.Count);
@@ -248,8 +264,8 @@ public sealed class OcrApiClientTests
         var withSecret = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
         var withoutSecret = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_b","status":"queued"}""");
 
-        await Create(withSecret, LinkOptions(callbackSecret: "s3cret")).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
-        await Create(withoutSecret, LinkOptions()).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
+        await Create(withSecret, LinkOptions(callbackSecret: "s3cret")).SubmitAsync(new MemoryStream([1]), "a.png", Ct);
+        await Create(withoutSecret, LinkOptions()).SubmitAsync(new MemoryStream([1]), "a.png", Ct);
 
         Assert.Equal("https://ocr.example/api/ocr-callback", FormValue(withSecret.Body, "callback_url"));
         Assert.Null(FormValue(withoutSecret.Body, "callback_url"));
@@ -261,7 +277,7 @@ public sealed class OcrApiClientTests
     {
         var handler = new StubHandler(HttpStatusCode.Accepted, """{"job_id":"job_a","status":"queued"}""");
 
-        await Create(handler, new OcrApiOptions { CallbackSecret = "s3cret" }).SubmitAsync(new MemoryStream([1]), "a.png", OcrDocumentType.Printed, Ct);
+        await Create(handler, new OcrApiOptions { CallbackSecret = "s3cret" }).SubmitAsync(new MemoryStream([1]), "a.png", Ct);
 
         Assert.Contains("filename=a.png", handler.Body, StringComparison.Ordinal);
         Assert.Null(FormValue(handler.Body, "file_url"));

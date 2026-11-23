@@ -36,7 +36,7 @@ public sealed class UploadOcrPagesHandlerTests
         Assert.Equal(jpeg, pages[1].Content.ToArray());
 
         var sent = Assert.Single(_api.Submitted);
-        Assert.Equal(("Contract 7.pdf", OcrDocumentType.Handwritten), (sent.FileName, sent.Type));
+        Assert.Equal("Contract 7.pdf", sent.FileName);
         Assert.Equal(FakePdfComposer.Output, sent.Bytes);
         Assert.Equal(result.Value.Id, Assert.Single(_registry.All).Id);
         Assert.Equal(OcrJobChangeKind.Created, Assert.Single(_notifier.Changes).Kind);
@@ -63,7 +63,6 @@ public sealed class UploadOcrPagesHandlerTests
         { Command("../etc/passwd", Page("a.png", TestJobs.Png())), OcrErrorCodes.FileNameInvalid },
         { Command("tab\there", Page("a.png", TestJobs.Png())), OcrErrorCodes.FileNameInvalid },
         { Command(new string('n', OcrRules.MaxFileNameLength), Page("a.png", TestJobs.Png())), OcrErrorCodes.FileNameTooLong },
-        { new UploadOcrPagesCommand("scan", [Page("a.png", TestJobs.Png())], null), OcrErrorCodes.DocumentTypeRequired },
     };
 
     [Theory]
@@ -110,7 +109,7 @@ public sealed class UploadOcrPagesHandlerTests
     }
 
     private static UploadOcrPagesCommand Command(string name, params OcrPageFile[] pages) =>
-        new(name, pages, OcrDocumentType.Handwritten);
+        new(name, pages);
 
     private static OcrPageFile Page(string fileName, byte[] content) => new(fileName, content.Length, new MemoryStream(content));
 }

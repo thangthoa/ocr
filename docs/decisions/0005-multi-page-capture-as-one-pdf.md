@@ -35,6 +35,12 @@ nhưng không có API ghép ảnh. TIFF nhiều trang chưa được xác nhận
 - Chọn file chỉ **liệt kê** (sắp theo tên, số tính theo giá trị: `page-2` trước `page-10`); người dùng đổi
   thứ tự / bỏ trang rồi bấm **Upload**, lúc đó file mới được đọc. Chọn lại file thì danh sách được thay
   (trình duyệt không giữ file của lần chọn trước).
+- **Bỏ ô chọn loại tài liệu** (bổ sung 2026-11-23): dịch vụ có thêm `doc_type=auto`, tự nhận diện từng trang in /
+  viết tay và đọc bằng engine tương ứng, nên app luôn gửi `auto`. Trường này API vẫn bắt buộc. Một document
+  có thể vừa có trang in vừa có trang viết tay. Loại tài liệu hiện ra là loại của các trang dịch vụ trả về (ví dụ
+  *Printed / typed + Handwritten*). Danh sách job của dịch vụ không kèm các trang, nên danh sách Documents
+  thường không hiện loại, còn trang document thì có. Thay một trang cũng không có `doc_type`: trang bị nhận nhầm
+  loại thì người dùng không ép lại được, chỉ có thể báo bên AI.
 
 ## Phương án đã cân nhắc
 

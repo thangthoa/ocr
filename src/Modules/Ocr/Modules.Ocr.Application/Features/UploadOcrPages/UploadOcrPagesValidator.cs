@@ -8,10 +8,6 @@ public sealed class UploadOcrPagesValidator : AbstractValidator<UploadOcrPagesCo
 {
     public UploadOcrPagesValidator()
     {
-        RuleFor(x => x.DocumentType)
-            .NotNull().WithErrorCode(OcrErrorCodes.DocumentTypeRequired).WithMessage("Document type is required.")
-            .IsInEnum().WithErrorCode(OcrErrorCodes.DocumentTypeRequired).WithMessage("Document type is invalid.");
-
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithErrorCode(OcrErrorCodes.FileNameRequired).WithMessage("File name is required.")

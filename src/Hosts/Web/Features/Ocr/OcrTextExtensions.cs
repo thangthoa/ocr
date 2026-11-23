@@ -71,6 +71,10 @@ internal static class OcrTextExtensions
 
     public static string DocumentType(this IStringLocalizer<OcrText> text, OcrDocumentType type) => text[$"DocumentType.{type}"];
 
+    /// <summary>The kinds of a job's pages, for example "Printed / typed + Handwritten"; empty while none is known.</summary>
+    public static string DocumentTypes(this IStringLocalizer<OcrText> text, IReadOnlyList<OcrDocumentType> types) =>
+        string.Join(" + ", types.Select(text.DocumentType));
+
     private static string FormatsLabel(IEnumerable<string> extensions) =>
         string.Join(", ", extensions.Select(e => e.TrimStart('.').ToUpperInvariant()));
 }

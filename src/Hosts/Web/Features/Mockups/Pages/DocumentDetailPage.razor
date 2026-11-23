@@ -81,9 +81,9 @@ else
             </div>
             <p class="text-muted small mb-0 mt-1">
                 <span dir="ltr">@document.Id</span>
-                @if (job is not null)
+                @if (job is { DocumentTypes.Count: > 0 })
                 {
-                    <span> · @OcrText.DocumentType(job.DocumentType)</span>
+                    <span id="document-types"> · @OcrText.DocumentTypes(job.DocumentTypes)</span>
                 }
                 @if (document.Pages > 0)
                 {
@@ -583,7 +583,7 @@ else
                                     <dt>@OcrText["Column.Status"]</dt>
                                     <dd><OcrStatusBadge Status="job.Status" /></dd>
                                     <dt>@OcrText["Column.Type"]</dt>
-                                    <dd>@OcrText.DocumentType(job.DocumentType)</dd>
+                                    <dd>@(job.DocumentTypes.Count > 0 ? OcrText.DocumentTypes(job.DocumentTypes) : Missing)</dd>
                                     <dt>@OcrText["Detail.Completed"]</dt>
                                     <dd>@FormatDateTime(job.FinishedAtUtc)</dd>
                                 </dl>

@@ -7,7 +7,6 @@ namespace Modules.Ocr.Domain.Jobs;
 public sealed record OcrJob(
     OcrJobId Id,
     string FileName,
-    OcrDocumentType DocumentType,
     OcrJobStatus Status,
     int PagesTotal,
     int PagesDone,
@@ -34,6 +33,13 @@ public sealed record OcrJob(
 
     /// <summary>When pages were last changed.</summary>
     public DateTime? UpdatedAtUtc { get; init; }
+
+    /// <summary>
+    /// The kinds of the pages recognized so far, printed before handwritten; empty until a page is recognized. The
+    /// service tells the kind of each page itself, and its job list carries no pages, so only a job read on its own
+    /// has them.
+    /// </summary>
+    public IReadOnlyList<OcrDocumentType> DocumentTypes => [.. Pages.Select(p => p.Type).Distinct().Order()];
 
     /// <summary>The service only cancels jobs that are still waiting (API doc §3.5).</summary>
     public bool CanCancel => Status == OcrJobStatus.Queued;

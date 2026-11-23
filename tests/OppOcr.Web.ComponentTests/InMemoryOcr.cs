@@ -43,12 +43,12 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
     /// <summary>The job as the "service" has it now.</summary>
     public OcrJob OnService(string id) => _service[id];
 
-    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
+    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, CancellationToken cancellationToken)
     {
         if (Unavailable)
             return Down;
         await content.CopyToAsync(Stream.Null, cancellationToken);
-        var job = NewJob($"job_{++_next:D16}", fileName, OcrJobStatus.Queued) with { DocumentType = documentType };
+        var job = NewJob($"job_{++_next:D16}", fileName, OcrJobStatus.Queued);
         _service[job.Id.Value] = job;
         return job;
     }
@@ -150,5 +150,5 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
     }
 
     public static OcrJob NewJob(string id, string fileName, OcrJobStatus status) =>
-        new(OcrJobId.Parse(id), fileName, OcrDocumentType.Printed, status, 1, 0, null, null, null, null, [], null, null);
+        new(OcrJobId.Parse(id), fileName, status, 1, 0, null, null, null, null, [], null, null);
 }

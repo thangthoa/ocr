@@ -5,7 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="UploadTitle" xml:space="preserve"><value>Scan</value></data>
-  <data name="UploadIntro" xml:space="preserve"><value>Choose the document type, one file or several images, and a document name, then upload. The document page opens as soon as the upload is done.</value></data>
+  <data name="UploadIntro" xml:space="preserve"><value>Choose one file or several images and a document name, then upload. The OCR service tells printed from handwritten pages itself. The document page opens as soon as the upload is done.</value></data>
   <data name="FolderPrompt" xml:space="preserve"><value>Or use every image in a folder, in file name order:</value></data>
   <data name="ChooseFolder" xml:space="preserve"><value>Choose a folder</value></data>
   <data name="FolderSkipped" xml:space="preserve"><value>{0} file(s) in the folder were skipped because they are not supported images.</value></data>
@@ -14,7 +14,6 @@
   <data name="FolderTooLarge" xml:space="preserve"><value>The folder has more than {0} files. Choose a smaller folder.</value></data>
   <data name="JobsTitle" xml:space="preserve"><value>OCR jobs</value></data>
   <data name="JobTitle" xml:space="preserve"><value>OCR job</value></data>
-  <data name="DocumentTypeLegend" xml:space="preserve"><value>Document type</value></data>
   <data name="DocumentType.Printed" xml:space="preserve"><value>Printed / typed</value></data>
   <data name="DocumentType.Handwritten" xml:space="preserve"><value>Handwritten</value></data>
   <data name="DropZonePrompt" xml:space="preserve"><value>Drag and drop a file here, or click to browse</value></data>
@@ -89,7 +88,6 @@
   <data name="ocr.empty" xml:space="preserve"><value>The file is empty.</value></data>
   <data name="ocr.too_large" xml:space="preserve"><value>The file exceeds {0} MB.</value></data>
   <data name="ocr.content_mismatch" xml:space="preserve"><value>The file is not a supported document or does not match its extension.</value></data>
-  <data name="ocr.document_type_required" xml:space="preserve"><value>Choose a document type.</value></data>
   <data name="ocr.not_ready" xml:space="preserve"><value>The result is not ready yet.</value></data>
   <data name="ocr.service_unavailable" xml:space="preserve"><value>The OCR service is not available right now.</value></data>
   <data name="ocr.file_name_invalid" xml:space="preserve"><value>The file name must not contain / \ : * ? " &lt; &gt; | or control characters.</value></data>

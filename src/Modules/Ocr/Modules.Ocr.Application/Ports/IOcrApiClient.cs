@@ -13,9 +13,10 @@ public interface IOcrApiClient
     /// <summary>
     /// Creates a job for one file. How the file reaches the service (uploaded, or downloaded by the
     /// service from a link, ADR 0006) is the adapter's choice; the call returns once the service has it.
+    /// The service recognizes printed and handwritten pages itself (see <see cref="OcrJob.DocumentTypes"/>).
     /// </summary>
     /// <param name="content">Read to the end; the caller keeps ownership and disposes it.</param>
-    Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken);
+    Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, CancellationToken cancellationToken);
 
     Task<Result<OcrJob>> GetAsync(OcrJobId jobId, CancellationToken cancellationToken);
 

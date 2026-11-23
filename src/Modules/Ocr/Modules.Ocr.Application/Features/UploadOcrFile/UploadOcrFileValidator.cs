@@ -8,10 +8,6 @@ public sealed class UploadOcrFileValidator : AbstractValidator<UploadOcrFileComm
 {
     public UploadOcrFileValidator()
     {
-        RuleFor(x => x.DocumentType)
-            .NotNull().WithErrorCode(OcrErrorCodes.DocumentTypeRequired).WithMessage("Document type is required.")
-            .IsInEnum().WithErrorCode(OcrErrorCodes.DocumentTypeRequired).WithMessage("Document type is invalid.");
-
         RuleFor(x => x.FileName)
             .NotEmpty().WithErrorCode(OcrErrorCodes.FileNameRequired).WithMessage("File name is required.")
             .MaximumLength(OcrRules.MaxFileNameLength).WithErrorCode(OcrErrorCodes.FileNameTooLong)

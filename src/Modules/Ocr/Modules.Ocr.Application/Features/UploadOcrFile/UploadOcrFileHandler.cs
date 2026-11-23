@@ -37,7 +37,7 @@ public sealed partial class UploadOcrFileHandler(
 
         var sizeBytes = buffer.Length;
         buffer.Position = 0;
-        var result = await api.SubmitAsync(buffer, command.FileName, command.DocumentType!.Value, cancellationToken);
+        var result = await api.SubmitAsync(buffer, command.FileName, cancellationToken);
         if (result.IsFailure)
         {
             LogRejected(command.FileName, result.Error!.Code);
@@ -46,7 +46,7 @@ public sealed partial class UploadOcrFileHandler(
 
         var job = result.Value;
         registry.Add(job);
-        LogSubmitted(job.Id.Value, detected.Value, sizeBytes, job.DocumentType);
+        LogSubmitted(job.Id.Value, detected.Value, sizeBytes);
         await notifier.NotifyAsync(new OcrJobChange(job.Id, job.FileName, job.Status, OcrJobChangeKind.Created), cancellationToken);
         return job;
     }
@@ -67,8 +67,8 @@ public sealed partial class UploadOcrFileHandler(
         return total > 0;
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Ocr: submitted job {JobId} ({Format}, {SizeBytes} bytes, {DocumentType})")]
-    private partial void LogSubmitted(string jobId, OcrFileFormat format, long sizeBytes, OcrDocumentType documentType);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Ocr: submitted job {JobId} ({Format}, {SizeBytes} bytes)")]
+    private partial void LogSubmitted(string jobId, OcrFileFormat format, long sizeBytes);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Ocr: the service did not accept {FileName} ({ErrorCode})")]
     private partial void LogRejected(string fileName, string errorCode);

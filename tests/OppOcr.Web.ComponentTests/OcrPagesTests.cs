@@ -41,11 +41,12 @@ public sealed class OcrPagesTests : BunitContext
     }
 
     [Fact]
-    public void Capture_options_default_to_printed_and_one_file_without_a_batch_ticket()
+    public void Capture_options_default_to_one_file_without_a_document_type_or_a_batch_ticket()
     {
         var cut = Render<OcrUploadPage>();
 
-        Assert.Equal(nameof(OcrDocumentType.Printed), cut.Find("#doc-type").GetAttribute("value"));
+        // The service tells printed from handwritten pages itself.
+        Assert.Empty(cut.FindAll("#doc-type"));
         Assert.True(cut.Find("#mode-One").HasAttribute("checked"));
         Assert.Empty(cut.Find("#file-name").GetAttribute("value") ?? string.Empty);
         Assert.False(cut.Find("#ocr-files").HasAttribute("multiple"));
@@ -55,10 +56,9 @@ public sealed class OcrPagesTests : BunitContext
     }
 
     [Fact]
-    public void One_file_is_sent_with_the_typed_name_and_document_type_and_its_page_opens()
+    public void One_file_is_sent_with_the_typed_name_and_its_page_opens()
     {
         var cut = Render<OcrUploadPage>();
-        cut.Find("#doc-type").Change(nameof(OcrDocumentType.Handwritten));
         cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromBinary(PngBytes, "IMG_0042.png"));
         cut.Find("#file-name").Input("Invoice 17");
 
@@ -68,7 +68,7 @@ public sealed class OcrPagesTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var job = Assert.Single(_ocr.Registry);
-            Assert.Equal(("Invoice 17.png", OcrDocumentType.Handwritten), (job.FileName, job.DocumentType));
+            Assert.Equal("Invoice 17.png", job.FileName);
             // The document page follows the file step by step (Scan, Recognizing, Reviewing, Archived).
             Assert.Equal("http://localhost/" + OcrEndpoints.JobUrl(job.Id.Value), Navigation.Uri);
             Assert.Empty(cut.FindAll(".selected-files"));
@@ -154,7 +154,7 @@ public sealed class OcrPagesTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var job = Assert.Single(_ocr.Registry);
-            Assert.Equal(("Contract.pdf", OcrDocumentType.Printed), (job.FileName, job.DocumentType));
+            Assert.Equal("Contract.pdf", job.FileName);
             Assert.Equal("http://localhost/" + OcrEndpoints.JobUrl(job.Id.Value), Navigation.Uri);
         });
         var pages = Assert.Single(_composer.Calls);

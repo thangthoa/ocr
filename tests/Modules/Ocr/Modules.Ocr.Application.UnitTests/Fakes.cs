@@ -9,7 +9,7 @@ internal sealed class FakeApi : IOcrApiClient
 {
     private int _next;
 
-    public List<(string FileName, OcrDocumentType Type, byte[] Bytes)> Submitted { get; } = [];
+    public List<(string FileName, byte[] Bytes)> Submitted { get; } = [];
 
     public List<string> Cancelled { get; } = [];
 
@@ -27,15 +27,15 @@ internal sealed class FakeApi : IOcrApiClient
 
     public int ListCalls { get; private set; }
 
-    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
+    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, CancellationToken cancellationToken)
     {
         using var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, cancellationToken);
-        Submitted.Add((fileName, documentType, buffer.ToArray()));
+        Submitted.Add((fileName, buffer.ToArray()));
         if (SubmitResult is not null)
             return SubmitResult();
 
-        var job = TestJobs.Job($"job_{++_next:D16}", OcrJobStatus.Queued) with { FileName = fileName, DocumentType = documentType, QueuePosition = _next };
+        var job = TestJobs.Job($"job_{++_next:D16}", OcrJobStatus.Queued) with { FileName = fileName, QueuePosition = _next };
         Jobs[job.Id.Value] = job;
         return job;
     }
@@ -135,7 +135,7 @@ internal sealed class FakeNotifier : IOcrJobNotifier
 internal static class TestJobs
 {
     public static OcrJob Job(string id, OcrJobStatus status) =>
-        new(OcrJobId.Parse(id), "a.png", OcrDocumentType.Printed, status, 1, 0, null, null, null, null, [], null, null);
+        new(OcrJobId.Parse(id), "a.png", status, 1, 0, null, null, null, null, [], null, null);
 
     public static byte[] Png(int size = 64)
     {

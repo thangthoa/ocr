@@ -41,7 +41,7 @@ public sealed class InMemoryOcrJobRegistryTests
     }
 
     private static OcrJob Job(int n, OcrJobStatus status) =>
-        new(OcrJobId.Parse($"job_{n:D16}"), $"f{n}.png", OcrDocumentType.Printed, status, 1, 0, null, null, null, null, [], null, null);
+        new(OcrJobId.Parse($"job_{n:D16}"), $"f{n}.png", status, 1, 0, null, null, null, null, [], null, null);
 
     private static int Number(OcrJob job) => int.Parse(job.Id.Value[4..], System.Globalization.CultureInfo.InvariantCulture);
 }

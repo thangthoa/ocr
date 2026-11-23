@@ -106,6 +106,20 @@ public sealed class OcrJobTests
         Assert.True((done with { Duplicates = [new OcrPageDuplicate(1, 2, OcrDuplicateKind.SameText)] }).HasVisibleChangesSince(done));
     }
 
+    [Fact]
+    public void Document_types_come_from_the_recognized_pages_printed_first()
+    {
+        static OcrPage Page(int number, OcrDocumentType type) => new(number, type, "نص", 1, "A v2", [], Cached: false);
+        var done = Job(OcrJobStatus.Done);
+
+        // Not known before a page is recognized: the job list of the service carries no pages.
+        Assert.Empty(done.DocumentTypes);
+        Assert.Equal([OcrDocumentType.Handwritten], (done with { Pages = [Page(1, OcrDocumentType.Handwritten), Page(2, OcrDocumentType.Handwritten)] }).DocumentTypes);
+        Assert.Equal(
+            [OcrDocumentType.Printed, OcrDocumentType.Handwritten],
+            (done with { Pages = [Page(1, OcrDocumentType.Handwritten), Page(2, OcrDocumentType.Printed), Page(3, OcrDocumentType.Handwritten)] }).DocumentTypes);
+    }
+
     private static OcrJob Job(OcrJobStatus status) =>
-        new(OcrJobId.Parse("job_0123456789abcdef"), "a.png", OcrDocumentType.Printed, status, 2, 0, null, null, null, null, [], null, null);
+        new(OcrJobId.Parse("job_0123456789abcdef"), "a.png", status, 2, 0, null, null, null, null, [], null, null);
 }

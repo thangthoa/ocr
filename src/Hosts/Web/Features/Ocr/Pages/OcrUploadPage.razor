@@ -23,7 +23,7 @@
 <fieldset class="capture-options mb-3" disabled="@_uploading">
     <legend class="visually-hidden">@Text["Options.Legend"]</legend>
     <div class="row g-3">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <label for="file-name" class="form-label">@Text["FileName.Label"] <span class="text-danger" aria-hidden="true">*</span></label>
             <input id="file-name" class="form-control @(ShowNameError ? "is-invalid" : null)" dir="auto" autocomplete="off"
                    maxlength="@OcrRules.MaxFileNameLength" aria-required="true" aria-invalid="@(ShowNameError ? "true" : null)"
@@ -47,17 +47,7 @@
             }
         </div>
 
-        <div class="col-12 col-md-4">
-            <label for="doc-type" class="form-label">@Text["DocumentTypeLegend"] <span class="text-danger" aria-hidden="true">*</span></label>
-            <select id="doc-type" class="form-select" aria-required="true" @bind="_documentType">
-                @foreach (var type in Enum.GetValues<OcrDocumentType>())
-                {
-                    <option value="@type">@Text.DocumentType(type)</option>
-                }
-            </select>
-        </div>
-
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <span id="mode-label" class="form-label d-block">@Text["Mode.Label"]</span>
             <div class="btn-group" role="radiogroup" aria-labelledby="mode-label" aria-describedby="mode-hint">
                 @foreach (var mode in Enum.GetValues<CaptureMode>())

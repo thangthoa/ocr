@@ -21,16 +21,20 @@ internal sealed partial class OcrApiClient(
 {
     public const string ApiKeyHeader = "X-API-Key";
 
+    internal const string AutoDocumentType = "auto";
+
     internal static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
-    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, OcrDocumentType documentType, CancellationToken cancellationToken)
+    public async Task<Result<OcrJob>> SubmitAsync(Stream content, string fileName, CancellationToken cancellationToken)
     {
         var settings = options.Value;
         using var form = new MultipartFormDataContent();
-        form.Add(new StringContent(documentType.ToWire()), "doc_type");
+        // The field is required. "auto" lets the service tell printed from handwritten pages and read each one with
+        // its engine, so the user no longer has to choose (and one document may mix both).
+        form.Add(new StringContent(AutoDocumentType), "doc_type");
 
         // Uploading from the office network to the service is very slow; the service downloads the same
         // file from this application's public address many times faster (ADR 0006). It does so before

@@ -31,7 +31,6 @@ public sealed partial class OcrUploadPage : IDisposable
 
     private readonly CancellationTokenSource _disposed = new();
     private readonly List<IBrowserFile> _files = [];
-    private OcrDocumentType _documentType = OcrDocumentType.Printed;
     private CaptureMode _mode = CaptureMode.One;
     private string _fileName = string.Empty;
     private bool _nameRequired;
@@ -242,7 +241,7 @@ public sealed partial class OcrUploadPage : IDisposable
 
         await using var stream = file.OpenReadStream(maxAllowedSize: Math.Max(file.Size, 1), _disposed.Token);
         return await UploadFileHandler.HandleAsync(
-            new UploadOcrFileCommand(OcrFileFormats.WithExtension(name, format), file.Size, stream, _documentType), _disposed.Token);
+            new UploadOcrFileCommand(OcrFileFormats.WithExtension(name, format), file.Size, stream), _disposed.Token);
     }
 
     private async Task<Result<OcrJob>> UploadPagesAsync(List<IBrowserFile> files, string name)
@@ -252,7 +251,7 @@ public sealed partial class OcrUploadPage : IDisposable
         try
         {
             var pages = files.Zip(streams, (file, stream) => new OcrPageFile(file.Name, file.Size, stream)).ToList();
-            return await UploadPagesHandler.HandleAsync(new UploadOcrPagesCommand(name, pages, _documentType), _disposed.Token);
+            return await UploadPagesHandler.HandleAsync(new UploadOcrPagesCommand(name, pages), _disposed.Token);
         }
         finally
         {

@@ -8,7 +8,6 @@ internal sealed record ApiJob(
     string? JobId,
     string? Status,
     string? FileName,
-    string? DocType,
     int PagesTotal,
     int PagesDone,
     string? CurrentStep,
@@ -50,7 +49,6 @@ internal static class ApiMapping
         return new OcrJob(
             id,
             job.FileName ?? id.Value,
-            ParseDocumentType(job.DocType),
             ParseStatus(job.Status),
             Math.Max(0, job.PagesTotal),
             Math.Max(0, job.PagesDone),
@@ -69,13 +67,6 @@ internal static class ApiMapping
             UpdatedAtUtc = FromEpoch(job.UpdatedAt),
         };
     }
-
-    public static string ToWire(this OcrDocumentType type) => type switch
-    {
-        OcrDocumentType.Printed => "printed",
-        OcrDocumentType.Handwritten => "handwritten",
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-    };
 
     public static string ToWire(this OcrJobStatus status) => status.ToString().ToLowerInvariant();
 

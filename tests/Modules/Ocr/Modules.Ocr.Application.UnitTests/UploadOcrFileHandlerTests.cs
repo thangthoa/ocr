@@ -21,23 +21,14 @@ public sealed class UploadOcrFileHandlerTests
     {
         var bytes = TestJobs.Pdf();
 
-        var result = await Handler.HandleAsync(new UploadOcrFileCommand("giay-to.pdf", bytes.Length, new MemoryStream(bytes), OcrDocumentType.Handwritten), Ct);
+        var result = await Handler.HandleAsync(new UploadOcrFileCommand("giay-to.pdf", bytes.Length, new MemoryStream(bytes)), Ct);
 
         Assert.True(result.IsSuccess);
         var sent = Assert.Single(_api.Submitted);
-        Assert.Equal(("giay-to.pdf", OcrDocumentType.Handwritten), (sent.FileName, sent.Type));
+        Assert.Equal("giay-to.pdf", sent.FileName);
         Assert.Equal(bytes, sent.Bytes);
         Assert.Equal(result.Value.Id, Assert.Single(_registry.All).Id);
         Assert.Equal(OcrJobChangeKind.Created, Assert.Single(_notifier.Changes).Kind);
-    }
-
-    [Fact]
-    public async Task Missing_document_type_is_rejected_before_calling_the_service()
-    {
-        var result = await Handler.HandleAsync(new UploadOcrFileCommand("a.png", 64, new MemoryStream(TestJobs.Png()), null), Ct);
-
-        Assert.Equal(OcrErrorCodes.DocumentTypeRequired, result.Error?.Code);
-        Assert.Empty(_api.Submitted);
     }
 
     [Theory]
@@ -45,7 +36,7 @@ public sealed class UploadOcrFileHandlerTests
     [InlineData("a.pdf", OcrErrorCodes.ContentMismatch)]
     public async Task Bad_files_never_reach_the_service(string fileName, string expectedCode)
     {
-        var result = await Handler.HandleAsync(new UploadOcrFileCommand(fileName, 64, new MemoryStream(TestJobs.Png()), OcrDocumentType.Printed), Ct);
+        var result = await Handler.HandleAsync(new UploadOcrFileCommand(fileName, 64, new MemoryStream(TestJobs.Png())), Ct);
 
         Assert.Equal(expectedCode, result.Error?.Code);
         Assert.Empty(_api.Submitted);
@@ -55,7 +46,7 @@ public sealed class UploadOcrFileHandlerTests
     public async Task Stream_longer_than_limit_is_rejected_even_if_reported_small()
     {
         var result = await Handler.HandleAsync(
-            new UploadOcrFileCommand("big.png", 10, new MemoryStream(TestJobs.Png((int)OcrRules.MaxSizeBytes + 1)), OcrDocumentType.Printed), Ct);
+            new UploadOcrFileCommand("big.png", 10, new MemoryStream(TestJobs.Png((int)OcrRules.MaxSizeBytes + 1))), Ct);
 
         Assert.Equal(OcrErrors.TooLarge, result.Error);
         Assert.Empty(_api.Submitted);
@@ -66,7 +57,7 @@ public sealed class UploadOcrFileHandlerTests
     {
         _api.SubmitResult = () => Error.Validation("too_many_pages", "PDF has 30 pages");
 
-        var result = await Handler.HandleAsync(new UploadOcrFileCommand("big.pdf", 15, new MemoryStream(TestJobs.Pdf()), OcrDocumentType.Printed), Ct);
+        var result = await Handler.HandleAsync(new UploadOcrFileCommand("big.pdf", 15, new MemoryStream(TestJobs.Pdf())), Ct);
 
         Assert.Equal("too_many_pages", result.Error?.Code);
         Assert.Empty(_registry.All);
@@ -78,7 +69,7 @@ public sealed class UploadOcrFileHandlerTests
     {
         _api.SubmitResult = () => Error.Failure(OcrServiceErrorCodes.ServiceUnavailable, "down");
 
-        var result = await Handler.HandleAsync(new UploadOcrFileCommand("a.png", 64, new MemoryStream(TestJobs.Png()), OcrDocumentType.Printed), Ct);
+        var result = await Handler.HandleAsync(new UploadOcrFileCommand("a.png", 64, new MemoryStream(TestJobs.Png())), Ct);
 
         Assert.Equal(OcrErrorCodes.ServiceUnavailable, result.Error?.Code);
     }

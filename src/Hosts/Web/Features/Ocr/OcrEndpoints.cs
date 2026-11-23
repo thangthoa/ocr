@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Application.Features.DownloadOcrResult;
 using Modules.Ocr.Application.Features.GetOcrPageImage;
@@ -22,7 +23,28 @@ internal static class OcrEndpoints
         $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/pages/{page}/image" + (revision > 0 ? $"?v={revision}" : string.Empty);
 
     public static string DownloadUrl(string jobId, OcrResultFormat format) =>
-        $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/download?format={format.ToString().ToLowerInvariant()}";
+        $"/ocr/jobs/{Uri.EscapeDataString(jobId)}/download?format={FormatName(format)}";
+
+    /// <summary>The OCR service's own name for the format: <c>docx</c>, <c>docx_layout</c>, <c>docx_gdocs</c>, <c>txt</c>…</summary>
+    public static string FormatName(OcrResultFormat format) => JsonNamingPolicy.SnakeCaseLower.ConvertName(format.ToString());
+
+    public static bool TryParseFormat(string? name, out OcrResultFormat format)
+    {
+        format = OcrResultFormat.Docx;
+        if (name is null)
+            return true;
+
+        foreach (var candidate in Enum.GetValues<OcrResultFormat>())
+        {
+            if (string.Equals(FormatName(candidate), name, StringComparison.OrdinalIgnoreCase))
+            {
+                format = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public static IEndpointRouteBuilder MapOcrEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -37,7 +59,7 @@ internal static class OcrEndpoints
 
         group.MapGet("/download", async (string id, string? format, DownloadOcrResultHandler handler, HttpContext http, CancellationToken ct) =>
         {
-            if (!Enum.TryParse<OcrResultFormat>(format ?? nameof(OcrResultFormat.Docx), ignoreCase: true, out var parsed) || !Enum.IsDefined(parsed))
+            if (!TryParseFormat(format, out var parsed))
                 return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "Unsupported format.");
             return ToFile(await handler.HandleAsync(new DownloadOcrResultQuery(id, parsed), ct), http, attachment: true);
         });

@@ -95,11 +95,8 @@ internal sealed partial class OcrApiClient(
     public Task<Result<FileContent>> GetPageImageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken) =>
         SendForFileAsync($"{JobPath(jobId)}/pages/{pageNumber}/image", $"page-{pageNumber}", cancellationToken);
 
-    public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken)
-    {
-        var wire = format.ToString().ToLowerInvariant();
-        return SendForFileAsync($"{JobPath(jobId)}/download?format={wire}", $"result.{wire}", cancellationToken);
-    }
+    public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken) =>
+        SendForFileAsync($"{JobPath(jobId)}/download?format={format.ToWire()}", $"result.{format.FileExtension()}", cancellationToken);
 
     // Page changes (API doc §3.8) take only uploaded files: the service offers no file_url there (checked against
     // its openapi.json, 2026-11-21), so the files go up directly even when AppUrl is set.

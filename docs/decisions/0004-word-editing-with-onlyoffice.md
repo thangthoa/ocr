@@ -24,7 +24,12 @@ tiêu đề, chữ Ả Rập phải sang trái), và mỗi lần lưu là một 
 - **Luồng lưu**: OnlyOffice gọi callback khi người dùng bấm Save (status 6) hoặc khi đóng editor (status 2).
   App tải file về, bỏ qua nếu trùng hệt phiên bản trước (SHA-256), lưu thành phiên bản mới, đọc lại text để
   cập nhật nội dung tìm kiếm, và ghi nhật ký hoạt động.
-- **Phiên bản 1** là DOCX của dịch vụ OCR; nếu không có (tài liệu mẫu, dịch vụ OCR không kết nối được) thì
+- **Phiên bản 1** là DOCX của dịch vụ OCR (bổ sung 2026-11-23: bản giữ bố cục, `download?format=docx_layout`;
+  `format=docx` là Word dạng text chạy liền, không giữ bố cục). Mỗi khối là một bảng nổi đặt đúng vị trí, mỗi trang
+  là một section riêng và không có page break, nên khi đọc lại text sau khi sửa, app tách trang theo cả section
+  break. Font Amiri chỉ được nhúng trong file mà OnlyOffice không dùng font nhúng, nên cho tới khi document server có
+  font này, chữ trong preview và editor hơi lệch vị trí. Có `format=docx_gdocs` (cùng bố cục, các khối nối tiếp
+  nhau) cho người mở bằng Google Docs, nhưng app chưa dùng. Nếu không có file (tài liệu mẫu, dịch vụ OCR không kết nối được) thì
   app tự tạo DOCX từ text (không thêm thư viện Office; chỉ dùng `System.IO.Compression` và XML).
 - **Lưu trữ**: `{Documents:Storage:Path}/{id}/{n}.docx` cùng `versions.json` (mặc định `App_Data/documents`;
   trong container là `/app/data/documents` trên Docker volume `documents`, không mất khi deploy lại).

@@ -1,3 +1,4 @@
+using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Domain.Jobs;
 
 namespace Modules.Ocr.Infrastructure.Api;
@@ -77,6 +78,24 @@ internal static class ApiMapping
     };
 
     public static string ToWire(this OcrJobStatus status) => status.ToString().ToLowerInvariant();
+
+    public static string ToWire(this OcrResultFormat format) => format switch
+    {
+        OcrResultFormat.Docx => "docx",
+        OcrResultFormat.DocxLayout => "docx_layout",
+        OcrResultFormat.DocxGdocs => "docx_gdocs",
+        OcrResultFormat.Txt => "txt",
+        OcrResultFormat.Md => "md",
+        OcrResultFormat.Json => "json",
+        _ => throw new ArgumentOutOfRangeException(nameof(format), format, null),
+    };
+
+    /// <summary>For the file name when the service sends none; all three Word variants are DOCX files.</summary>
+    public static string FileExtension(this OcrResultFormat format) => format switch
+    {
+        OcrResultFormat.Docx or OcrResultFormat.DocxLayout or OcrResultFormat.DocxGdocs => "docx",
+        _ => format.ToWire(),
+    };
 
     private static OcrJobStatus ParseStatus(string? status) => status switch
     {

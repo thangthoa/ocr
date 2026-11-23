@@ -7,7 +7,8 @@ namespace OppOcr.Web.Features.Mockups.Word;
 
 /// <summary>
 /// Minimal DOCX reading and writing without an Office library: enough to start an edit from plain
-/// text and to read the text back (for search) after an edit. Pages are separated by page breaks.
+/// text and to read the text back (for search) after an edit. Pages are separated by page breaks; when reading,
+/// section breaks that start a new page separate them too.
 /// </summary>
 internal static class DocxText
 {
@@ -49,7 +50,7 @@ internal static class DocxText
         return buffer.ToArray();
     }
 
-    /// <summary>Text of the main document part, one entry per page (page breaks split pages).</summary>
+    /// <summary>Text of the main document part, one entry per page (page breaks and section breaks split pages).</summary>
     public static IReadOnlyList<string> ExtractPages(Stream docx)
     {
         using var zip = new ZipArchive(docx, ZipArchiveMode.Read, leaveOpen: true);
@@ -65,7 +66,7 @@ internal static class DocxText
 
         var pages = new List<StringBuilder> { new() };
         if (root is not null)
-            Walk(root, pages);
+            Walk(root, pages, PageEndingSections(root));
 
         // A page break sits in its own paragraph, so a page would otherwise start with an empty line.
         var result = pages.Select(p => p.ToString().Trim('\n').TrimEnd()).ToList();
@@ -74,7 +75,28 @@ internal static class DocxText
         return result;
     }
 
-    private static void Walk(XElement element, List<StringBuilder> pages)
+    /// <summary>
+    /// The section breaks after which a new page starts. A section break sits in the last paragraph of its section,
+    /// and the type of the next section says how that one starts: on a new page unless it is <c>continuous</c> or
+    /// <c>nextColumn</c> (no type is a new page). The OCR service's layout DOCX has one section per page and no page
+    /// breaks at all.
+    /// </summary>
+    private static HashSet<XElement> PageEndingSections(XElement body)
+    {
+        // Only real breaks: a tracked change keeps the previous properties in a nested w:sectPr.
+        var sections = body.Descendants(W + "sectPr").Where(s => s.Parent == body || s.Parent?.Name == W + "pPr").ToList();
+        var result = new HashSet<XElement>();
+        for (var i = 0; i < sections.Count - 1; i++)
+        {
+            var nextType = (string?)sections[i + 1].Element(W + "type")?.Attribute(W + "val");
+            if (nextType is not ("continuous" or "nextColumn"))
+                result.Add(sections[i]);
+        }
+
+        return result;
+    }
+
+    private static void Walk(XElement element, List<StringBuilder> pages, HashSet<XElement> pageEndingSections)
     {
         if (element.Name == W + "t")
         {
@@ -101,10 +123,14 @@ internal static class DocxText
             pages.Add(new StringBuilder());
 
         foreach (var child in element.Elements())
-            Walk(child, pages);
+            Walk(child, pages, pageEndingSections);
 
         if (element.Name == W + "p")
+        {
             pages[^1].Append('\n');
+            if (element.Element(W + "pPr")?.Element(W + "sectPr") is { } section && pageEndingSections.Contains(section))
+                pages.Add(new StringBuilder());
+        }
     }
 
     private static XElement Paragraph(string text)

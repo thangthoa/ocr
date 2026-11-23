@@ -44,7 +44,8 @@ Duyệt là lưu trữ: không còn trạng thái *Approved* riêng. Document đ
 **Send back to review** đưa nó về Review Queue (xoá thông tin duyệt) để sửa rồi duyệt lại.
 
 Từ dịch vụ OCR: tên file, loại (in / viết tay), trạng thái, tiến độ, ảnh và text từng trang, cảnh báo, trang trùng,
-file tải về (DOCX/TXT/MD/JSON, là kết quả OCR gốc, không gồm các lần sửa), chèn / thay / xoá trang, xoá/huỷ job.
+file tải về (DOCX / DOCX giữ bố cục / DOCX cho Google Docs / TXT / MD / JSON, là kết quả OCR gốc, không gồm các lần
+sửa), chèn / thay / xoá trang, xoá/huỷ job.
 
 App lưu thêm **trong bộ nhớ** (`Features/Mockups/Data/DocumentStore.cs`): trạng thái duyệt, metadata, text
 đã sửa theo từng trang và các phiên bản. Phiên bản 1.0 là text OCR, được tạo khi mở document đã OCR xong lần đầu.
@@ -297,7 +298,8 @@ Trang `/users/activity` trả lời các câu hỏi 60, 66, 69, 70, 106 và 110 
 ## Sửa Word trực tiếp (OnlyOffice Docs)
 
 Xem ADR 0004. Trên trang document đang *Reviewing*, nút **Edit** mở `/documents/{id}/word`
-với editor OnlyOffice nhúng trong trang. Phiên bản Word đầu tiên là DOCX của dịch vụ OCR (hoặc tạo từ text với tài
+với editor OnlyOffice nhúng trong trang. Phiên bản Word đầu tiên là DOCX giữ bố cục của dịch vụ OCR
+(`format=docx_layout`, hoặc tạo từ text với tài
 liệu mẫu / khi dịch vụ OCR tắt). Bấm **Save** (Ctrl+S) hoặc đóng editor thì app lưu phiên bản Word mới, cập nhật text
 và ghi nhật ký. Các phiên bản Word xem và tải ở tab Versions (mục *Word file*) và dòng *Word file, version n*.
 

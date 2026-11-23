@@ -33,7 +33,7 @@ public static class WordErrors
 
 /// <summary>
 /// Opens documents in OnlyOffice Docs and keeps what it saves (ADR 0004). The first Word version is
-/// the OCR service's DOCX, or one built from the text when there is none (samples, service down).
+/// the OCR service's layout-keeping DOCX, or one built from the text when there is none (samples, service down).
 /// </summary>
 public sealed partial class WordEditorService(
     IOptions<WordEditorOptions> options,
@@ -198,12 +198,16 @@ public sealed partial class WordEditorService(
 
     private static string LoginPageUser => Pages.LoginPage.DemoUserName;
 
-    /// <summary>The OCR service's Word file, or one made from the text when the service has none.</summary>
+    /// <summary>
+    /// The OCR service's Word file, or one made from the text when the service has none. It is the variant that keeps
+    /// the page layout of the scan (<see cref="OcrResultFormat.DocxLayout"/>): the preview shows it page by page next
+    /// to the scan, and it is what the editor opens and the archive hands out.
+    /// </summary>
     private async Task<WordVersion> AddOcrVersionAsync(DocumentRecord document, CancellationToken cancellationToken)
     {
         if (document.Job is { Status: OcrJobStatus.Done })
         {
-            var ocr = await downloadOcr.HandleAsync(new DownloadOcrResultQuery(document.Id, OcrResultFormat.Docx), cancellationToken);
+            var ocr = await downloadOcr.HandleAsync(new DownloadOcrResultQuery(document.Id, OcrResultFormat.DocxLayout), cancellationToken);
             if (ocr.IsSuccess)
             {
                 await using var stream = ocr.Value.Content;

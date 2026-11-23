@@ -6,6 +6,7 @@ using System.Web;
 using Bunit;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Modules.Ocr.Application.Contracts;
 using Modules.Ocr.Domain.Jobs;
 using OppOcr.BuildingBlocks.Application.Results;
 using OppOcr.Web.Features.Mockups.Data;
@@ -58,6 +59,43 @@ public sealed class WordEditorTests : BunitContext
         var xml = reader.ReadToEnd();
         Assert.Contains("<w:bidi />", xml, StringComparison.Ordinal);
         Assert.Contains("w:type=\"page\"", xml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Docx_text_reads_the_pages_of_the_ocr_layout_file()
+    {
+        // As the service builds docx_layout: every block a floating table, every page its own section, no page break.
+        static string Block(string text) =>
+            $"""<w:tbl><w:tblPr><w:tblpPr w:horzAnchor="page" w:tblpX="1156" w:tblpY="5056"/></w:tblPr><w:tr><w:tc><w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>""";
+        var body = Block("الأولى") + Block("سطر")
+            + """<w:p><w:pPr><w:sectPr><w:pgSz w:w="11906" w:h="17003"/></w:sectPr></w:pPr></w:p>"""
+            + Block("الثانية")
+            + """<w:sectPr><w:pgSz w:w="11906" w:h="18495"/></w:sectPr>""";
+
+        Assert.Equal(["الأولى\nسطر", "الثانية"], DocxText.ExtractPages(DocxWithBody(body)));
+    }
+
+    [Theory]
+    [InlineData("", new[] { "one", "two" })]
+    [InlineData("""<w:type w:val="oddPage"/>""", new[] { "one", "two" })]
+    [InlineData("""<w:type w:val="continuous"/>""", new[] { "one\ntwo" })]
+    public void Docx_text_starts_a_page_at_a_section_break_unless_the_next_section_continues_the_page(string nextSectionType, string[] expected)
+    {
+        var body = """<w:p><w:pPr><w:sectPr/></w:pPr><w:r><w:t>one</w:t></w:r></w:p><w:p><w:r><w:t>two</w:t></w:r></w:p>"""
+            + $"<w:sectPr>{nextSectionType}</w:sectPr>";
+
+        Assert.Equal(expected, DocxText.ExtractPages(DocxWithBody(body)));
+    }
+
+    /// <summary>A DOCX with only a main part holding this body, which is all <see cref="DocxText.ExtractPages"/> reads.</summary>
+    private static MemoryStream DocxWithBody(string body)
+    {
+        var buffer = new MemoryStream();
+        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+        using (var writer = new StreamWriter(zip.CreateEntry("word/document.xml").Open()))
+            writer.Write($"""<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>{body}</w:body></w:document>""");
+        buffer.Position = 0;
+        return buffer;
     }
 
     [Fact]
@@ -125,17 +163,18 @@ public sealed class WordEditorTests : BunitContext
     }
 
     [Fact]
-    public async Task Opening_a_finished_job_starts_from_the_ocr_docx()
+    public async Task Opening_a_finished_job_starts_from_the_ocr_docx_that_keeps_the_page_layout()
     {
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص", 5, "A v2", [], Cached: false);
         _ocr.SetOnService(InMemoryOcr.NewJob("job_0000000000000005", "scan.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] });
-        _ocr.Docx = DocxText.Create(["من خدمة OCR"]);
+        _ocr.LayoutDocx = DocxText.Create(["من خدمة OCR"]);
         // Keep the job in review: one that passes the automatic check is archived, and archived documents are final.
         Services.GetRequiredService<QualitySettingsStore>().Save(QualitySettings.Default with { AutoApprove = false }, "admin");
 
         var result = await Editor.OpenAsync("job_0000000000000005", "admin", CultureInfo.GetCultureInfo("en"), Ct);
 
         Assert.Equal(WordVersionSource.Ocr, result.Value.Version.Source);
+        Assert.Equal([OcrResultFormat.DocxLayout], _ocr.Downloads);
         Assert.Equal("scan.docx", ((Dictionary<string, object?>)result.Value.Config["document"]!)["title"]);
     }
 
@@ -309,7 +348,7 @@ public sealed class WordEditorTests : BunitContext
         const string id = "job_0000000000000008";
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص الصفحة", 5, "A v2", [], Cached: false);
         _ocr.SetOnService(InMemoryOcr.NewJob(id, "scan.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page] });
-        _ocr.Docx = DocxText.Create(["نص الصفحة"]);
+        _ocr.LayoutDocx = DocxText.Create(["نص الصفحة"]);
         _server.File = PageZip("image1.png");
 
         var cut = Render<DocumentDetailPage>(p => p.Add(x => x.Id, id));
@@ -351,7 +390,7 @@ public sealed class WordEditorTests : BunitContext
         Services.GetRequiredService<QualitySettingsStore>().Save(QualitySettings.Default with { AutoApprove = false }, "admin");
         OcrPage[] pages = [new(1, OcrDocumentType.Printed, "الأولى", 5, "A v2", [], false), new(2, OcrDocumentType.Printed, "الثانية", 5, "A v2", [], false)];
         _ocr.Seed(InMemoryOcr.NewJob(id, "scan.pdf", OcrJobStatus.Done) with { PagesTotal = 2, PagesDone = 2, Pages = pages });
-        _ocr.Docx = DocxText.Create(["الأولى", "الثانية"]);
+        _ocr.LayoutDocx = DocxText.Create(["الأولى", "الثانية"]);
         var first = await Editor.CurrentVersionAsync(await DocumentAsync(id), Ct);
 
         var deleted = await Services.GetRequiredService<DocumentPageEditor>().DeleteAsync(id, 2, "admin", Ct);
@@ -362,7 +401,7 @@ public sealed class WordEditorTests : BunitContext
         Assert.Equal(WordErrors.WordPending, (await Editor.OpenAsync(id, "admin", CultureInfo.InvariantCulture, Ct)).Error!.Code);
 
         _ocr.SetOnService(_ocr.OnService(id) with { WordReady = true });
-        _ocr.Docx = DocxText.Create(["الأولى"]);
+        _ocr.LayoutDocx = DocxText.Create(["الأولى"]);
         var document = await DocumentAsync(id);
         var latest = await Editor.CurrentVersionAsync(document, Ct);
 
@@ -379,7 +418,7 @@ public sealed class WordEditorTests : BunitContext
         const string id = "job_0000000000000010";
         var page = new OcrPage(1, OcrDocumentType.Printed, "نص", 5, "A v2", [], false);
         _ocr.Seed(InMemoryOcr.NewJob(id, "scan.png", OcrJobStatus.Done) with { PagesDone = 1, Pages = [page], WordReady = false });
-        _ocr.Docx = DocxText.Create(["نص"]);
+        _ocr.LayoutDocx = DocxText.Create(["نص"]);
 
         var result = await Preview.GetAsync(await DocumentAsync(id), Ct);
 

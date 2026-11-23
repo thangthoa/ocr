@@ -14,8 +14,14 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
 
     public List<string> Cancelled { get; } = [];
 
-    /// <summary>What <c>download?format=docx</c> returns; null answers 404 like a job without a result.</summary>
-    public byte[]? Docx { get; set; }
+    /// <summary>
+    /// What <c>download?format=docx_layout</c> returns; null answers 404 like a job without a result. The other
+    /// formats always answer 404, so a test sees which Word file the app asked for.
+    /// </summary>
+    public byte[]? LayoutDocx { get; set; }
+
+    /// <summary>Formats asked for, in order.</summary>
+    public List<OcrResultFormat> Downloads { get; } = [];
 
     /// <summary>Makes every call fail as if the OCR service could not be reached.</summary>
     public bool Unavailable { get; set; }
@@ -67,10 +73,13 @@ internal sealed class InMemoryOcr : IOcrApiClient, IOcrJobRegistry
     public Task<Result<FileContent>> GetPageImageAsync(OcrJobId jobId, int pageNumber, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
-    public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken) =>
-        Task.FromResult<Result<FileContent>>(Docx is { } docx && format == OcrResultFormat.Docx
-            ? new FileContent(new MemoryStream(docx, writable: false), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "result.docx")
+    public Task<Result<FileContent>> DownloadAsync(OcrJobId jobId, OcrResultFormat format, CancellationToken cancellationToken)
+    {
+        Downloads.Add(format);
+        return Task.FromResult<Result<FileContent>>(LayoutDocx is { } docx && format == OcrResultFormat.DocxLayout
+            ? new FileContent(new MemoryStream(docx, writable: false), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "result_layout.docx")
             : Error.NotFound("not_found", "no result"));
+    }
 
     /// <summary>Page changes received, as (method, page or position, file names).</summary>
     public List<(string Method, int? Page, IReadOnlyList<string> Files)> PageEdits { get; } = [];

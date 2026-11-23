@@ -5,7 +5,15 @@ namespace Modules.Ocr.Application.Contracts;
 
 public enum OcrResultFormat
 {
+    /// <summary>Word as flowing text (right to left, with logos / signatures / stamps); the page layout is not kept.</summary>
     Docx,
+
+    /// <summary>Word keeping the original page layout: every block at its place, one section per page.</summary>
+    DocxLayout,
+
+    /// <summary>The same layout for Google Docs: blocks flow one after the other instead of being pinned.</summary>
+    DocxGdocs,
+
     Txt,
     Md,
     Json,

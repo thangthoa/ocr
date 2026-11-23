@@ -170,6 +170,23 @@ public sealed class OcrApiClientTests
         Assert.Equal("النص", await reader.ReadToEndAsync(Ct));
     }
 
+    [Theory]
+    [InlineData(OcrResultFormat.Docx, "docx", "result.docx")]
+    [InlineData(OcrResultFormat.DocxLayout, "docx_layout", "result.docx")]
+    [InlineData(OcrResultFormat.DocxGdocs, "docx_gdocs", "result.docx")]
+    [InlineData(OcrResultFormat.Md, "md", "result.md")]
+    [InlineData(OcrResultFormat.Json, "json", "result.json")]
+    public async Task Download_asks_for_the_format_by_its_service_name(OcrResultFormat format, string wire, string fileNameWithoutHeader)
+    {
+        var handler = new StubHandler(HttpStatusCode.OK, "x", "application/octet-stream");
+
+        var result = await Create(handler).DownloadAsync(JobX, format, Ct);
+
+        Assert.Equal($"?format={wire}", handler.Request!.RequestUri!.Query);
+        await using var content = result.Value.Content;
+        Assert.Equal(fileNameWithoutHeader, result.Value.FileName);
+    }
+
     [Fact]
     public async Task Submit_with_an_app_url_sends_a_link_the_service_downloads_during_the_request()
     {
